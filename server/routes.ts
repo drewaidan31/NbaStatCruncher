@@ -38,12 +38,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Fetch NBA players data from official NBA API
   app.get("/api/nba/players", async (req, res) => {
     try {
-      const existingPlayers = await storage.getAllPlayers();
-      
-      // If we already have players, return them
-      if (existingPlayers.length > 0) {
-        return res.json(existingPlayers);
-      }
+      // Clear existing players to fetch fresh data for the selected season
+      await storage.deleteAllPlayers();
 
       const season = req.query.season as string || "2024-25";
       console.log(`Loading authentic NBA player statistics for ${season} season from official NBA API`);
