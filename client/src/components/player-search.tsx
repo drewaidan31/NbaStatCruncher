@@ -32,12 +32,14 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect }: Player
   const [selectedPlayer1, setSelectedPlayer1] = useState<Player | null>(null);
   const [selectedSeason1, setSelectedSeason1] = useState("2024-25");
 
-  const { data: players = [], isLoading } = useQuery({
+  const { data: players = [], isLoading, error } = useQuery({
     queryKey: ["/api/nba/players", selectedSeason],
   });
 
   // Debug: Log the data structure
   console.log("Players data:", players);
+  console.log("Query loading:", isLoading);
+  console.log("Query error:", error);
   console.log("Search term:", searchTerm);
 
   const filteredPlayers = searchTerm.length >= 1 
