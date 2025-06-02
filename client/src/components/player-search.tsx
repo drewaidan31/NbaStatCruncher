@@ -33,6 +33,9 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
   const [searchTerm, setSearchTerm] = useState("");
   const [compareMode, setCompareMode] = useState(false);
   const [selectedPlayer1, setSelectedPlayer1] = useState<Player | null>(null);
+  const [selectedSeason1, setSelectedSeason1] = useState("");
+  const [selectedSeason2, setSelectedSeason2] = useState("");
+  const [showSeasonPicker, setShowSeasonPicker] = useState<{ player: Player; isPlayer2: boolean } | null>(null);
 
   const { data: players = [], isLoading, error } = useQuery({
     queryKey: ["/api/nba/players"],
@@ -69,19 +72,39 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
   const handlePlayerClick = (player: Player) => {
     if (compareMode) {
       if (!selectedPlayer1) {
-        setSelectedPlayer1(player);
+        // Select first player and show season picker
+        setShowSeasonPicker({ player, isPlayer2: false });
       } else {
-        onCompareSelect({
-          player1: selectedPlayer1,
-          season1: selectedPlayer1.currentSeason || "2024-25",
-          player2: player,
-          season2: player.currentSeason || "2024-25"
-        });
-        setCompareMode(false);
-        setSelectedPlayer1(null);
+        // Select second player and show season picker
+        setShowSeasonPicker({ player, isPlayer2: true });
       }
     } else {
       onPlayerSelect(player, player.currentSeason || "2024-25");
+    }
+  };
+
+  const handleSeasonSelect = (season: string) => {
+    if (!showSeasonPicker) return;
+    
+    if (!showSeasonPicker.isPlayer2) {
+      // First player selected
+      setSelectedPlayer1(showSeasonPicker.player);
+      setSelectedSeason1(season);
+      setShowSeasonPicker(null);
+    } else {
+      // Second player selected - start comparison
+      setSelectedSeason2(season);
+      onCompareSelect({
+        player1: selectedPlayer1!,
+        season1: selectedSeason1,
+        player2: showSeasonPicker.player,
+        season2: season
+      });
+      setCompareMode(false);
+      setSelectedPlayer1(null);
+      setSelectedSeason1("");
+      setSelectedSeason2("");
+      setShowSeasonPicker(null);
     }
   };
 
@@ -122,13 +145,41 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
         </div>
       </div>
 
-      {compareMode && selectedPlayer1 && (
+      {compareMode && selectedPlayer1 && !showSeasonPicker && (
         <div className="bg-slate-700 rounded-lg p-3 mb-4 border border-slate-600">
           <div className="text-sm text-slate-300">Selected for comparison:</div>
           <div className="text-white font-medium">
-            {selectedPlayer1.name} ({selectedPlayer1.currentSeason || "2024-25"}) - {selectedPlayer1.team}
+            {selectedPlayer1.name} ({selectedSeason1}) - {selectedPlayer1.team}
           </div>
           <div className="text-xs text-slate-400">Now select a second player to compare</div>
+        </div>
+      )}
+
+      {/* Season Selection Modal */}
+      {showSeasonPicker && (
+        <div className="bg-slate-700 rounded-lg p-4 mb-4 border border-orange-500">
+          <div className="text-sm text-slate-300 mb-2">
+            Select season for {showSeasonPicker.player.name}:
+          </div>
+          <div className="grid grid-cols-3 gap-2 mb-3">
+            {showSeasonPicker.player.availableSeasons?.map((season) => (
+              <button
+                key={season}
+                onClick={() => handleSeasonSelect(season)}
+                className="bg-orange-600 hover:bg-orange-700 text-white text-sm py-2 px-3 rounded transition-colors"
+              >
+                {season}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowSeasonPicker(null)}
+              className="bg-slate-600 hover:bg-slate-500 text-white text-sm py-1 px-3 rounded transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       )}
 
