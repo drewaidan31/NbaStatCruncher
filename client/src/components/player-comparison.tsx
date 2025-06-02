@@ -35,7 +35,7 @@ interface PlayerComparisonProps {
 }
 
 export default function PlayerComparison({ comparison, onBack, currentFormula }: PlayerComparisonProps) {
-  const [formula, setFormula] = useState(currentFormula || "PPG + APG + RPG");
+  const [formula, setFormula] = useState("");
   const [customStatName, setCustomStatName] = useState("Total Impact");
   const [player1Value, setPlayer1Value] = useState<number | null>(null);
   const [player2Value, setPlayer2Value] = useState<number | null>(null);
@@ -331,37 +331,50 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
             </div>
           </div>
 
-          {player1Value !== null && player2Value !== null && (
-            <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-lg p-4 border border-orange-500/30">
-              <div className="flex items-center gap-4">
-                <TrendingUp className="w-5 h-5 text-orange-400" />
-                <div className="flex-1">
-                  <div className="text-slate-300 text-sm mb-2">{customStatName} Comparison</div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-white">{player1Value.toFixed(2)}</div>
-                      <div className="text-xs text-slate-400">{player1.name}</div>
+          {/* Custom Stat Results */}
+          <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-lg p-4 border border-orange-500/30">
+            <div className="flex items-center gap-4">
+              <TrendingUp className="w-5 h-5 text-orange-400" />
+              <div className="flex-1">
+                <div className="text-slate-300 text-sm mb-2">{customStatName} Comparison</div>
+                {formula ? (
+                  <>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-white">
+                          {player1Value !== null ? player1Value.toFixed(2) : "—"}
+                        </div>
+                        <div className="text-xs text-slate-400">{player1.name}</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-white">
+                          {player2Value !== null ? player2Value.toFixed(2) : "—"}
+                        </div>
+                        <div className="text-xs text-slate-400">{player2.name}</div>
+                      </div>
                     </div>
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-white">{player2Value.toFixed(2)}</div>
-                      <div className="text-xs text-slate-400">{player2.name}</div>
+                    <div className="text-center mt-2">
+                      <div className="text-xs text-slate-400">Formula: {formula}</div>
+                      {player1Value !== null && player2Value !== null && (
+                        <div className="text-sm font-medium text-green-400 mt-1">
+                          {player1Value > player2Value 
+                            ? `${player1.name} leads by ${(player1Value - player2Value).toFixed(2)}`
+                            : player2Value > player1Value 
+                            ? `${player2.name} leads by ${(player2Value - player1Value).toFixed(2)}`
+                            : "Tied!"
+                          }
+                        </div>
+                      )}
                     </div>
+                  </>
+                ) : (
+                  <div className="text-center text-slate-400 py-4">
+                    Build a formula above to compare custom stats
                   </div>
-                  <div className="text-center mt-2">
-                    <div className="text-xs text-slate-400">Formula: {formula}</div>
-                    <div className="text-sm font-medium text-green-400 mt-1">
-                      {player1Value > player2Value 
-                        ? `${player1.name} leads by ${(player1Value - player2Value).toFixed(2)}`
-                        : player2Value > player1Value 
-                        ? `${player2.name} leads by ${(player2Value - player1Value).toFixed(2)}`
-                        : "Tied!"
-                      }
-                    </div>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
