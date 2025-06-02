@@ -87,7 +87,7 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
       const result = evaluate(expression);
       return typeof result === 'number' ? result : null;
     } catch (error) {
-      console.error('Custom stat calculation error:', error, 'Formula:', formula, 'Expression:', expression);
+      console.error('Custom stat calculation error:', error, 'Formula:', formula);
       return null;
     }
   };
