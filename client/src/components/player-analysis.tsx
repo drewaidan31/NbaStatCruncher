@@ -223,6 +223,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
           .filter(point => point !== null)
           .sort((a, b) => a!.season.localeCompare(b!.season));
         
+        console.log('Chart data points:', chartDataPoints);
         setChartData(chartDataPoints as Array<{season: string, value: number, team: string}>);
       }
     } catch (error) {
