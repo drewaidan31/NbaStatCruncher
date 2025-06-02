@@ -183,9 +183,10 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
       
       // Replace stat abbreviations with actual values
       Object.entries(statMappings).forEach(([key, value]) => {
-        if (key.includes('_PCT')) {
-          // Handle percentage stats
-          const regex = new RegExp(`\\b${key}\\b`, 'g');
+        if (key.includes('%')) {
+          // Handle percentage stats with special regex
+          const escapedKey = key.replace(/%/g, '\\%');
+          const regex = new RegExp(`\\b${escapedKey}\\b`, 'g');
           expression = expression.replace(regex, value.toString());
         } else {
           const regex = new RegExp(`\\b${key}\\b`, 'g');
@@ -216,6 +217,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
         setChartData(chartDataPoints as Array<{season: string, value: number, team: string}>);
       }
     } catch (error) {
+      console.error('Calculation error:', error);
       setCalculatedValue(null);
       setChartData([]);
     }
