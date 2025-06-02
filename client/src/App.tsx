@@ -1,15 +1,19 @@
 import { useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import StatCalculator from "./components/stat-calculator";
+import SaveStatDialog from "./components/save-stat-dialog";
+import { useAuth } from "./hooks/useAuth";
 
 const queryClient = new QueryClient();
 
-export default function App() {
+function MainApp() {
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [formula, setFormula] = useState("");
   const [results, setResults] = useState([]);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
 
   useEffect(() => {
     const fetchPlayers = async () => {
@@ -99,6 +103,29 @@ export default function App() {
                   onFormulaChange={setFormula}
                   onCalculate={calculateStats}
                 />
+
+                {results.length > 0 && isAuthenticated && (
+                  <div className="mt-4 flex justify-center">
+                    <button
+                      onClick={() => setShowSaveDialog(true)}
+                      className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                    >
+                      Save Custom Stat
+                    </button>
+                  </div>
+                )}
+
+                {!isAuthenticated && !authLoading && (
+                  <div className="mt-4 text-center">
+                    <p className="text-slate-400 mb-2">Sign in to save your custom stats</p>
+                    <a
+                      href="/api/login"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors inline-block"
+                    >
+                      Sign In
+                    </a>
+                  </div>
+                )}
               </div>
 
               {results.length > 0 && (
@@ -136,6 +163,20 @@ export default function App() {
           )}
         </div>
       </div>
+
+      <SaveStatDialog 
+        formula={formula}
+        isOpen={showSaveDialog}
+        onClose={() => setShowSaveDialog(false)}
+      />
+    </QueryClientProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <MainApp />
     </QueryClientProvider>
   );
 }
