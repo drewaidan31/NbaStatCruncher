@@ -103,32 +103,52 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
 
   const statMappings = {
     'PTS': currentPlayerData.points,
+    'PPG': currentPlayerData.points, // Support both formats
     'AST': currentPlayerData.assists,
+    'APG': currentPlayerData.assists, // Support both formats
     'REB': currentPlayerData.rebounds,
+    'RPG': currentPlayerData.rebounds, // Support both formats
     'STL': currentPlayerData.steals,
+    'SPG': currentPlayerData.steals, // Support both formats
     'BLK': currentPlayerData.blocks,
+    'BPG': currentPlayerData.blocks, // Support both formats
     'TOV': currentPlayerData.turnovers,
+    'TPG': currentPlayerData.turnovers, // Support both formats
     'FG_PCT': currentPlayerData.fieldGoalPercentage,
+    'FG%': currentPlayerData.fieldGoalPercentage, // Support both formats
     'THREE_PCT': currentPlayerData.threePointPercentage,
+    '3P%': currentPlayerData.threePointPercentage, // Support both formats
     'FT_PCT': currentPlayerData.freeThrowPercentage,
+    'FT%': currentPlayerData.freeThrowPercentage, // Support both formats
     'GP': currentPlayerData.gamesPlayed,
     'PLUS_MINUS': currentPlayerData.plusMinus,
+    '+/-': currentPlayerData.plusMinus, // Support both formats
     'MIN': currentPlayerData.minutesPerGame || 32.5
   };
 
   const calculateCustomStatForSeason = (seasonData: any) => {
     const seasonStatMappings = {
       'PTS': seasonData.points,
+      'PPG': seasonData.points, // Support both formats
       'AST': seasonData.assists,
+      'APG': seasonData.assists, // Support both formats
       'REB': seasonData.rebounds,
+      'RPG': seasonData.rebounds, // Support both formats
       'STL': seasonData.steals,
+      'SPG': seasonData.steals, // Support both formats
       'BLK': seasonData.blocks,
+      'BPG': seasonData.blocks, // Support both formats
       'TOV': seasonData.turnovers,
+      'TPG': seasonData.turnovers, // Support both formats
       'FG_PCT': seasonData.fieldGoalPercentage,
+      'FG%': seasonData.fieldGoalPercentage, // Support both formats
       'THREE_PCT': seasonData.threePointPercentage,
+      '3P%': seasonData.threePointPercentage, // Support both formats
       'FT_PCT': seasonData.freeThrowPercentage,
+      'FT%': seasonData.freeThrowPercentage, // Support both formats
       'GP': seasonData.gamesPlayed,
       'PLUS_MINUS': seasonData.plusMinus,
+      '+/-': seasonData.plusMinus, // Support both formats
       'MIN': seasonData.minutesPerGame || 32.5
     };
 
