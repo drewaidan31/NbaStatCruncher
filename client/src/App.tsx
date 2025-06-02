@@ -427,8 +427,32 @@ function MainApp() {
                         dataKey="value" 
                         stroke="#F97316" 
                         strokeWidth={2}
-                        dot={{ fill: '#F97316', strokeWidth: 1, r: 3 }}
-                        activeDot={{ r: 4, stroke: '#F97316', strokeWidth: 1 }}
+                        dot={(props: any) => {
+                          const { cx, cy, payload } = props;
+                          return (
+                            <g>
+                              <circle 
+                                cx={cx} 
+                                cy={cy} 
+                                r={4} 
+                                fill="#F97316" 
+                                stroke="#1F2937" 
+                                strokeWidth={2}
+                              />
+                              <text 
+                                x={cx} 
+                                y={cy - 8} 
+                                textAnchor="middle" 
+                                fontSize={8} 
+                                fill="#9CA3AF"
+                                fontWeight="bold"
+                              >
+                                {payload?.team}
+                              </text>
+                            </g>
+                          );
+                        }}
+                        activeDot={{ r: 6, stroke: '#F97316', strokeWidth: 2 }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
