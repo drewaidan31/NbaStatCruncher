@@ -59,16 +59,22 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
 
   const calculateCustomStat = (player: Player) => {
     // Only calculate if formula is not empty
-    if (!formula || formula.trim().length === 0) return null;
+    if (!formula || formula.trim().length === 0) {
+      console.log('No formula provided');
+      return null;
+    }
     
     try {
       let expression = formula;
       const statMappings = getStatMappings(player);
+      console.log('Original formula:', formula);
+      console.log('Player stats:', statMappings);
       
       // Replace stat abbreviations with actual values
       // Handle +/- first since it has special characters
       if (expression.includes('+/-')) {
         expression = expression.replace(/\+\/-/g, statMappings['+/-'].toString());
+        console.log('After +/- replacement:', expression);
       }
       
       // Handle percentage stats
@@ -86,11 +92,13 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
           }
         }
       });
-
+      
+      console.log('Final expression:', expression);
       const result = evaluate(expression);
+      console.log('Calculation result:', result);
       return typeof result === 'number' ? result : null;
     } catch (error) {
-      // Return null for any calculation errors (incomplete or invalid formulas)
+      console.log('Calculation error:', error);
       return null;
     }
   };
@@ -103,8 +111,10 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
   };
 
   const handleCalculate = () => {
+    console.log('Calculate button clicked, formula:', formula);
     const value1 = calculateCustomStat(player1);
     const value2 = calculateCustomStat(player2);
+    console.log('Calculated values:', { value1, value2 });
     setPlayer1Value(value1);
     setPlayer2Value(value2);
   };
