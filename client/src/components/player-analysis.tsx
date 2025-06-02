@@ -434,16 +434,68 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
 
         {/* Result Display - Prominent */}
         {calculatedValue !== null && (
-          <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-xl p-6 mb-6 text-center shadow-lg">
-            <div className="flex items-center justify-center gap-3 mb-2">
-              <TrendingUp className="w-6 h-6 text-white" />
-              <h3 className="text-xl font-bold text-white">{customStatName}</h3>
+          <>
+            <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-xl p-6 mb-6 text-center shadow-lg">
+              <div className="flex items-center justify-center gap-3 mb-2">
+                <TrendingUp className="w-6 h-6 text-white" />
+                <h3 className="text-xl font-bold text-white">{customStatName}</h3>
+              </div>
+              <div className="text-5xl font-bold text-white mb-2">{calculatedValue.toFixed(2)}</div>
+              <div className="text-orange-100 text-sm bg-black/20 rounded-lg px-3 py-1 inline-block">
+                Formula: {formula}
+              </div>
             </div>
-            <div className="text-5xl font-bold text-white mb-2">{calculatedValue.toFixed(2)}</div>
-            <div className="text-orange-100 text-sm bg-black/20 rounded-lg px-3 py-1 inline-block">
-              Formula: {formula}
-            </div>
-          </div>
+
+            {/* Custom Stat Chart - Right after result */}
+            {chartData.length > 0 && (
+              <div className="bg-slate-800 rounded-lg p-6 border border-slate-700 mb-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <TrendingUp className="w-5 h-5 text-orange-400" />
+                  <h3 className="text-lg font-medium text-white">{customStatName} Over Time</h3>
+                  <span className="text-sm text-slate-400">({chartData.length} seasons)</span>
+                </div>
+                <div className="h-64 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                      <XAxis 
+                        dataKey="season" 
+                        stroke="#9CA3AF"
+                        fontSize={12}
+                        angle={-45}
+                        textAnchor="end"
+                        height={60}
+                      />
+                      <YAxis stroke="#9CA3AF" fontSize={12} />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: '#1F2937', 
+                          border: '1px solid #374151',
+                          borderRadius: '8px',
+                          color: '#F9FAFB'
+                        }}
+                        labelFormatter={(label) => {
+                          const point = chartData.find(d => d.season === label);
+                          return `${label} (${point?.team || 'N/A'})`;
+                        }}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="value" 
+                        stroke="#F97316" 
+                        strokeWidth={3}
+                        dot={{ fill: '#F97316', strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6, stroke: '#F97316', strokeWidth: 2 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="mt-4 text-sm text-slate-400">
+                  Track how {customStatName.toLowerCase()} changed throughout {player.name}'s career across different teams and seasons.
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         {/* No Result State */}
@@ -722,59 +774,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
         </div>
       </div>
 
-      {/* Custom Stat Chart */}
-      {chartData.length > 0 && calculatedValue !== null && (
-        <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-5 h-5 text-orange-400" />
-            <h3 className="text-lg font-medium text-white">{customStatName} Over Time</h3>
-            <span className="text-sm text-slate-400">({chartData.length} seasons)</span>
-          </div>
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis 
-                  dataKey="season" 
-                  stroke="#9CA3AF"
-                  fontSize={12}
-                  angle={-45}
-                  textAnchor="end"
-                  height={60}
-                />
-                <YAxis stroke="#9CA3AF" fontSize={12} />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1F2937', 
-                    border: '1px solid #374151',
-                    borderRadius: '8px',
-                    color: '#F9FAFB'
-                  }}
-                  formatter={(value: number, name: string) => [
-                    `${value.toFixed(2)}`,
-                    customStatName
-                  ]}
-                  labelFormatter={(label: string) => {
-                    const point = chartData.find(d => d.season === label);
-                    return `${label} (${point?.team || 'N/A'})`;
-                  }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="value" 
-                  stroke="#F97316" 
-                  strokeWidth={3}
-                  dot={{ fill: '#F97316', strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6, stroke: '#F97316', strokeWidth: 2 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="mt-4 text-sm text-slate-400">
-            Track how {customStatName.toLowerCase()} changed throughout {player.name}'s career across different teams and seasons.
-          </div>
-        </div>
-      )}
+
 
       {/* Compact Player Stats */}
       <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
