@@ -688,7 +688,7 @@ function MainApp() {
             NBA Custom Stats Calculator
           </h1>
           <p className="text-xl text-slate-300">
-            Create custom basketball statistics with authentic NBA player data
+            Create custom basketball statistics with 29 seasons of authentic NBA data (1996-2025)
           </p>
         </div>
 
