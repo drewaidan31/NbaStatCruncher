@@ -161,20 +161,25 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
       }
       
       // Replace stat abbreviations with actual values
+      // First handle percentage stats specifically
+      if (expression.includes('FG%')) {
+        expression = expression.replace(/FG%/g, seasonStatMappings['FG%'].toString());
+      }
+      if (expression.includes('3P%')) {
+        expression = expression.replace(/3P%/g, seasonStatMappings['3P%'].toString());
+      }
+      if (expression.includes('FT%')) {
+        expression = expression.replace(/FT%/g, seasonStatMappings['FT%'].toString());
+      }
+      
+      // Then handle other stats
       Object.entries(seasonStatMappings).forEach(([key, value]) => {
-        if (key === '+/-') {
-          // Skip +/- as we handled it above
+        if (key === '+/-' || key.includes('%')) {
+          // Skip these as we handled them above
           return;
         }
-        if (key.includes('%')) {
-          // Handle percentage stats with special regex
-          const escapedKey = key.replace(/%/g, '\\%');
-          const regex = new RegExp(`\\b${escapedKey}\\b`, 'g');
-          expression = expression.replace(regex, value.toString());
-        } else {
-          const regex = new RegExp(`\\b${key}\\b`, 'g');
-          expression = expression.replace(regex, value.toString());
-        }
+        const regex = new RegExp(`\\b${key}\\b`, 'g');
+        expression = expression.replace(regex, value.toString());
       });
       
       const result = evaluate(expression);
@@ -198,20 +203,25 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
       }
       
       // Replace stat abbreviations with actual values
+      // First handle percentage stats specifically
+      if (expression.includes('FG%')) {
+        expression = expression.replace(/FG%/g, statMappings['FG%'].toString());
+      }
+      if (expression.includes('3P%')) {
+        expression = expression.replace(/3P%/g, statMappings['3P%'].toString());
+      }
+      if (expression.includes('FT%')) {
+        expression = expression.replace(/FT%/g, statMappings['FT%'].toString());
+      }
+      
+      // Then handle other stats
       Object.entries(statMappings).forEach(([key, value]) => {
-        if (key === '+/-') {
-          // Skip +/- as we handled it above
+        if (key === '+/-' || key.includes('%')) {
+          // Skip these as we handled them above
           return;
         }
-        if (key.includes('%')) {
-          // Handle percentage stats with special regex
-          const escapedKey = key.replace(/%/g, '\\%');
-          const regex = new RegExp(`\\b${escapedKey}\\b`, 'g');
-          expression = expression.replace(regex, value.toString());
-        } else {
-          const regex = new RegExp(`\\b${key}\\b`, 'g');
-          expression = expression.replace(regex, value.toString());
-        }
+        const regex = new RegExp(`\\b${key}\\b`, 'g');
+        expression = expression.replace(regex, value.toString());
       });
       
       console.log('Final expression:', expression);
