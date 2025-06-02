@@ -122,6 +122,28 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
     setPlayer2Value(value2);
   };
 
+  const handleSaveStat = async () => {
+    try {
+      const response = await fetch('/api/custom-stats', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: customStatName,
+          formula: formula,
+          description: `Custom stat: ${customStatName}`
+        }),
+      });
+      
+      if (response.ok) {
+        console.log('Stat saved successfully!');
+      }
+    } catch (error) {
+      console.error('Error saving stat:', error);
+    }
+  };
+
   const StatComparison = ({ label, value1, value2, isPercentage = false, higherIsBetter = true }: {
     label: string;
     value1: number;
@@ -241,6 +263,13 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
                   className="bg-orange-600 hover:bg-orange-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium py-2 px-6 rounded-lg transition-colors"
                 >
                   Calculate
+                </button>
+                <button
+                  onClick={handleSaveStat}
+                  disabled={!formula || !customStatName || (player1Value === null && player2Value === null)}
+                  className="bg-green-600 hover:bg-green-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                >
+                  Save Stat
                 </button>
                 <button
                   onClick={() => {

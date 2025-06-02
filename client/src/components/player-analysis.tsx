@@ -52,6 +52,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
   const [customStatName, setCustomStatName] = useState("Total Impact");
   const [calculatedValue, setCalculatedValue] = useState<number | null>(null);
   const [showExamples, setShowExamples] = useState(false);
+  const [showSavedStats, setShowSavedStats] = useState(false);
   const [selectedSeason, setSelectedSeason] = useState(player.currentSeason || season);
   const [currentPlayerData, setCurrentPlayerData] = useState(player);
 
@@ -59,6 +60,12 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
   const { data: seasonPlayerData, isLoading: isLoadingSeason } = useQuery({
     queryKey: ['/api/nba/players', player.playerId, 'season', selectedSeason],
     enabled: selectedSeason !== player.currentSeason && !!selectedSeason,
+  });
+
+  // Query to fetch saved custom stats
+  const { data: savedStats = [], isLoading: isLoadingStats } = useQuery({
+    queryKey: ['/api/custom-stats'],
+    enabled: showSavedStats,
   });
 
   // Update current player data when season changes
@@ -157,6 +164,29 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
     calculateCustomStat();
   };
 
+  const handleSaveStat = async () => {
+    try {
+      const response = await fetch('/api/custom-stats', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: customStatName,
+          formula: formula,
+          description: `Custom stat: ${customStatName}`
+        }),
+      });
+      
+      if (response.ok) {
+        // You could add a toast notification here
+        console.log('Stat saved successfully!');
+      }
+    } catch (error) {
+      console.error('Error saving stat:', error);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -220,6 +250,13 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
             <Sparkles className="w-4 h-4" />
             Formula Examples
           </button>
+          <button
+            onClick={() => setShowSavedStats(!showSavedStats)}
+            className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-slate-300 text-sm transition-colors"
+          >
+            <BarChart3 className="w-4 h-4" />
+            Saved Stats
+          </button>
         </div>
 
         {/* Result Display - Prominent */}
@@ -280,6 +317,13 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
                   className="bg-orange-600 hover:bg-orange-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium py-2 px-6 rounded-lg transition-colors"
                 >
                   Calculate
+                </button>
+                <button
+                  onClick={handleSaveStat}
+                  disabled={!formula || !customStatName || calculatedValue === null}
+                  className="bg-green-600 hover:bg-green-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                >
+                  Save Stat
                 </button>
                 <button
                   onClick={() => {
@@ -405,6 +449,43 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
               handleFormulaChange(selectedFormula);
               setShowExamples(false);
             }} />
+          )}
+
+          {/* Saved Stats Section */}
+          {showSavedStats && (
+            <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+              <h3 className="text-lg font-semibold text-white mb-4">Saved Custom Stats</h3>
+              {isLoadingStats ? (
+                <div className="text-slate-400">Loading saved stats...</div>
+              ) : savedStats.length === 0 ? (
+                <div className="text-slate-400">No saved stats yet. Create and save a stat to see it here!</div>
+              ) : (
+                <div className="space-y-3">
+                  {savedStats.map((stat: any) => (
+                    <div
+                      key={stat.id}
+                      className="bg-slate-700 rounded-lg p-4 border border-slate-600 hover:border-slate-500 cursor-pointer transition-colors"
+                      onClick={() => {
+                        setFormula(stat.formula);
+                        setCustomStatName(stat.name);
+                        handleFormulaChange(stat.formula);
+                        setShowSavedStats(false);
+                      }}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="text-white font-medium">{stat.name}</h4>
+                          <p className="text-slate-400 text-sm mt-1">{stat.formula}</p>
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          Click to load
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
 
           <div className="bg-slate-700 rounded-lg p-4">
