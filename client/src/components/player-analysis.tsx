@@ -50,7 +50,7 @@ interface PlayerAnalysisProps {
 
 export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysisProps) {
   const [formula, setFormula] = useState("");
-  const [customStatName, setCustomStatName] = useState("Total Impact");
+  const [customStatName, setCustomStatName] = useState("");
   const [calculatedValue, setCalculatedValue] = useState<number | null>(null);
   const [showExamples, setShowExamples] = useState(false);
   const [showSavedStats, setShowSavedStats] = useState(false);
