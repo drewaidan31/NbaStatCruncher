@@ -27,30 +27,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log("Fetching NBA data with API key:", rapidApiKey ? "API key present" : "API key missing");
       
-      // Try to get players using the correct API endpoint structure
+      // Get NBA players using search parameter for common names
       let allPlayers = [];
+      const searchTerms = ["james", "curry", "durant", "davis", "paul"];
       
-      // First try to get a specific player to test the endpoint
-      try {
-        const testResponse = await fetch("https://api-nba-v1.p.rapidapi.com/players?search=james", {
-          method: "GET",
-          headers: {
-            "X-RapidAPI-Key": rapidApiKey,
-            "X-RapidAPI-Host": "api-nba-v1.p.rapidapi.com"
-          }
-        });
+      for (const searchTerm of searchTerms) {
+        try {
+          const playersResponse = await fetch(`https://api-nba-v1.p.rapidapi.com/players?search=${searchTerm}`, {
+            method: "GET",
+            headers: {
+              "X-RapidAPI-Key": rapidApiKey,
+              "X-RapidAPI-Host": "api-nba-v1.p.rapidapi.com"
+            }
+          });
 
-        if (testResponse.ok) {
-          const testData = await testResponse.json();
-          console.log("Players API test response:", testData);
-          if (testData?.response?.length) {
-            allPlayers = testData.response;
+          if (playersResponse.ok) {
+            const playersData = await playersResponse.json();
+            console.log(`Players found for "${searchTerm}":`, playersData?.response?.length || 0);
+            if (playersData?.response?.length) {
+              allPlayers.push(...playersData.response);
+            }
+          } else {
+            console.log(`Players API failed for "${searchTerm}":`, await playersResponse.text());
           }
-        } else {
-          console.log("Players API test failed:", await testResponse.text());
+        } catch (error) {
+          console.log(`Error fetching players for "${searchTerm}":`, error);
         }
-      } catch (error) {
-        console.log("Error testing players API:", error);
       }
 
       console.log("Total NBA players collected:", allPlayers.length);
@@ -63,24 +65,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log("NBA API Data received:", allPlayers.length, "players");
       
-      // Transform NBA API data to our schema - generate realistic stats based on player info
+      // Since we have real NBA player data, we need to get their statistics
+      // For now, we'll use realistic stats based on player positions until we can access stats endpoint
       const players = allPlayers.slice(0, 50).map((playerData: any) => {
-        const name = `${playerData.firstName || ""} ${playerData.lastName || ""}`.trim();
+        const name = `${playerData.firstname || ""} ${playerData.lastname || ""}`.trim();
         const position = playerData.leagues?.standard?.pos || "G";
-        const team = playerData.leagues?.standard?.jersey ? 
-          `Team${playerData.leagues.standard.jersey}` : "UNK";
+        const team = playerData.leagues?.standard?.team?.name || "Free Agent";
         
-        // Generate realistic stats based on position
+        // Use position-based realistic averages since we have real player data
         const isGuard = position.includes("G");
         const isCenter = position.includes("C");
         const isForward = position.includes("F");
         
         return {
-          playerId: playerData.playerId || Math.floor(Math.random() * 10000),
+          playerId: playerData.id,
           name: name,
           team: team,
           position: position,
-          gamesPlayed: Math.floor(Math.random() * 25) + 55, // 55-80 games
+          gamesPlayed: Math.floor(Math.random() * 25) + 55,
           minutesPerGame: Math.random() * 15 + (isGuard ? 25 : isCenter ? 20 : 22),
           points: Math.random() * (isGuard ? 20 : isCenter ? 15 : 18) + (isGuard ? 8 : isCenter ? 10 : 12),
           assists: Math.random() * (isGuard ? 8 : 3) + (isGuard ? 2 : 1),
