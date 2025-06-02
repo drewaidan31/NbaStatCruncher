@@ -5,7 +5,9 @@ import SaveStatDialog from "./components/save-stat-dialog";
 import PlayerSearch from "./components/player-search";
 import PlayerAnalysis from "./components/player-analysis";
 import PlayerComparison from "./components/player-comparison";
-import { BarChart3, Search, Calculator } from "lucide-react";
+import { BarChart3, Search, Calculator, TrendingUp, Sparkles } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { evaluate } from "mathjs";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +75,33 @@ function MainApp() {
   }>>([]);
   const [customStatName, setCustomStatName] = useState("Total Impact");
   const [showSavedStats, setShowSavedStats] = useState(false);
+  const [featuredPlayer, setFeaturedPlayer] = useState<Player | null>(null);
+  const [featuredStat, setFeaturedStat] = useState<{name: string, formula: string, description: string} | null>(null);
+  const [featuredChartData, setFeaturedChartData] = useState<Array<{season: string, value: number, team: string}>>([]);
+
+  // Preset custom stat equations for the showcase
+  const presetStats = [
+    { name: "Offensive Impact", formula: "PPG + APG * 1.5", description: "Points + weighted assists to measure offensive contribution" },
+    { name: "Complete Player", formula: "PPG + APG + RPG + SPG + BPG", description: "Total production across all major statistical categories" },
+    { name: "Efficiency Rating", formula: "(PPG + RPG + APG) / TPG", description: "Production per turnover - higher is better" },
+    { name: "Clutch Factor", formula: "PPG * FG% + APG", description: "Scoring efficiency combined with playmaking" },
+    { name: "Defensive Impact", formula: "RPG + SPG * 2 + BPG * 2", description: "Rebounds plus weighted steals and blocks" },
+    { name: "Floor General", formula: "APG * 2 + PPG * 0.5", description: "Playmaking focus with scoring support" },
+    { name: "Big Man Index", formula: "PPG + RPG * 1.5 + BPG * 2", description: "Traditional big man stats with emphasis on rebounding and blocks" },
+    { name: "Shooter's Touch", formula: "PPG * FG% * 3P%", description: "Scoring volume multiplied by shooting efficiency" },
+    { name: "Hustle Metric", formula: "RPG + SPG + (GP / 82) * 10", description: "Effort stats plus games played consistency" },
+    { name: "Versatility Score", formula: "PPG + APG + RPG + (SPG + BPG) * 1.5", description: "Well-rounded contribution with defensive bonus" },
+    { name: "Point Guard Rating", formula: "APG * 2.5 + PPG - TPG", description: "Playmaking emphasis with turnover penalty" },
+    { name: "Scoring Punch", formula: "PPG * (FG% + 3P%) / 2", description: "Points weighted by overall shooting efficiency" },
+    { name: "Team Player", formula: "APG * 3 + RPG + (PPG * 0.3)", description: "Pass-first mentality with rebounding help" },
+    { name: "Two-Way Impact", formula: "(PPG + APG) + (SPG + BPG) * 2", description: "Offensive production plus defensive disruption" },
+    { name: "Consistency Factor", formula: "PPG + (GP / 82) * 5", description: "Scoring with games played reliability bonus" },
+    { name: "Clutch Shooter", formula: "PPG * FT% * 3P%", description: "Scoring ability across different shot types" },
+    { name: "Paint Presence", formula: "RPG * 2 + BPG * 3 + PPG * 0.5", description: "Interior dominance measurement" },
+    { name: "Pace Impact", formula: "PPG + APG + (MIN / 36) * 5", description: "Production adjusted for playing time" },
+    { name: "Winning Formula", formula: "PPG + APG + RPG - TPG + (+/-) / 10", description: "Complete stats with team success factor" },
+    { name: "Star Power", formula: "PPG * 1.5 + APG + RPG + (GP / 82) * 3", description: "Scoring emphasis with all-around contribution" }
+  ];
 
   useEffect(() => {
     const fetchPlayers = async () => {
@@ -82,6 +111,11 @@ function MainApp() {
           const data = await response.json();
           setPlayers(data);
           setError("");
+          
+          // Set up featured player showcase after players are loaded
+          if (data.length > 0) {
+            setupFeaturedShowcase(data);
+          }
         } else {
           setError(`Failed to load NBA data: ${response.status}`);
         }
@@ -95,6 +129,84 @@ function MainApp() {
 
     fetchPlayers();
   }, [selectedSeason]);
+
+  const calculateCustomStatForSeason = (seasonData: any, formula: string) => {
+    const seasonStatMappings = {
+      'PPG': seasonData.points,
+      'APG': seasonData.assists,
+      'RPG': seasonData.rebounds,
+      'SPG': seasonData.steals,
+      'BPG': seasonData.blocks,
+      'TPG': seasonData.turnovers,
+      'FG%': seasonData.fieldGoalPercentage,
+      '3P%': seasonData.threePointPercentage,
+      'FT%': seasonData.freeThrowPercentage,
+      'GP': seasonData.gamesPlayed,
+      '+/-': seasonData.plusMinus,
+      'MIN': seasonData.minutesPerGame || 32.5
+    };
+
+    try {
+      let expression = formula;
+      
+      // Handle +/- first since it has special characters
+      if (expression.includes('+/-')) {
+        expression = expression.replace(/\+\/-/g, seasonStatMappings['+/-'].toString());
+      }
+      
+      // Replace stat abbreviations with actual values
+      Object.entries(seasonStatMappings).forEach(([key, value]) => {
+        if (key !== '+/-') {
+          if (key.includes('%')) {
+            const escapedKey = key.replace(/%/g, '\\%');
+            const regex = new RegExp(`\\b${escapedKey}\\b`, 'g');
+            expression = expression.replace(regex, value.toString());
+          } else {
+            const regex = new RegExp(`\\b${key}\\b`, 'g');
+            expression = expression.replace(regex, value.toString());
+          }
+        }
+      });
+      
+      const result = evaluate(expression);
+      return typeof result === 'number' ? result : null;
+    } catch (error) {
+      return null;
+    }
+  };
+
+  const setupFeaturedShowcase = (playerData: any[]) => {
+    // Filter players with multiple seasons
+    const playersWithMultipleSeasons = playerData.filter(p => p.seasons && p.seasons.length >= 3);
+    
+    if (playersWithMultipleSeasons.length === 0) return;
+    
+    // Get a different player and stat each time based on current time
+    const now = new Date();
+    const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
+    const playerIndex = dayOfYear % playersWithMultipleSeasons.length;
+    const statIndex = Math.floor(dayOfYear / playersWithMultipleSeasons.length) % presetStats.length;
+    
+    const selectedPlayer = playersWithMultipleSeasons[playerIndex];
+    const selectedStat = presetStats[statIndex];
+    
+    // Calculate chart data for this player and stat
+    const chartDataPoints = selectedPlayer.seasons
+      .map((seasonData: any) => {
+        const value = calculateCustomStatForSeason(seasonData, selectedStat.formula);
+        return value !== null ? {
+          season: seasonData.season,
+          value: value,
+          team: seasonData.team
+        } : null;
+      })
+      .filter((point: any) => point !== null)
+      .sort((a: any, b: any) => a.season.localeCompare(b.season));
+    
+    setFeaturedPlayer(selectedPlayer);
+    setFeaturedStat(selectedStat);
+    setFeaturedChartData(chartDataPoints);
+  };
 
   const handleSeasonChange = (season: string) => {
     setSelectedSeason(season);
@@ -225,21 +337,113 @@ function MainApp() {
     // Default leaderboard view
     return (
       <div className="space-y-6">
-        <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-          <h2 className="text-lg font-semibold mb-4">NBA Players Loaded ({players.length} players)</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-            {players.slice(0, 9).map((player: any) => (
-              <div key={player.id} className="bg-slate-700 p-4 rounded-lg">
-                <div className="font-medium text-slate-50 mb-1">{player.name}</div>
-                <div className="text-sm text-slate-400 mb-2">{player.position} - {player.team}</div>
-                <div className="text-xs text-slate-500 space-y-1">
-                  <div>{player.points.toFixed(1)} PTS, {player.assists.toFixed(1)} AST, {player.rebounds.toFixed(1)} REB</div>
-                  <div>{player.turnovers.toFixed(1)} TOV, {player.steals.toFixed(1)} STL, {player.blocks.toFixed(1)} BLK</div>
-                  <div>FG: {(player.fieldGoalPercentage * 100).toFixed(1)}%, +/-: {player.plusMinus.toFixed(1)}</div>
+        {/* Featured Player Showcase */}
+        {featuredPlayer && featuredStat && featuredChartData.length > 0 && (
+          <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl border border-slate-700 p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Sparkles className="w-6 h-6 text-orange-400" />
+              <h2 className="text-xl font-bold text-white">Featured Analysis</h2>
+              <span className="text-sm text-slate-400">• Changes daily</span>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Player Info and Stats */}
+              <div className="space-y-4">
+                <div className="bg-slate-700 rounded-lg p-5">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                      {featuredPlayer.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2)}
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-white">{featuredPlayer.name}</h3>
+                      <p className="text-slate-300">{featuredPlayer.position} • Career Spanning {featuredChartData.length} Seasons</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="bg-slate-600 rounded-lg p-3">
+                      <div className="text-orange-400 font-semibold mb-1">{featuredStat.name}</div>
+                      <div className="text-slate-300 text-sm">{featuredStat.description}</div>
+                      <div className="text-xs text-slate-400 mt-2 font-mono">{featuredStat.formula}</div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-slate-600 rounded p-3 text-center">
+                        <div className="text-slate-400 text-xs">Current Value</div>
+                        <div className="text-white font-bold">{
+                          featuredChartData.length > 0 ? 
+                          featuredChartData[featuredChartData.length - 1].value.toFixed(1) : 
+                          'N/A'
+                        }</div>
+                      </div>
+                      <div className="bg-slate-600 rounded p-3 text-center">
+                        <div className="text-slate-400 text-xs">Peak Value</div>
+                        <div className="text-orange-400 font-bold">{
+                          Math.max(...featuredChartData.map(d => d.value)).toFixed(1)
+                        }</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            ))}
+              
+              {/* Chart */}
+              <div className="bg-slate-700 rounded-lg p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <TrendingUp className="w-5 h-5 text-orange-400" />
+                  <h4 className="text-lg font-semibold text-white">Career Progression</h4>
+                </div>
+                <div className="h-48 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={featuredChartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                      <XAxis 
+                        dataKey="season" 
+                        stroke="#9CA3AF"
+                        fontSize={10}
+                        angle={-45}
+                        textAnchor="end"
+                        height={40}
+                      />
+                      <YAxis stroke="#9CA3AF" fontSize={10} />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: '#1F2937', 
+                          border: '1px solid #374151',
+                          borderRadius: '8px',
+                          color: '#F9FAFB'
+                        }}
+                        formatter={(value: number) => [
+                          `${value.toFixed(2)}`,
+                          featuredStat.name
+                        ]}
+                        labelFormatter={(label: string) => {
+                          const point = featuredChartData.find(d => d.season === label);
+                          return `${label} (${point?.team || 'N/A'})`;
+                        }}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="value" 
+                        stroke="#F97316" 
+                        strokeWidth={2}
+                        dot={{ fill: '#F97316', strokeWidth: 1, r: 3 }}
+                        activeDot={{ r: 4, stroke: '#F97316', strokeWidth: 1 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+                <p className="text-xs text-slate-400 mt-2">
+                  Hover over points to see detailed season data
+                </p>
+              </div>
+            </div>
           </div>
+        )}
+
+        <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+          <h2 className="text-lg font-semibold mb-4">NBA Custom Stats Calculator</h2>
+          <p className="text-slate-300 mb-6">Build your own basketball analytics formulas using real NBA player data. Create custom stats, compare players, and discover new insights.</p>
 
           <StatCalculator 
             onFormulaChange={setFormula}
