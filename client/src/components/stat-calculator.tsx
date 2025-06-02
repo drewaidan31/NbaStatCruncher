@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { Sparkles, Loader2 } from "lucide-react";
 
 interface StatCalculatorProps {
   onFormulaChange: (formula: string) => void;
@@ -7,6 +10,19 @@ interface StatCalculatorProps {
 
 export default function StatCalculator({ onFormulaChange, onCalculate }: StatCalculatorProps) {
   const [display, setDisplay] = useState("");
+  const [aiName, setAiName] = useState("");
+  const [aiDescription, setAiDescription] = useState("");
+
+  const generateNameMutation = useMutation({
+    mutationFn: async (formula: string) => {
+      const response = await apiRequest("POST", "/api/custom-stats/generate-name", { formula });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setAiName(data.name);
+      setAiDescription(data.description);
+    },
+  });
 
   const stats = [
     { name: "PTS", value: "PTS" },
@@ -46,6 +62,12 @@ export default function StatCalculator({ onFormulaChange, onCalculate }: StatCal
 
   const handleCalculate = () => {
     onCalculate();
+  };
+
+  const handleGenerateName = () => {
+    if (display.trim()) {
+      generateNameMutation.mutate(display);
+    }
   };
 
   return (
@@ -122,7 +144,35 @@ export default function StatCalculator({ onFormulaChange, onCalculate }: StatCal
             >
               Calculate Rankings
             </button>
+            
+            <button
+              onClick={handleGenerateName}
+              disabled={!display.trim() || generateNameMutation.isPending}
+              className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2 px-4 rounded font-medium transition-colors flex items-center justify-center gap-2"
+            >
+              {generateNameMutation.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Sparkles className="w-4 h-4" />
+              )}
+              AI Generate Name
+            </button>
           </div>
+
+          {(aiName || aiDescription) && (
+            <div className="mt-6 bg-purple-900/30 border border-purple-600/50 rounded-lg p-4">
+              <h5 className="text-sm font-medium text-purple-300 mb-2 flex items-center gap-2">
+                <Sparkles className="w-4 h-4" />
+                AI Generated Name
+              </h5>
+              {aiName && (
+                <div className="text-lg font-semibold text-purple-100 mb-2">{aiName}</div>
+              )}
+              {aiDescription && (
+                <div className="text-sm text-purple-200">{aiDescription}</div>
+              )}
+            </div>
+          )}
 
           {/* Quick Formulas */}
           <div className="mt-6">

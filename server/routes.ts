@@ -228,7 +228,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Generate AI name for custom stat formula
+  // Generate AI name for custom stat formula (public endpoint)
   app.post("/api/custom-stats/generate-name", async (req, res) => {
     try {
       const { formula } = req.body;
