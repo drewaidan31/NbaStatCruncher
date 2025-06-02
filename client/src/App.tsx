@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import StatCalculator from "./components/stat-calculator";
 
 const queryClient = new QueryClient();
 
@@ -94,33 +95,10 @@ export default function App() {
                   ))}
                 </div>
 
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Enter Custom Formula:
-                    </label>
-                    <input
-                      type="text"
-                      value={formula}
-                      onChange={(e) => setFormula(e.target.value)}
-                      placeholder="e.g. points + assists + rebounds - turnovers"
-                      className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white placeholder-slate-400"
-                    />
-                    <div className="mt-2 text-xs text-slate-400">
-                      Available stats: points, assists, rebounds, steals, blocks, turnovers, fieldGoalPercentage, threePointPercentage, freeThrowPercentage, plusMinus, minutesPerGame
-                    </div>
-                    <div className="mt-1 text-xs text-slate-500">
-                      Example formulas: "points + assists + rebounds", "fieldGoalPercentage * points", "(points + assists) / turnovers", "plusMinus + steals + blocks"
-                    </div>
-                  </div>
-                  <button
-                    onClick={calculateStats}
-                    disabled={!formula.trim()}
-                    className="bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white font-medium px-6 py-2 rounded-lg"
-                  >
-                    Calculate Custom Stats
-                  </button>
-                </div>
+                <StatCalculator 
+                  onFormulaChange={setFormula}
+                  onCalculate={calculateStats}
+                />
               </div>
 
               {results.length > 0 && (
