@@ -111,6 +111,16 @@ function MainApp() {
                 <option value="2022-23">2022-23 Season</option>
                 <option value="2021-22">2021-22 Season</option>
                 <option value="2020-21">2020-21 Season</option>
+                <option value="2019-20">2019-20 Season</option>
+                <option value="2018-19">2018-19 Season</option>
+                <option value="2017-18">2017-18 Season</option>
+                <option value="2016-17">2016-17 Season</option>
+                <option value="2015-16">2015-16 Season</option>
+                <option value="2014-15">2014-15 Season</option>
+                <option value="2013-14">2013-14 Season</option>
+                <option value="2012-13">2012-13 Season</option>
+                <option value="2011-12">2011-12 Season</option>
+                <option value="2010-11">2010-11 Season</option>
               </select>
             </div>
           </div>
