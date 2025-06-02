@@ -130,24 +130,47 @@ def get_all_players_with_seasons():
             if len(player_data['seasons']) > 0:
                 # Sort seasons by year (most recent first)
                 player_data['seasons'].sort(key=lambda x: x['season'], reverse=True)
-                # Set current stats to most recent season
+                
+                # Calculate career totals across all seasons
+                total_games = sum(s['gamesPlayed'] for s in player_data['seasons'])
+                total_minutes = sum(s['minutesPerGame'] * s['gamesPlayed'] for s in player_data['seasons'])
+                total_points = sum(s['points'] * s['gamesPlayed'] for s in player_data['seasons'])
+                total_assists = sum(s['assists'] * s['gamesPlayed'] for s in player_data['seasons'])
+                total_rebounds = sum(s['rebounds'] * s['gamesPlayed'] for s in player_data['seasons'])
+                total_steals = sum(s['steals'] * s['gamesPlayed'] for s in player_data['seasons'])
+                total_blocks = sum(s['blocks'] * s['gamesPlayed'] for s in player_data['seasons'])
+                total_turnovers = sum(s['turnovers'] * s['gamesPlayed'] for s in player_data['seasons'])
+                total_plus_minus = sum(s['plusMinus'] * s['gamesPlayed'] for s in player_data['seasons'])
+                
+                # Calculate weighted averages for percentages
+                fg_pct_seasons = [s for s in player_data['seasons'] if s['fieldGoalPercentage'] > 0]
+                three_pct_seasons = [s for s in player_data['seasons'] if s['threePointPercentage'] > 0]
+                ft_pct_seasons = [s for s in player_data['seasons'] if s['freeThrowPercentage'] > 0]
+                
+                avg_fg_pct = sum(s['fieldGoalPercentage'] for s in fg_pct_seasons) / len(fg_pct_seasons) if fg_pct_seasons else 0.0
+                avg_three_pct = sum(s['threePointPercentage'] for s in three_pct_seasons) / len(three_pct_seasons) if three_pct_seasons else 0.0
+                avg_ft_pct = sum(s['freeThrowPercentage'] for s in ft_pct_seasons) / len(ft_pct_seasons) if ft_pct_seasons else 0.0
+                
+                # Get latest season info for team/position
                 latest_season = player_data['seasons'][0]
+                
+                # Set career averages as main stats
                 player_data.update({
                     'currentSeason': latest_season['season'],
                     'team': latest_season['team'],
                     'position': latest_season['position'],
-                    'gamesPlayed': latest_season['gamesPlayed'],
-                    'minutesPerGame': latest_season['minutesPerGame'],
-                    'points': latest_season['points'],
-                    'assists': latest_season['assists'],
-                    'rebounds': latest_season['rebounds'],
-                    'steals': latest_season['steals'],
-                    'blocks': latest_season['blocks'],
-                    'turnovers': latest_season['turnovers'],
-                    'fieldGoalPercentage': latest_season['fieldGoalPercentage'],
-                    'threePointPercentage': latest_season['threePointPercentage'],
-                    'freeThrowPercentage': latest_season['freeThrowPercentage'],
-                    'plusMinus': latest_season['plusMinus'],
+                    'gamesPlayed': total_games,
+                    'minutesPerGame': total_minutes / total_games if total_games > 0 else 0.0,
+                    'points': total_points / total_games if total_games > 0 else 0.0,
+                    'assists': total_assists / total_games if total_games > 0 else 0.0,
+                    'rebounds': total_rebounds / total_games if total_games > 0 else 0.0,
+                    'steals': total_steals / total_games if total_games > 0 else 0.0,
+                    'blocks': total_blocks / total_games if total_games > 0 else 0.0,
+                    'turnovers': total_turnovers / total_games if total_games > 0 else 0.0,
+                    'fieldGoalPercentage': avg_fg_pct,
+                    'threePointPercentage': avg_three_pct,
+                    'freeThrowPercentage': avg_ft_pct,
+                    'plusMinus': total_plus_minus / total_games if total_games > 0 else 0.0,
                     'availableSeasons': [s['season'] for s in player_data['seasons']]
                 })
                 players_list.append(player_data)
