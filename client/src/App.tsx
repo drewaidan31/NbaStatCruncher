@@ -377,6 +377,17 @@ function MainApp() {
                             if (response.ok) {
                               const data = await response.json();
                               setResults(data);
+                              
+                              // Scroll to results section after calculation
+                              setTimeout(() => {
+                                const resultsElement = document.getElementById('leaderboard-results');
+                                if (resultsElement) {
+                                  resultsElement.scrollIntoView({ 
+                                    behavior: 'smooth',
+                                    block: 'start'
+                                  });
+                                }
+                              }, 200);
                             } else {
                               setError("Failed to calculate custom statistics");
                             }
@@ -574,7 +585,7 @@ function MainApp() {
         </div>
 
         {results.length > 0 && (
-          <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+          <div id="leaderboard-results" className="bg-slate-800 rounded-xl border border-slate-700 p-6">
             <h3 className="text-lg font-semibold mb-4">Custom Statistics Leaderboard</h3>
             <div className="overflow-x-auto">
               <table className="w-full">
