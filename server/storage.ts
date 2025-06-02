@@ -1,4 +1,17 @@
-import { nbaPlayers, customStats, type Player, type InsertPlayer, type CustomStat, type InsertCustomStat } from "@shared/schema";
+import { 
+  nbaPlayers, 
+  customStats, 
+  users,
+  type Player, 
+  type InsertPlayer, 
+  type CustomStat, 
+  type InsertCustomStat,
+  type User,
+  type UpsertUser,
+  type SaveCustomStat
+} from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // Player operations
@@ -11,6 +24,14 @@ export interface IStorage {
   // Custom stat operations
   getCustomStats(): Promise<CustomStat[]>;
   createCustomStat(stat: InsertCustomStat): Promise<CustomStat>;
+  
+  // User operations for authentication
+  getUser(id: string): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
+  
+  // Saved custom stats operations
+  saveCustomStat(stat: SaveCustomStat): Promise<CustomStat>;
+  getUserCustomStats(userId: string): Promise<CustomStat[]>;
 }
 
 export class MemStorage implements IStorage {
