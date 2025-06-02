@@ -33,23 +33,25 @@ def get_nba_players_from_api():
         
         players_data = []
         for _, row in df.iterrows():
+            games_played = int(row['GP']) if row['GP'] > 0 else 1  # Avoid division by zero
+            
             player_data = {
                 'playerId': int(row['PLAYER_ID']),
                 'name': row['PLAYER_NAME'],
                 'team': row['TEAM_ABBREVIATION'],
                 'position': 'G',  # Default, NBA API doesn't provide position in this endpoint
-                'gamesPlayed': int(row['GP']),
-                'minutesPerGame': float(row['MIN']),
-                'points': float(row['PTS']),
-                'assists': float(row['AST']),
-                'rebounds': float(row['REB']),
-                'steals': float(row['STL']),
-                'blocks': float(row['BLK']),
-                'turnovers': float(row['TOV']),
+                'gamesPlayed': games_played,
+                'minutesPerGame': float(row['MIN']) / games_played,
+                'points': float(row['PTS']) / games_played,
+                'assists': float(row['AST']) / games_played,
+                'rebounds': float(row['REB']) / games_played,
+                'steals': float(row['STL']) / games_played,
+                'blocks': float(row['BLK']) / games_played,
+                'turnovers': float(row['TOV']) / games_played,
                 'fieldGoalPercentage': float(row['FG_PCT']) if row['FG_PCT'] else 0.0,
                 'threePointPercentage': float(row['FG3_PCT']) if row['FG3_PCT'] else 0.0,
                 'freeThrowPercentage': float(row['FT_PCT']) if row['FT_PCT'] else 0.0,
-                'plusMinus': float(row['PLUS_MINUS']) if row['PLUS_MINUS'] else 0.0
+                'plusMinus': float(row['PLUS_MINUS']) / games_played if row['PLUS_MINUS'] else 0.0
             }
             players_data.append(player_data)
         
