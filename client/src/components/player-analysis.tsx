@@ -126,20 +126,12 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
 
   const handleFormulaChange = (newFormula: string) => {
     setFormula(newFormula);
-    // Auto-calculate when formula changes
-    setTimeout(() => {
-      let expression = newFormula;
-      try {
-        Object.entries(statMappings).forEach(([key, value]) => {
-          const regex = new RegExp(`\\b${key.replace(/[+\-%]/g, '\\$&')}\\b`, 'g');
-          expression = expression.replace(regex, value.toString());
-        });
-        const result = evaluate(expression);
-        setCalculatedValue(typeof result === 'number' ? result : null);
-      } catch {
-        setCalculatedValue(null);
-      }
-    }, 100);
+    // Reset calculated value when formula changes
+    setCalculatedValue(null);
+  };
+
+  const handleCalculate = () => {
+    calculateCustomStat();
   };
 
   return (
@@ -255,6 +247,26 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
                 <div className="text-white text-lg font-mono min-h-[2rem] break-all">
                   {formula || "Click stats and operations to build your formula"}
                 </div>
+              </div>
+              
+              {/* Calculate Button */}
+              <div className="flex gap-3">
+                <button
+                  onClick={handleCalculate}
+                  disabled={!formula}
+                  className="bg-orange-600 hover:bg-orange-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium py-2 px-6 rounded-lg transition-colors"
+                >
+                  Calculate
+                </button>
+                <button
+                  onClick={() => {
+                    setFormula("");
+                    handleFormulaChange("");
+                  }}
+                  className="bg-slate-600 hover:bg-slate-500 text-white py-2 px-4 rounded-lg transition-colors"
+                >
+                  Clear
+                </button>
               </div>
             </div>
 
