@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { Sparkles, Loader2 } from "lucide-react";
 
 interface SaveStatDialogProps {
   formula: string;
@@ -12,6 +13,17 @@ export default function SaveStatDialog({ formula, onClose, isOpen }: SaveStatDia
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const queryClient = useQueryClient();
+
+  const generateNameMutation = useMutation({
+    mutationFn: async (formula: string) => {
+      const response = await apiRequest("POST", "/api/custom-stats/generate-name", { formula });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setName(data.name);
+      setDescription(data.description);
+    },
+  });
 
   const saveMutation = useMutation({
     mutationFn: async (data: { name: string; formula: string; description?: string }) => {
@@ -36,6 +48,12 @@ export default function SaveStatDialog({ formula, onClose, isOpen }: SaveStatDia
     }
   };
 
+  const handleGenerateName = () => {
+    if (formula.trim()) {
+      generateNameMutation.mutate(formula);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -45,9 +63,23 @@ export default function SaveStatDialog({ formula, onClose, isOpen }: SaveStatDia
         
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Stat Name *
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-slate-300">
+                Stat Name *
+              </label>
+              <button
+                onClick={handleGenerateName}
+                disabled={!formula.trim() || generateNameMutation.isPending}
+                className="flex items-center gap-1 text-xs bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-2 py-1 rounded transition-colors"
+              >
+                {generateNameMutation.isPending ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  <Sparkles className="w-3 h-3" />
+                )}
+                AI Generate
+              </button>
+            </div>
             <input
               type="text"
               value={name}

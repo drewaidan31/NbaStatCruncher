@@ -5,6 +5,7 @@ import { formulaCalculationSchema, saveCustomStatSchema, NBA_STAT_MAPPINGS, type
 import { evaluate } from "mathjs";
 import { spawn } from "child_process";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { generateStatName } from "./openai-service";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -224,6 +225,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user custom stats:", error);
       res.status(500).json({ message: "Failed to fetch saved stats" });
+    }
+  });
+
+  // Generate AI name for custom stat formula
+  app.post("/api/custom-stats/generate-name", async (req, res) => {
+    try {
+      const { formula } = req.body;
+      
+      if (!formula || typeof formula !== 'string') {
+        return res.status(400).json({ message: "Formula is required" });
+      }
+
+      const result = await generateStatName(formula);
+      res.json(result);
+    } catch (error) {
+      console.error("Error generating stat name:", error);
+      res.status(500).json({ message: "Failed to generate stat name" });
     }
   });
 
