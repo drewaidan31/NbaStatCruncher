@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ArrowLeft, Calculator, TrendingUp, GitCompare } from "lucide-react";
-import FormulaInput from "./formula-input";
+
 import { evaluate } from "mathjs";
 
 interface Player {
@@ -184,7 +184,126 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
             />
           </div>
 
-          <FormulaInput formula={formula} onFormulaChange={handleFormulaChange} />
+          {/* Interactive Calculator Interface */}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Formula Builder:
+              </label>
+              <div className="bg-slate-900 rounded-lg p-4 border border-slate-600">
+                <div className="text-slate-300 text-sm mb-1">Formula:</div>
+                <div className="text-white text-lg font-mono min-h-[2rem] break-all">
+                  {formula || "Click stats and operations to build your formula"}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Statistics */}
+              <div>
+                <h4 className="text-sm font-medium text-slate-400 mb-3">Player Statistics</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { name: "PPG", value: "PPG" },
+                    { name: "APG", value: "APG" },
+                    { name: "RPG", value: "RPG" },
+                    { name: "SPG", value: "SPG" },
+                    { name: "BPG", value: "BPG" },
+                    { name: "TPG", value: "TPG" },
+                    { name: "FG%", value: "FG%" },
+                    { name: "3P%", value: "3P%" },
+                    { name: "FT%", value: "FT%" },
+                    { name: "+/-", value: "+/-" },
+                    { name: "GP", value: "GP" },
+                    { name: "MIN", value: "MIN" }
+                  ].map((stat) => (
+                    <button
+                      key={stat.value}
+                      onClick={() => {
+                        const newFormula = formula + stat.value;
+                        setFormula(newFormula);
+                        handleFormulaChange(newFormula);
+                      }}
+                      className="bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 px-3 rounded transition-colors"
+                    >
+                      {stat.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Operations */}
+              <div>
+                <h4 className="text-sm font-medium text-slate-400 mb-3">Operations</h4>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { symbol: "+", value: " + " },
+                    { symbol: "-", value: " - " },
+                    { symbol: "×", value: " * " },
+                    { symbol: "÷", value: " / " },
+                    { symbol: "(", value: "(" },
+                    { symbol: ")", value: ")" }
+                  ].map((op) => (
+                    <button
+                      key={op.symbol}
+                      onClick={() => {
+                        const newFormula = formula + op.value;
+                        setFormula(newFormula);
+                        handleFormulaChange(newFormula);
+                      }}
+                      className="bg-green-600 hover:bg-green-700 text-white text-sm py-2 px-3 rounded transition-colors"
+                    >
+                      {op.symbol}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Numbers */}
+              <div>
+                <h4 className="text-sm font-medium text-slate-400 mb-3">Numbers</h4>
+                <div className="grid grid-cols-3 gap-2">
+                  {["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "."].map((num) => (
+                    <button
+                      key={num}
+                      onClick={() => {
+                        const newFormula = formula + num;
+                        setFormula(newFormula);
+                        handleFormulaChange(newFormula);
+                      }}
+                      className="bg-slate-600 hover:bg-slate-500 text-white text-sm py-2 px-3 rounded transition-colors"
+                    >
+                      {num}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Calculator Controls */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setFormula("");
+                  setPlayer1Value(null);
+                  setPlayer2Value(null);
+                }}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition-colors"
+              >
+                Clear
+              </button>
+              <button
+                onClick={() => {
+                  const newFormula = formula.slice(0, -1);
+                  setFormula(newFormula);
+                  handleFormulaChange(newFormula);
+                }}
+                className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
 
           <div className="bg-slate-700 rounded-lg p-4">
             <div className="text-sm text-slate-400 mb-2">Available Stats (PPG, APG, RPG, SPG, BPG, TPG, FG%, 3P%, FT%, GP, +/-, MIN)</div>
