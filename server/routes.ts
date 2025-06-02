@@ -38,14 +38,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Fetch NBA players data from official NBA API
   app.get("/api/nba/players", async (req, res) => {
     try {
-      // Clear existing players to fetch fresh data for the selected season
+      // Clear existing players to fetch fresh data for unified profiles
       await storage.deleteAllPlayers();
 
-      const season = req.query.season as string || "2024-25";
-      console.log(`Loading authentic NBA player statistics for ${season} season from official NBA API`);
+      console.log(`Loading unified NBA player profiles from official NBA API`);
       
-      // Use Python script to fetch authentic NBA data
-      const python = spawn("python3", ["server/nba_data.py", season]);
+      // Use Python script to fetch unified player data with all seasons
+      const python = spawn("python3", ["server/nba_data.py", "unified"]);
       
       let pythonData = "";
       let pythonError = "";
@@ -239,6 +238,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating stat name:", error);
       res.status(500).json({ message: "Failed to generate stat name" });
+    }
+  });
+
+  // Get specific season stats for a player
+  app.get("/api/nba/players/:playerId/season/:season", async (req, res) => {
+    try {
+      const { playerId, season } = req.params;
+      
+      // Get the player from stored data
+      const players = await storage.getAllPlayers();
+      const player = players.find(p => p.playerId.toString() === playerId);
+      
+      if (!player || !player.seasons) {
+        return res.status(404).json({ message: "Player not found" });
+      }
+      
+      // Find the specific season data
+      const seasonData = player.seasons.find((s: any) => s.season === season);
+      
+      if (!seasonData) {
+        return res.status(404).json({ message: "Season data not found for this player" });
+      }
+      
+      // Return player with the selected season's stats
+      const playerWithSeasonStats = {
+        ...player,
+        currentSeason: season,
+        team: seasonData.team,
+        position: seasonData.position,
+        gamesPlayed: seasonData.gamesPlayed,
+        minutesPerGame: seasonData.minutesPerGame,
+        points: seasonData.points,
+        assists: seasonData.assists,
+        rebounds: seasonData.rebounds,
+        steals: seasonData.steals,
+        blocks: seasonData.blocks,
+        turnovers: seasonData.turnovers,
+        fieldGoalPercentage: seasonData.fieldGoalPercentage,
+        threePointPercentage: seasonData.threePointPercentage,
+        freeThrowPercentage: seasonData.freeThrowPercentage,
+        plusMinus: seasonData.plusMinus
+      };
+      
+      res.json(playerWithSeasonStats);
+    } catch (error) {
+      console.error("Error fetching player season data:", error);
+      res.status(500).json({ message: "Failed to fetch player season data" });
     }
   });
 

@@ -64,17 +64,17 @@ def get_nba_players_from_api(season='2024-25'):
         print(f"Error fetching from NBA API: {e}", file=sys.stderr)
         return None
 
-def get_all_time_leaders():
-    """Get all-time leaders by combining data from multiple seasons"""
+def get_all_players_with_seasons():
+    """Get all unique players with all their seasons"""
     try:
-        # Key seasons to include for all-time leaders
+        # Key seasons to include
         key_seasons = ['2024-25', '2023-24', '2022-23', '2021-22', '2020-21', '2019-20', 
                       '2018-19', '2017-18', '2016-17', '2015-16', '2014-15',
                       '2013-14', '2012-13', '2011-12', '2010-11']
         
-        all_players = {}  # Dictionary to store best season for each player
+        all_players = {}  # Dictionary to store all seasons for each player
         
-        print(f"Fetching all-time leaders from {len(key_seasons)} seasons...", file=sys.stderr)
+        print(f"Fetching players from {len(key_seasons)} seasons...", file=sys.stderr)
         
         for season in key_seasons:
             try:
@@ -84,33 +84,39 @@ def get_all_time_leaders():
                 )
                 
                 df = player_stats.get_data_frames()[0]
-                df = df[df['GP'] >= 20]  # Higher threshold for all-time consideration
+                df = df[df['GP'] >= 5]  # Include players with at least 5 games
                 
                 for _, row in df.iterrows():
                     games_played = int(row['GP']) if row['GP'] > 0 else 1
+                    player_id = int(row['PLAYER_ID'])
                     player_name = row['PLAYER_NAME']
-                    ppg = float(row['PTS']) / games_played
                     
-                    # Keep the best season for each player based on PPG
-                    if player_name not in all_players or ppg > all_players[player_name]['points']:
-                        all_players[player_name] = {
-                            'playerId': int(row['PLAYER_ID']),
+                    season_stats = {
+                        'season': season,
+                        'team': row['TEAM_ABBREVIATION'],
+                        'position': 'G',
+                        'gamesPlayed': games_played,
+                        'minutesPerGame': float(row['MIN']) / games_played,
+                        'points': float(row['PTS']) / games_played,
+                        'assists': float(row['AST']) / games_played,
+                        'rebounds': float(row['REB']) / games_played,
+                        'steals': float(row['STL']) / games_played,
+                        'blocks': float(row['BLK']) / games_played,
+                        'turnovers': float(row['TOV']) / games_played,
+                        'fieldGoalPercentage': float(row['FG_PCT']) if row['FG_PCT'] else 0.0,
+                        'threePointPercentage': float(row['FG3_PCT']) if row['FG3_PCT'] else 0.0,
+                        'freeThrowPercentage': float(row['FT_PCT']) if row['FT_PCT'] else 0.0,
+                        'plusMinus': float(row['PLUS_MINUS']) / games_played if row['PLUS_MINUS'] else 0.0
+                    }
+                    
+                    if player_id not in all_players:
+                        all_players[player_id] = {
+                            'playerId': player_id,
                             'name': player_name,
-                            'team': f"{row['TEAM_ABBREVIATION']} ({season})",
-                            'position': 'G',
-                            'gamesPlayed': games_played,
-                            'minutesPerGame': float(row['MIN']) / games_played,
-                            'points': ppg,
-                            'assists': float(row['AST']) / games_played,
-                            'rebounds': float(row['REB']) / games_played,
-                            'steals': float(row['STL']) / games_played,
-                            'blocks': float(row['BLK']) / games_played,
-                            'turnovers': float(row['TOV']) / games_played,
-                            'fieldGoalPercentage': float(row['FG_PCT']) if row['FG_PCT'] else 0.0,
-                            'threePointPercentage': float(row['FG3_PCT']) if row['FG3_PCT'] else 0.0,
-                            'freeThrowPercentage': float(row['FT_PCT']) if row['FT_PCT'] else 0.0,
-                            'plusMinus': float(row['PLUS_MINUS']) / games_played if row['PLUS_MINUS'] else 0.0
+                            'seasons': []
                         }
+                    
+                    all_players[player_id]['seasons'].append(season_stats)
                 
                 print(f"Processed {season}: {len(df)} players", file=sys.stderr)
                 
@@ -118,11 +124,83 @@ def get_all_time_leaders():
                 print(f"Error processing season {season}: {e}", file=sys.stderr)
                 continue
         
-        # Convert to list and sort by points
-        players_list = list(all_players.values())
+        # Convert to list and filter to players with at least one season
+        players_list = []
+        for player_data in all_players.values():
+            if len(player_data['seasons']) > 0:
+                # Sort seasons by year (most recent first)
+                player_data['seasons'].sort(key=lambda x: x['season'], reverse=True)
+                # Set current stats to most recent season
+                latest_season = player_data['seasons'][0]
+                player_data.update({
+                    'currentSeason': latest_season['season'],
+                    'team': latest_season['team'],
+                    'position': latest_season['position'],
+                    'gamesPlayed': latest_season['gamesPlayed'],
+                    'minutesPerGame': latest_season['minutesPerGame'],
+                    'points': latest_season['points'],
+                    'assists': latest_season['assists'],
+                    'rebounds': latest_season['rebounds'],
+                    'steals': latest_season['steals'],
+                    'blocks': latest_season['blocks'],
+                    'turnovers': latest_season['turnovers'],
+                    'fieldGoalPercentage': latest_season['fieldGoalPercentage'],
+                    'threePointPercentage': latest_season['threePointPercentage'],
+                    'freeThrowPercentage': latest_season['freeThrowPercentage'],
+                    'plusMinus': latest_season['plusMinus'],
+                    'availableSeasons': [s['season'] for s in player_data['seasons']]
+                })
+                players_list.append(player_data)
+        
+        # Sort by most recent season points
         players_list.sort(key=lambda x: x['points'], reverse=True)
         
-        # Take top 300 for all-time leaders
+        # Take top 500 unique players
+        players_list = players_list[:500]
+        
+        print(f"Unique players compiled: {len(players_list)} players", file=sys.stderr)
+        return players_list
+        
+    except Exception as e:
+        print(f"Error creating player profiles: {e}", file=sys.stderr)
+        return None
+
+def get_all_time_leaders():
+    """Get all-time leaders by combining data from multiple seasons"""
+    try:
+        # Get all players with seasons
+        all_players_data = get_all_players_with_seasons()
+        if not all_players_data:
+            return None
+            
+        # Convert to old format for compatibility
+        players_list = []
+        for player_data in all_players_data:
+            # Find best season for each player based on PPG
+            best_season = max(player_data['seasons'], key=lambda x: x['points'])
+            
+            player_legacy = {
+                'playerId': player_data['playerId'],
+                'name': player_data['name'],
+                'team': f"{best_season['team']} ({best_season['season']})",
+                'position': best_season['position'],
+                'gamesPlayed': best_season['gamesPlayed'],
+                'minutesPerGame': best_season['minutesPerGame'],
+                'points': best_season['points'],
+                'assists': best_season['assists'],
+                'rebounds': best_season['rebounds'],
+                'steals': best_season['steals'],
+                'blocks': best_season['blocks'],
+                'turnovers': best_season['turnovers'],
+                'fieldGoalPercentage': best_season['fieldGoalPercentage'],
+                'threePointPercentage': best_season['threePointPercentage'],
+                'freeThrowPercentage': best_season['freeThrowPercentage'],
+                'plusMinus': best_season['plusMinus']
+            }
+            players_list.append(player_legacy)
+            
+        # Sort by points and take top 300
+        players_list.sort(key=lambda x: x['points'], reverse=True)
         players_list = players_list[:300]
         
         print(f"All-time leaders compiled: {len(players_list)} players", file=sys.stderr)
@@ -355,18 +433,35 @@ def get_sample_nba_players():
     return players
 
 if __name__ == "__main__":
-    # Get season from command line argument, default to 2024-25
-    season = sys.argv[1] if len(sys.argv) > 1 else '2024-25'
+    # Get season from command line argument, default to unified profiles
+    season = sys.argv[1] if len(sys.argv) > 1 else 'unified'
     
     if NBA_API_AVAILABLE:
-        # Try to get data from official NBA API first
-        api_data = get_nba_players_from_api(season)
-        if api_data:
-            print(json.dumps(api_data))
+        if season == 'unified':
+            # Get unified player profiles with all seasons
+            api_data = get_all_players_with_seasons()
+            if api_data:
+                print(json.dumps(api_data))
+            else:
+                # Fallback to curated data
+                players_data = get_sample_nba_players()
+                print(json.dumps(players_data))
+        elif season == 'all-time':
+            # Get all-time leaders (legacy format)
+            api_data = get_all_time_leaders()
+            if api_data:
+                print(json.dumps(api_data))
+            else:
+                players_data = get_sample_nba_players()
+                print(json.dumps(players_data))
         else:
-            # Fallback to curated data
-            players_data = get_sample_nba_players()
-            print(json.dumps(players_data))
+            # Get specific season data (legacy format)
+            api_data = get_nba_players_from_api(season)
+            if api_data:
+                print(json.dumps(api_data))
+            else:
+                players_data = get_sample_nba_players()
+                print(json.dumps(players_data))
     else:
         # Use curated data when NBA API not available
         players_data = get_sample_nba_players()

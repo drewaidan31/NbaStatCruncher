@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { ArrowLeft, Calculator, TrendingUp, Sparkles, BarChart3 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, Calculator, TrendingUp, Sparkles, BarChart3, Calendar } from "lucide-react";
 import FormulaInput from "./formula-input";
 import FormulaExamples from "./formula-examples";
 import { evaluate } from "mathjs";
+import { useQuery } from "@tanstack/react-query";
 
 interface Player {
   playerId: number;
@@ -20,6 +21,25 @@ interface Player {
   threePointPercentage: number;
   freeThrowPercentage: number;
   plusMinus: number;
+  currentSeason?: string;
+  seasons?: Array<{
+    season: string;
+    team: string;
+    position: string;
+    gamesPlayed: number;
+    minutesPerGame: number;
+    points: number;
+    assists: number;
+    rebounds: number;
+    steals: number;
+    blocks: number;
+    turnovers: number;
+    fieldGoalPercentage: number;
+    threePointPercentage: number;
+    freeThrowPercentage: number;
+    plusMinus: number;
+  }>;
+  availableSeasons?: string[];
 }
 
 interface PlayerAnalysisProps {

@@ -20,6 +20,9 @@ export const nbaPlayers = pgTable("nba_players", {
   threePointPercentage: real("three_point_percentage").notNull().default(0),
   freeThrowPercentage: real("free_throw_percentage").notNull().default(0),
   plusMinus: real("plus_minus").notNull().default(0),
+  currentSeason: text("current_season"),
+  seasons: jsonb("seasons"),
+  availableSeasons: text("available_seasons").array(),
 });
 
 // Session storage table for authentication

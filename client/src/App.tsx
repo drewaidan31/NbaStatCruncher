@@ -25,6 +25,25 @@ interface Player {
   threePointPercentage: number;
   freeThrowPercentage: number;
   plusMinus: number;
+  currentSeason?: string;
+  seasons?: Array<{
+    season: string;
+    team: string;
+    position: string;
+    gamesPlayed: number;
+    minutesPerGame: number;
+    points: number;
+    assists: number;
+    rebounds: number;
+    steals: number;
+    blocks: number;
+    turnovers: number;
+    fieldGoalPercentage: number;
+    threePointPercentage: number;
+    freeThrowPercentage: number;
+    plusMinus: number;
+  }>;
+  availableSeasons?: string[];
 }
 
 type ViewMode = 'leaderboard' | 'search' | 'analysis' | 'comparison';
