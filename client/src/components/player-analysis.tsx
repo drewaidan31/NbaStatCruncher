@@ -279,11 +279,14 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
       });
       
       if (response.ok) {
-        console.log('Stat saved successfully!');
+        const savedStat = await response.json();
+        console.log('Stat saved successfully!', savedStat);
         // Always refresh the saved stats after saving
         refetchStats();
       } else {
-        console.error('Failed to save stat:', response.statusText);
+        console.error('Failed to save stat:', response.status, response.statusText);
+        const errorText = await response.text();
+        console.error('Error details:', errorText);
       }
     } catch (error) {
       console.error('Error saving stat:', error);
@@ -560,7 +563,14 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold text-white">Saved Custom Stats</h3>
                 <button
-                  onClick={() => refetchStats()}
+                  onClick={() => {
+                    console.log('Manually refreshing saved stats...');
+                    refetchStats().then((result) => {
+                      console.log('Refetch result:', result);
+                    }).catch((error) => {
+                      console.error('Refetch error:', error);
+                    });
+                  }}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors"
                 >
                   Refresh
