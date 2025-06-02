@@ -156,6 +156,9 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
               <div className="text-sm text-slate-400 mb-2">
                 {filteredPlayers.length} suggestion{filteredPlayers.length !== 1 ? 's' : ''}
                 {filteredPlayers.length === 10 ? ' (showing top 10)' : ''}
+                {currentFormula && customStatResults && (
+                  <span className="text-green-400 ml-2">• Showing custom stat: {currentFormula}</span>
+                )}
               </div>
               <div className="max-h-60 overflow-y-auto space-y-1">
                 {filteredPlayers.map((player: Player) => (

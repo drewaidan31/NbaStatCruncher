@@ -176,6 +176,7 @@ function MainApp() {
         <PlayerComparison
           comparison={comparisonData}
           onBack={handleBackToSearch}
+          currentFormula={formula}
         />
       );
     }

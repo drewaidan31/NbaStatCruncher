@@ -31,10 +31,11 @@ interface ComparisonData {
 interface PlayerComparisonProps {
   comparison: ComparisonData;
   onBack: () => void;
+  currentFormula?: string;
 }
 
-export default function PlayerComparison({ comparison, onBack }: PlayerComparisonProps) {
-  const [formula, setFormula] = useState("PPG + APG + RPG");
+export default function PlayerComparison({ comparison, onBack, currentFormula }: PlayerComparisonProps) {
+  const [formula, setFormula] = useState(currentFormula || "PPG + APG + RPG");
   const [customStatName, setCustomStatName] = useState("Total Impact");
   const [player1Value, setPlayer1Value] = useState<number | null>(null);
   const [player2Value, setPlayer2Value] = useState<number | null>(null);
