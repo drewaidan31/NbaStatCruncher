@@ -34,6 +34,13 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect }: Player
 
   const { data: players = [], isLoading, error } = useQuery({
     queryKey: ["/api/nba/players", selectedSeason],
+    queryFn: async () => {
+      const response = await fetch(`/api/nba/players?season=${selectedSeason}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch players: ${response.status}`);
+      }
+      return response.json();
+    },
   });
 
   // Debug: Log the data structure
