@@ -27,8 +27,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log("Fetching NBA data with API key:", rapidApiKey ? "API key present" : "API key missing");
       
-      // Get recent games first to find valid game IDs
-      const gamesResponse = await fetch("https://api-nba-v1.p.rapidapi.com/games?season=2024", {
+      // Get season data to find current season info
+      const seasonsResponse = await fetch("https://api-nba-v1.p.rapidapi.com/seasons", {
         method: "GET",
         headers: {
           "X-RapidAPI-Key": rapidApiKey,
@@ -36,31 +36,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
-      if (!gamesResponse.ok) {
-        const errorText = await gamesResponse.text();
-        console.log("Games API Error:", errorText);
+      if (!seasonsResponse.ok) {
+        const errorText = await seasonsResponse.text();
+        console.log("Seasons API Error:", errorText);
         return res.status(500).json({ 
-          message: `Failed to fetch NBA games: ${gamesResponse.status} ${gamesResponse.statusText}` 
+          message: `Failed to fetch NBA seasons: ${seasonsResponse.status} ${seasonsResponse.statusText}` 
         });
       }
 
-      const gamesData = await gamesResponse.json();
-      console.log("Games data received:", gamesData?.response?.length || 0, "games");
+      const seasonsData = await seasonsResponse.json();
+      console.log("Seasons data received:", seasonsData?.response?.length || 0, "seasons");
 
-      if (!gamesData?.response?.length) {
-        return res.status(500).json({ 
-          message: "No NBA games data available from the API" 
-        });
-      }
-
-      // Get a recent game ID
-      const recentGame = gamesData.response[0];
-      const gameId = recentGame.id;
-
-      console.log("Using game ID:", gameId);
-
-      // Now get statistics for players from this game
-      const response = await fetch(`https://api-nba-v1.p.rapidapi.com/players/statistics?game=${gameId}`, {
+      // Use current season (2024) to get player statistics
+      const response = await fetch("https://api-nba-v1.p.rapidapi.com/players/statistics?season=2024", {
         method: "GET",
         headers: {
           "X-RapidAPI-Key": rapidApiKey,
