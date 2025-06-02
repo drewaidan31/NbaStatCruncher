@@ -3,6 +3,7 @@ import { ArrowLeft, Calculator, TrendingUp, Sparkles, BarChart3, Calendar } from
 import FormulaExamples from "./formula-examples";
 import { evaluate } from "mathjs";
 import { useQuery } from "@tanstack/react-query";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 interface Player {
   playerId: number;
@@ -55,6 +56,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
   const [showSavedStats, setShowSavedStats] = useState(false);
   const [selectedSeason, setSelectedSeason] = useState(player.currentSeason || season);
   const [currentPlayerData, setCurrentPlayerData] = useState(player);
+  const [chartData, setChartData] = useState<Array<{season: string, value: number, team: string}>>([]);
 
   // Query to fetch specific season data for the player
   const { data: seasonPlayerData, isLoading: isLoadingSeason } = useQuery({
@@ -114,43 +116,96 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
     'MIN': currentPlayerData.minutesPerGame || 32.5
   };
 
-  const calculateCustomStat = () => {
-    console.log('Player analysis calculate clicked, formula:', formula);
-    console.log('Current player data:', currentPlayerData);
-    console.log('Stat mappings:', statMappings);
-    
+  const calculateCustomStatForSeason = (seasonData: any) => {
+    const seasonStatMappings = {
+      'PPG': seasonData.points,
+      'APG': seasonData.assists,
+      'RPG': seasonData.rebounds,
+      'SPG': seasonData.steals,
+      'BPG': seasonData.blocks,
+      'TPG': seasonData.turnovers,
+      'FG%': seasonData.fieldGoalPercentage,
+      '3P%': seasonData.threePointPercentage,
+      'FT%': seasonData.freeThrowPercentage,
+      'GP': seasonData.gamesPlayed,
+      '+/-': seasonData.plusMinus,
+      'MIN': seasonData.minutesPerGame || 32.5
+    };
+
     try {
       let expression = formula;
       
       // Handle +/- first since it has special characters
       if (expression.includes('+/-')) {
-        expression = expression.replace(/\+\/-/g, statMappings['+/-'].toString());
-        console.log('After +/- replacement:', expression);
+        expression = expression.replace(/\+\/-/g, seasonStatMappings['+/-'].toString());
       }
       
       // Replace stat abbreviations with actual values
-      Object.entries(statMappings).forEach(([key, value]) => {
+      Object.entries(seasonStatMappings).forEach(([key, value]) => {
         if (key !== '+/-') {
           if (key.includes('%')) {
-            // For percentage stats, escape the % character
             const escapedKey = key.replace(/%/g, '\\%');
             const regex = new RegExp(`\\b${escapedKey}\\b`, 'g');
             expression = expression.replace(regex, value.toString());
           } else {
-            // For regular stats
             const regex = new RegExp(`\\b${key}\\b`, 'g');
             expression = expression.replace(regex, value.toString());
           }
         }
       });
       
-      console.log('Final expression:', expression);
       const result = evaluate(expression);
-      console.log('Calculation result:', result);
-      setCalculatedValue(typeof result === 'number' ? result : null);
+      return typeof result === 'number' ? result : null;
     } catch (error) {
-      console.log('Calculation error:', error);
+      return null;
+    }
+  };
+
+  const calculateCustomStat = () => {
+    try {
+      let expression = formula;
+      
+      // Handle +/- first since it has special characters
+      if (expression.includes('+/-')) {
+        expression = expression.replace(/\+\/-/g, statMappings['+/-'].toString());
+      }
+      
+      // Replace stat abbreviations with actual values
+      Object.entries(statMappings).forEach(([key, value]) => {
+        if (key !== '+/-') {
+          if (key.includes('%')) {
+            const escapedKey = key.replace(/%/g, '\\%');
+            const regex = new RegExp(`\\b${escapedKey}\\b`, 'g');
+            expression = expression.replace(regex, value.toString());
+          } else {
+            const regex = new RegExp(`\\b${key}\\b`, 'g');
+            expression = expression.replace(regex, value.toString());
+          }
+        }
+      });
+      
+      const result = evaluate(expression);
+      setCalculatedValue(typeof result === 'number' ? result : null);
+
+      // Calculate for all seasons to create chart data
+      if (player.seasons && formula.trim()) {
+        const chartDataPoints = player.seasons
+          .map(seasonData => {
+            const value = calculateCustomStatForSeason(seasonData);
+            return value !== null ? {
+              season: seasonData.season,
+              value: value,
+              team: seasonData.team
+            } : null;
+          })
+          .filter(point => point !== null)
+          .sort((a, b) => a!.season.localeCompare(b!.season));
+        
+        setChartData(chartDataPoints as Array<{season: string, value: number, team: string}>);
+      }
+    } catch (error) {
       setCalculatedValue(null);
+      setChartData([]);
     }
   };
 
@@ -503,6 +558,60 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
           </div>
         </div>
       </div>
+
+      {/* Custom Stat Chart */}
+      {chartData.length > 0 && calculatedValue !== null && (
+        <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp className="w-5 h-5 text-orange-400" />
+            <h3 className="text-lg font-medium text-white">{customStatName} Over Time</h3>
+            <span className="text-sm text-slate-400">({chartData.length} seasons)</span>
+          </div>
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis 
+                  dataKey="season" 
+                  stroke="#9CA3AF"
+                  fontSize={12}
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
+                />
+                <YAxis stroke="#9CA3AF" fontSize={12} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#1F2937', 
+                    border: '1px solid #374151',
+                    borderRadius: '8px',
+                    color: '#F9FAFB'
+                  }}
+                  formatter={(value: number, name: string) => [
+                    `${value.toFixed(2)}`,
+                    customStatName
+                  ]}
+                  labelFormatter={(label: string) => {
+                    const point = chartData.find(d => d.season === label);
+                    return `${label} (${point?.team || 'N/A'})`;
+                  }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="value" 
+                  stroke="#F97316" 
+                  strokeWidth={3}
+                  dot={{ fill: '#F97316', strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: '#F97316', strokeWidth: 2 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="mt-4 text-sm text-slate-400">
+            Track how {customStatName.toLowerCase()} changed throughout {player.name}'s career across different teams and seasons.
+          </div>
+        </div>
+      )}
 
       {/* Compact Player Stats */}
       <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
