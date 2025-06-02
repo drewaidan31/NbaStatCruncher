@@ -1,132 +1,100 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Save } from "lucide-react";
 
 interface SaveStatDialogProps {
   formula: string;
-  onClose: () => void;
-  isOpen: boolean;
+  onSave: (name: string, description: string) => void;
+  disabled?: boolean;
 }
 
-export default function SaveStatDialog({ formula, onClose, isOpen }: SaveStatDialogProps) {
+export default function SaveStatDialog({ formula, onSave, disabled }: SaveStatDialogProps) {
+  const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const queryClient = useQueryClient();
-
-  const generateNameMutation = useMutation({
-    mutationFn: async (formula: string) => {
-      const response = await apiRequest("POST", "/api/custom-stats/generate-name", { formula });
-      return response.json();
-    },
-    onSuccess: (data) => {
-      setName(data.name);
-      setDescription(data.description);
-    },
-  });
-
-  const saveMutation = useMutation({
-    mutationFn: async (data: { name: string; formula: string; description?: string }) => {
-      const response = await apiRequest("POST", "/api/custom-stats/save", data);
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/custom-stats/my"] });
-      setName("");
-      setDescription("");
-      onClose();
-    },
-  });
 
   const handleSave = () => {
-    if (name.trim() && formula.trim()) {
-      saveMutation.mutate({
-        name: name.trim(),
-        formula,
-        description: description.trim() || undefined,
-      });
+    if (name.trim()) {
+      onSave(name.trim(), description.trim());
+      setName("");
+      setDescription("");
+      setOpen(false);
     }
   };
-
-  const handleGenerateName = () => {
-    if (formula.trim()) {
-      generateNameMutation.mutate(formula);
-    }
-  };
-
-  if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-slate-800 rounded-xl border border-slate-700 p-6 max-w-md w-full mx-4">
-        <h3 className="text-lg font-semibold text-slate-50 mb-4">Save Custom Stat</h3>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button 
+          variant="outline" 
+          disabled={disabled || !formula.trim()}
+          className="w-full"
+        >
+          <Save className="w-4 h-4 mr-2" />
+          Save Custom Stat
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Save Custom Stat</DialogTitle>
+          <DialogDescription>
+            Give your custom stat formula a name and description.
+          </DialogDescription>
+        </DialogHeader>
         
         <div className="space-y-4">
+          <div className="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg">
+            <div className="text-sm text-slate-600 dark:text-slate-400 mb-1">Formula:</div>
+            <div className="font-mono text-sm">{formula}</div>
+          </div>
+          
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-medium text-slate-300">
-                Stat Name *
-              </label>
-              <button
-                onClick={handleGenerateName}
-                disabled={!formula.trim() || generateNameMutation.isPending}
-                className="flex items-center gap-1 text-xs bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-2 py-1 rounded transition-colors"
-              >
-                {generateNameMutation.isPending ? (
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                ) : (
-                  <Sparkles className="w-3 h-3" />
-                )}
-                AI Generate
-              </button>
-            </div>
-            <input
-              type="text"
+            <label htmlFor="stat-name" className="block text-sm font-medium mb-2">
+              Stat Name
+            </label>
+            <Input
+              id="stat-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Triple-Double Impact"
-              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400"
+              maxLength={50}
             />
           </div>
-
+          
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Description
+            <label htmlFor="stat-description" className="block text-sm font-medium mb-2">
+              Description (optional)
             </label>
-            <textarea
+            <Textarea
+              id="stat-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Optional description of what this stat measures"
-              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 h-20 resize-none"
+              placeholder="e.g., Measures overall impact by combining points, assists, and rebounds"
+              maxLength={200}
+              rows={3}
             />
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Formula
-            </label>
-            <div className="bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-slate-300 font-mono text-sm">
-              {formula}
-            </div>
-          </div>
         </div>
-
-        <div className="flex gap-3 mt-6">
-          <button
-            onClick={onClose}
-            className="flex-1 bg-slate-600 hover:bg-slate-500 text-white py-2 px-4 rounded-lg transition-colors"
-          >
+        
+        <div className="flex gap-2 justify-end">
+          <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={!name.trim() || !formula.trim() || saveMutation.isPending}
-            className="flex-1 bg-orange-600 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2 px-4 rounded-lg transition-colors"
-          >
-            {saveMutation.isPending ? "Saving..." : "Save Stat"}
-          </button>
+          </Button>
+          <Button onClick={handleSave} disabled={!name.trim()}>
+            Save Stat
+          </Button>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

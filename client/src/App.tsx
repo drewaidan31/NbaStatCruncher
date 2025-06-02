@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import StatCalculator from "./components/stat-calculator";
 import SaveStatDialog from "./components/save-stat-dialog";
-import { useAuth } from "./hooks/useAuth";
 
 const queryClient = new QueryClient();
 
@@ -12,8 +11,13 @@ function MainApp() {
   const [error, setError] = useState("");
   const [formula, setFormula] = useState("");
   const [results, setResults] = useState([]);
-  const [showSaveDialog, setShowSaveDialog] = useState(false);
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const [savedStats, setSavedStats] = useState<Array<{
+    id: number;
+    name: string;
+    description: string;
+    formula: string;
+    createdAt: string;
+  }>>([]);
 
   useEffect(() => {
     const fetchPlayers = async () => {
@@ -57,6 +61,19 @@ function MainApp() {
       console.error("Error calculating stats:", err);
       setError("Error calculating statistics");
     }
+  };
+
+  const handleSaveStat = (name: string, description: string) => {
+    const newStat = {
+      id: Date.now(),
+      name,
+      description,
+      formula,
+      createdAt: new Date().toISOString()
+    };
+    
+    setSavedStats(prev => [newStat, ...prev]);
+    setError("");
   };
 
   return (
@@ -104,26 +121,12 @@ function MainApp() {
                 onCalculate={calculateStats}
               />
 
-              {results.length > 0 && isAuthenticated && (
+              {results.length > 0 && (
                 <div className="mt-4 flex justify-center">
-                  <button
-                    onClick={() => setShowSaveDialog(true)}
-                    className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
-                  >
-                    Save Custom Stat
-                  </button>
-                </div>
-              )}
-
-              {!isAuthenticated && !authLoading && (
-                <div className="mt-4 text-center">
-                  <p className="text-slate-400 mb-2">Sign in to save your custom stats</p>
-                  <a
-                    href="/api/login"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors inline-block"
-                  >
-                    Sign In
-                  </a>
+                  <SaveStatDialog 
+                    formula={formula}
+                    onSave={handleSaveStat}
+                  />
                 </div>
               )}
             </div>
@@ -155,6 +158,34 @@ function MainApp() {
                 </div>
               </div>
             )}
+
+            {savedStats.length > 0 && (
+              <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+                <h3 className="text-lg font-semibold mb-4">Your Saved Custom Stats</h3>
+                <div className="space-y-4">
+                  {savedStats.map((stat) => (
+                    <div key={stat.id} className="bg-slate-700 p-4 rounded-lg">
+                      <div className="flex justify-between items-start mb-2">
+                        <h4 className="font-medium text-slate-50">{stat.name}</h4>
+                        <button
+                          onClick={() => {
+                            setFormula(stat.formula);
+                            calculateStats();
+                          }}
+                          className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition-colors"
+                        >
+                          Use Formula
+                        </button>
+                      </div>
+                      {stat.description && (
+                        <p className="text-sm text-slate-400 mb-2">{stat.description}</p>
+                      )}
+                      <div className="text-xs text-slate-500 font-mono">{stat.formula}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="text-center py-8">
@@ -163,11 +194,7 @@ function MainApp() {
         )}
       </div>
 
-      <SaveStatDialog 
-        formula={formula}
-        isOpen={showSaveDialog}
-        onClose={() => setShowSaveDialog(false)}
-      />
+
     </div>
   );
 }
