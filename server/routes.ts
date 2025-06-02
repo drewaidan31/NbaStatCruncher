@@ -27,7 +27,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log("Fetching NBA data with API key:", rapidApiKey ? "API key present" : "API key missing");
       
-      // Get season data to find current season info
+      // Get available seasons first
       const seasonsResponse = await fetch("https://api-nba-v1.p.rapidapi.com/seasons", {
         method: "GET",
         headers: {
@@ -45,10 +45,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const seasonsData = await seasonsResponse.json();
-      console.log("Seasons data received:", seasonsData?.response?.length || 0, "seasons");
+      console.log("Seasons data received:", seasonsData?.response || []);
+      
+      // Use the most recent available season (likely 2019 based on your screenshot)
+      const availableSeasons = seasonsData?.response || [];
+      const latestSeason = availableSeasons[availableSeasons.length - 1] || "2019";
+      
+      console.log("Using season:", latestSeason);
 
-      // Use current season (2024) to get player statistics
-      const response = await fetch("https://api-nba-v1.p.rapidapi.com/players/statistics?season=2024", {
+      // Get player statistics for the latest available season
+      const response = await fetch(`https://api-nba-v1.p.rapidapi.com/players/statistics?season=${latestSeason}`, {
         method: "GET",
         headers: {
           "X-RapidAPI-Key": rapidApiKey,
