@@ -211,9 +211,12 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
 
       // Calculate for all seasons to create chart data
       if (player.seasons && formula.trim()) {
+        console.log('Player seasons:', player.seasons);
         const chartDataPoints = player.seasons
           .map(seasonData => {
+            console.log('Processing season:', seasonData.season, seasonData);
             const value = calculateCustomStatForSeason(seasonData);
+            console.log('Season value calculated:', value);
             return value !== null ? {
               season: seasonData.season,
               value: value,
