@@ -97,13 +97,16 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
 
   const handleFormulaChange = (newFormula: string) => {
     setFormula(newFormula);
-    // Auto-calculate when formula changes
-    setTimeout(() => {
-      const value1 = calculateCustomStat(player1);
-      const value2 = calculateCustomStat(player2);
-      setPlayer1Value(value1);
-      setPlayer2Value(value2);
-    }, 100);
+    // Reset values when formula changes
+    setPlayer1Value(null);
+    setPlayer2Value(null);
+  };
+
+  const handleCalculate = () => {
+    const value1 = calculateCustomStat(player1);
+    const value2 = calculateCustomStat(player2);
+    setPlayer1Value(value1);
+    setPlayer2Value(value2);
   };
 
   const StatComparison = ({ label, value1, value2, isPercentage = false, higherIsBetter = true }: {
@@ -215,6 +218,26 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
                 <div className="text-white text-lg font-mono min-h-[2rem] break-all">
                   {formula || "Click stats and operations to build your formula"}
                 </div>
+              </div>
+              
+              {/* Calculate Button */}
+              <div className="flex gap-3">
+                <button
+                  onClick={handleCalculate}
+                  disabled={!formula}
+                  className="bg-orange-600 hover:bg-orange-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium py-2 px-6 rounded-lg transition-colors"
+                >
+                  Calculate
+                </button>
+                <button
+                  onClick={() => {
+                    setFormula("");
+                    handleFormulaChange("");
+                  }}
+                  className="bg-slate-600 hover:bg-slate-500 text-white py-2 px-4 rounded-lg transition-colors"
+                >
+                  Clear
+                </button>
               </div>
             </div>
 
