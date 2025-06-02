@@ -16,94 +16,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json(existingPlayers);
       }
 
-      // Fetch from RapidAPI
-      const rapidApiKey = process.env.RAPIDAPI_KEY || process.env.NBA_API_KEY || "";
+      console.log("Fetching NBA data using official NBA API library");
       
-      if (!rapidApiKey) {
+      // Use Python script to fetch NBA data from official NBA API
+      const { spawn } = require("child_process");
+      const python = spawn("python3", ["server/nba_data.py"]);
+      
+      let pythonData = "";
+      let pythonError = "";
+      
+      python.stdout.on("data", (data: any) => {
+        pythonData += data.toString();
+      });
+      
+      python.stderr.on("data", (data: any) => {
+        pythonError += data.toString();
+      });
+      
+      await new Promise((resolve, reject) => {
+        python.on("close", (code: number) => {
+          if (code === 0) {
+            resolve(code);
+          } else {
+            reject(new Error(`Python script failed with code ${code}: ${pythonError}`));
+          }
+        });
+      });
+
+      if (!pythonData.trim()) {
         return res.status(500).json({ 
-          message: "RapidAPI key not configured. Please add RAPIDAPI_KEY to environment variables." 
+          message: "No NBA player data received from the official NBA API" 
         });
       }
 
-      console.log("Fetching NBA data with API key:", rapidApiKey ? "API key present" : "API key missing");
-      
-      // Get NBA players using search parameter for common names
-      let allPlayers = [];
-      const searchTerms = ["james", "curry", "durant", "davis", "paul"];
-      
-      for (const searchTerm of searchTerms) {
-        try {
-          const playersResponse = await fetch(`https://api-nba-v1.p.rapidapi.com/players?search=${searchTerm}`, {
-            method: "GET",
-            headers: {
-              "X-RapidAPI-Key": rapidApiKey,
-              "X-RapidAPI-Host": "api-nba-v1.p.rapidapi.com"
-            }
-          });
+      const allPlayers = JSON.parse(pythonData);
 
-          if (playersResponse.ok) {
-            const playersData = await playersResponse.json();
-            console.log(`Players found for "${searchTerm}":`, playersData?.response?.length || 0);
-            if (playersData?.response?.length) {
-              // Log first player to see data structure
-              if (playersData.response[0]) {
-                console.log("Sample player data:", JSON.stringify(playersData.response[0], null, 2));
-              }
-              allPlayers.push(...playersData.response);
-            }
-          } else {
-            console.log(`Players API failed for "${searchTerm}":`, await playersResponse.text());
-          }
-        } catch (error) {
-          console.log(`Error fetching players for "${searchTerm}":`, error);
-        }
-      }
-
-      console.log("Total NBA players collected:", allPlayers.length);
+      console.log("NBA API Data received:", allPlayers.length, "players");
 
       if (allPlayers.length === 0) {
         return res.status(500).json({ 
-          message: "No NBA player data received from the API" 
+          message: "No NBA player data received from the official NBA API" 
         });
       }
 
-      console.log("NBA API Data received:", allPlayers.length, "players");
-      
-      // Transform the authentic NBA player data from your API subscription
-      const players = allPlayers.slice(0, 50).map((playerData: any) => {
-        const name = `${playerData.firstname || ""} ${playerData.lastname || ""}`.trim();
-        const position = playerData.leagues?.standard?.pos || "G";
-        const jerseyNumber = playerData.leagues?.standard?.jersey || "";
-        const team = jerseyNumber ? `#${jerseyNumber}` : "Free Agent";
-        
-        // Generate realistic stats based on actual player position and career info
-        const isGuard = position.includes("G");
-        const isCenter = position.includes("C");
-        const isForward = position.includes("F");
-        const yearsPro = playerData.nba?.pro || 1;
-        
-        // Career-adjusted statistics
-        const experienceMultiplier = Math.min(yearsPro / 10, 1.2);
-        
-        return {
-          playerId: playerData.id,
-          name: name,
-          team: team,
-          position: position,
-          gamesPlayed: Math.floor(Math.random() * 20) + 60,
-          minutesPerGame: (Math.random() * 10 + (isGuard ? 28 : isCenter ? 25 : 26)) * experienceMultiplier,
-          points: (Math.random() * (isGuard ? 15 : isCenter ? 12 : 14) + (isGuard ? 12 : isCenter ? 15 : 16)) * experienceMultiplier,
-          assists: (Math.random() * (isGuard ? 6 : 2) + (isGuard ? 4 : 1)) * experienceMultiplier,
-          rebounds: (Math.random() * (isCenter ? 8 : isForward ? 6 : 3) + (isCenter ? 10 : isForward ? 6 : 3)) * experienceMultiplier,
-          steals: Math.random() * 1.5 + 0.8,
-          blocks: Math.random() * (isCenter ? 2 : 0.8) + (isCenter ? 1 : 0.3),
-          turnovers: Math.random() * 3 + 1.5,
-          fieldGoalPercentage: Math.random() * 0.25 + 0.45,
-          threePointPercentage: Math.random() * 0.2 + (isGuard ? 0.35 : 0.28),
-          freeThrowPercentage: Math.random() * 0.25 + 0.7,
-          plusMinus: (Math.random() - 0.5) * 12,
-        };
-      }) || [];
+      // The NBA API library already provides structured data
+      const players = allPlayers;
 
       // Store players in memory
       for (const playerData of players) {
