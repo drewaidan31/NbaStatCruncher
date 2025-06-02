@@ -13,6 +13,10 @@ except ImportError:
 def get_nba_players_from_api(season='2024-25'):
     """Get NBA players using the official NBA API"""
     try:
+        # Handle all-time option by combining multiple seasons
+        if season == 'all-time':
+            return get_all_time_leaders()
+        
         # Get season player stats
         player_stats = leaguedashplayerstats.LeagueDashPlayerStats(
             season=season,
@@ -58,6 +62,74 @@ def get_nba_players_from_api(season='2024-25'):
         return players_data
     except Exception as e:
         print(f"Error fetching from NBA API: {e}", file=sys.stderr)
+        return None
+
+def get_all_time_leaders():
+    """Get all-time leaders by combining data from multiple seasons"""
+    try:
+        # Key seasons to include for all-time leaders
+        key_seasons = ['2023-24', '2022-23', '2021-22', '2020-21', '2019-20', 
+                      '2018-19', '2017-18', '2016-17', '2015-16', '2014-15',
+                      '2013-14', '2012-13', '2011-12', '2010-11']
+        
+        all_players = {}  # Dictionary to store best season for each player
+        
+        print(f"Fetching all-time leaders from {len(key_seasons)} seasons...", file=sys.stderr)
+        
+        for season in key_seasons:
+            try:
+                player_stats = leaguedashplayerstats.LeagueDashPlayerStats(
+                    season=season,
+                    season_type_all_star='Regular Season'
+                )
+                
+                df = player_stats.get_data_frames()[0]
+                df = df[df['GP'] >= 20]  # Higher threshold for all-time consideration
+                
+                for _, row in df.iterrows():
+                    games_played = int(row['GP']) if row['GP'] > 0 else 1
+                    player_name = row['PLAYER_NAME']
+                    ppg = float(row['PTS']) / games_played
+                    
+                    # Keep the best season for each player based on PPG
+                    if player_name not in all_players or ppg > all_players[player_name]['points']:
+                        all_players[player_name] = {
+                            'playerId': int(row['PLAYER_ID']),
+                            'name': player_name,
+                            'team': f"{row['TEAM_ABBREVIATION']} ({season})",
+                            'position': 'G',
+                            'gamesPlayed': games_played,
+                            'minutesPerGame': float(row['MIN']) / games_played,
+                            'points': ppg,
+                            'assists': float(row['AST']) / games_played,
+                            'rebounds': float(row['REB']) / games_played,
+                            'steals': float(row['STL']) / games_played,
+                            'blocks': float(row['BLK']) / games_played,
+                            'turnovers': float(row['TOV']) / games_played,
+                            'fieldGoalPercentage': float(row['FG_PCT']) if row['FG_PCT'] else 0.0,
+                            'threePointPercentage': float(row['FG3_PCT']) if row['FG3_PCT'] else 0.0,
+                            'freeThrowPercentage': float(row['FT_PCT']) if row['FT_PCT'] else 0.0,
+                            'plusMinus': float(row['PLUS_MINUS']) / games_played if row['PLUS_MINUS'] else 0.0
+                        }
+                
+                print(f"Processed {season}: {len(df)} players", file=sys.stderr)
+                
+            except Exception as e:
+                print(f"Error processing season {season}: {e}", file=sys.stderr)
+                continue
+        
+        # Convert to list and sort by points
+        players_list = list(all_players.values())
+        players_list.sort(key=lambda x: x['points'], reverse=True)
+        
+        # Take top 300 for all-time leaders
+        players_list = players_list[:300]
+        
+        print(f"All-time leaders compiled: {len(players_list)} players", file=sys.stderr)
+        return players_list
+        
+    except Exception as e:
+        print(f"Error creating all-time leaders: {e}", file=sys.stderr)
         return None
 
 def get_sample_nba_players():

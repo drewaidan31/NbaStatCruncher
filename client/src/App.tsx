@@ -106,6 +106,7 @@ function MainApp() {
                 onChange={(e) => handleSeasonChange(e.target.value)}
                 className="bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
               >
+                <option value="all-time">All-Time Leaders (2010-2025)</option>
                 <option value="2024-25">2024-25 Season (Current)</option>
                 <option value="2023-24">2023-24 Season</option>
                 <option value="2022-23">2022-23 Season</option>
