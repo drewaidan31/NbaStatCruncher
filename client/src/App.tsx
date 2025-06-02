@@ -71,6 +71,8 @@ function MainApp() {
     formula: string;
     createdAt: string;
   }>>([]);
+  const [customStatName, setCustomStatName] = useState("Total Impact");
+  const [showSavedStats, setShowSavedStats] = useState(false);
 
   useEffect(() => {
     const fetchPlayers = async () => {
@@ -122,17 +124,45 @@ function MainApp() {
     }
   };
 
-  const handleSaveStat = (name: string, description: string) => {
-    const newStat = {
-      id: Date.now(),
-      name,
-      description,
-      formula,
-      createdAt: new Date().toISOString()
-    };
-    
-    setSavedStats(prev => [newStat, ...prev]);
-    setError("");
+  const handleSaveStat = async () => {
+    try {
+      const response = await fetch('/api/custom-stats', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: customStatName,
+          formula: formula,
+          description: `Custom stat: ${customStatName}`
+        }),
+      });
+      
+      if (response.ok) {
+        alert('Stat saved successfully!');
+        fetchSavedStats();
+      }
+    } catch (error) {
+      console.error('Error saving stat:', error);
+    }
+  };
+
+  const fetchSavedStats = async () => {
+    try {
+      const response = await fetch('/api/custom-stats');
+      if (response.ok) {
+        const data = await response.json();
+        setSavedStats(data);
+      }
+    } catch (error) {
+      console.error('Error fetching saved stats:', error);
+    }
+  };
+
+  const loadSavedStat = (stat: any) => {
+    setFormula(stat.formula);
+    setCustomStatName(stat.name);
+    setShowSavedStats(false);
   };
 
   const handlePlayerSelect = (player: Player, season: string) => {
@@ -216,12 +246,74 @@ function MainApp() {
             onCalculate={calculateStats}
           />
 
-          {results.length > 0 && (
-            <div className="mt-4 flex justify-center">
-              <SaveStatDialog 
-                formula={formula}
-                onSave={handleSaveStat}
+          {/* Save functionality for main menu */}
+          <div className="space-y-4 mt-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Custom Stat Name:
+              </label>
+              <input
+                type="text"
+                value={customStatName}
+                onChange={(e) => setCustomStatName(e.target.value)}
+                placeholder="Enter stat name (e.g., Total Impact)"
+                className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500"
               />
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={calculateStats}
+                disabled={!formula.trim()}
+                className="bg-orange-600 hover:bg-orange-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium py-2 px-6 rounded-lg transition-colors"
+              >
+                Calculate
+              </button>
+              <button
+                onClick={handleSaveStat}
+                disabled={!formula.trim() || !customStatName.trim()}
+                className="bg-green-600 hover:bg-green-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              >
+                Save Stat
+              </button>
+              <button
+                onClick={() => setShowSavedStats(!showSavedStats)}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              >
+                Saved Stats
+              </button>
+              <button
+                onClick={() => {
+                  setFormula("");
+                  setCustomStatName("Total Impact");
+                }}
+                className="bg-slate-600 hover:bg-slate-500 text-white py-2 px-4 rounded-lg transition-colors"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+
+          {/* Saved Stats Display */}
+          {showSavedStats && (
+            <div className="bg-slate-700 rounded-lg p-4 mt-4">
+              <h4 className="text-lg font-medium text-slate-50 mb-3">Your Saved Stats</h4>
+              <div className="space-y-2">
+                {savedStats.length === 0 ? (
+                  <p className="text-slate-400">No saved stats yet</p>
+                ) : (
+                  savedStats.map((stat) => (
+                    <button
+                      key={stat.id}
+                      onClick={() => loadSavedStat(stat)}
+                      className="w-full text-left bg-slate-600 hover:bg-slate-500 p-3 rounded-lg transition-colors"
+                    >
+                      <div className="font-medium text-slate-50">{stat.name}</div>
+                      <div className="text-sm text-slate-300">{stat.formula}</div>
+                    </button>
+                  ))
+                )}
+              </div>
             </div>
           )}
         </div>
