@@ -68,6 +68,8 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
   const { data: savedStats = [], isLoading: isLoadingStats, refetch: refetchStats } = useQuery({
     queryKey: ['/api/custom-stats/my'],
     enabled: showSavedStats,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
 
   // Update current player data when season changes
@@ -278,10 +280,8 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
       
       if (response.ok) {
         console.log('Stat saved successfully!');
-        // Refresh the saved stats list if showing them
-        if (showSavedStats) {
-          refetchStats();
-        }
+        // Always refresh the saved stats after saving
+        refetchStats();
       } else {
         console.error('Failed to save stat:', response.statusText);
       }
@@ -557,7 +557,15 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
           {/* Saved Stats Section */}
           {showSavedStats && (
             <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-              <h3 className="text-lg font-semibold text-white mb-4">Saved Custom Stats</h3>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-white">Saved Custom Stats</h3>
+                <button
+                  onClick={() => refetchStats()}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors"
+                >
+                  Refresh
+                </button>
+              </div>
               {isLoadingStats ? (
                 <div className="text-slate-400">Loading saved stats...</div>
               ) : savedStats.length === 0 ? (
