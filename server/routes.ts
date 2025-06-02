@@ -250,12 +250,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const players = await storage.getAllPlayers();
       const player = players.find(p => p.playerId.toString() === playerId);
       
-      if (!player || !player.seasons) {
+      if (!player) {
         return res.status(404).json({ message: "Player not found" });
       }
       
-      // Find the specific season data
-      const seasonData = player.seasons.find((s: any) => s.season === season);
+      // Check if seasons data exists and find the specific season
+      const seasonsArray = Array.isArray(player.seasons) ? player.seasons : [];
+      const seasonData = seasonsArray.find((s: any) => s.season === season);
       
       if (!seasonData) {
         return res.status(404).json({ message: "Season data not found for this player" });
