@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { ArrowLeft, Calculator, TrendingUp } from "lucide-react";
+import { ArrowLeft, Calculator, TrendingUp, Sparkles, BarChart3 } from "lucide-react";
 import FormulaInput from "./formula-input";
+import FormulaExamples from "./formula-examples";
 import { evaluate } from "mathjs";
 
 interface Player {
@@ -31,6 +32,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
   const [formula, setFormula] = useState("PPG + APG + RPG");
   const [customStatName, setCustomStatName] = useState("Total Impact");
   const [calculatedValue, setCalculatedValue] = useState<number | null>(null);
+  const [showExamples, setShowExamples] = useState(false);
 
   const statMappings = {
     'PPG': player.points,
@@ -86,78 +88,71 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
     <div className="space-y-6">
       {/* Header */}
       <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-        <div className="flex items-center gap-4 mb-4">
-          <button
-            onClick={onBack}
-            className="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-white" />
-          </button>
-          <div>
-            <h1 className="text-2xl font-bold text-white">{player.name}</h1>
-            <p className="text-slate-300">{player.team} • {player.position} • {season}</p>
-          </div>
-        </div>
-
-        {/* Player Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          <div className="bg-slate-700 rounded-lg p-3">
-            <div className="text-slate-400 text-sm">Points</div>
-            <div className="text-orange-400 font-bold text-lg">{player.points.toFixed(1)} PPG</div>
-          </div>
-          <div className="bg-slate-700 rounded-lg p-3">
-            <div className="text-slate-400 text-sm">Assists</div>
-            <div className="text-blue-400 font-bold text-lg">{player.assists.toFixed(1)} APG</div>
-          </div>
-          <div className="bg-slate-700 rounded-lg p-3">
-            <div className="text-slate-400 text-sm">Rebounds</div>
-            <div className="text-green-400 font-bold text-lg">{player.rebounds.toFixed(1)} RPG</div>
-          </div>
-          <div className="bg-slate-700 rounded-lg p-3">
-            <div className="text-slate-400 text-sm">Steals</div>
-            <div className="text-purple-400 font-bold text-lg">{player.steals.toFixed(1)} SPG</div>
-          </div>
-          <div className="bg-slate-700 rounded-lg p-3">
-            <div className="text-slate-400 text-sm">Blocks</div>
-            <div className="text-red-400 font-bold text-lg">{player.blocks.toFixed(1)} BPG</div>
-          </div>
-          <div className="bg-slate-700 rounded-lg p-3">
-            <div className="text-slate-400 text-sm">Games</div>
-            <div className="text-slate-300 font-bold text-lg">{player.gamesPlayed} GP</div>
-          </div>
-          <div className="bg-slate-700 rounded-lg p-3">
-            <div className="text-slate-400 text-sm">Field Goal %</div>
-            <div className="text-yellow-400 font-bold text-lg">{(player.fieldGoalPercentage * 100).toFixed(1)}%</div>
-          </div>
-          <div className="bg-slate-700 rounded-lg p-3">
-            <div className="text-slate-400 text-sm">3-Point %</div>
-            <div className="text-cyan-400 font-bold text-lg">{(player.threePointPercentage * 100).toFixed(1)}%</div>
-          </div>
-          <div className="bg-slate-700 rounded-lg p-3">
-            <div className="text-slate-400 text-sm">Free Throw %</div>
-            <div className="text-indigo-400 font-bold text-lg">{(player.freeThrowPercentage * 100).toFixed(1)}%</div>
-          </div>
-          <div className="bg-slate-700 rounded-lg p-3">
-            <div className="text-slate-400 text-sm">Plus/Minus</div>
-            <div className={`font-bold text-lg ${player.plusMinus >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-              {player.plusMinus > 0 ? '+' : ''}{player.plusMinus.toFixed(1)}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={onBack}
+              className="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 text-white" />
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold text-white">{player.name}</h1>
+              <p className="text-slate-300">{player.team} • {player.position} • {season}</p>
             </div>
           </div>
-          <div className="bg-slate-700 rounded-lg p-3">
-            <div className="text-slate-400 text-sm">Turnovers</div>
-            <div className="text-orange-300 font-bold text-lg">{player.turnovers.toFixed(1)} TPG</div>
+          <div className="text-right">
+            <p className="text-slate-400 text-sm">Custom Stat Calculator</p>
+            <p className="text-orange-400 font-medium">Build your own analytics</p>
           </div>
         </div>
       </div>
 
-      {/* Custom Stat Calculator */}
-      <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-        <div className="flex items-center gap-2 mb-4">
-          <Calculator className="w-5 h-5 text-orange-400" />
-          <h2 className="text-xl font-bold text-white">Custom Stat Calculator</h2>
+      {/* Custom Stat Calculator - Main Focus */}
+      <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg p-8 border border-orange-500/30 shadow-xl">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-orange-500/20 rounded-full">
+              <Calculator className="w-6 h-6 text-orange-400" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-white">Custom Stat Calculator</h2>
+              <p className="text-slate-400">Create your own performance metrics</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowExamples(!showExamples)}
+            className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-slate-300 text-sm transition-colors"
+          >
+            <Sparkles className="w-4 h-4" />
+            Formula Examples
+          </button>
         </div>
 
-        <div className="space-y-4">
+        {/* Result Display - Prominent */}
+        {calculatedValue !== null && (
+          <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-xl p-6 mb-6 text-center shadow-lg">
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <TrendingUp className="w-6 h-6 text-white" />
+              <h3 className="text-xl font-bold text-white">{customStatName}</h3>
+            </div>
+            <div className="text-5xl font-bold text-white mb-2">{calculatedValue.toFixed(2)}</div>
+            <div className="text-orange-100 text-sm bg-black/20 rounded-lg px-3 py-1 inline-block">
+              Formula: {formula}
+            </div>
+          </div>
+        )}
+
+        {/* No Result State */}
+        {calculatedValue === null && (
+          <div className="bg-slate-700/50 rounded-xl p-8 mb-6 text-center border-2 border-dashed border-slate-600">
+            <BarChart3 className="w-12 h-12 text-slate-500 mx-auto mb-3" />
+            <h3 className="text-lg font-medium text-slate-300 mb-2">Ready to Calculate</h3>
+            <p className="text-slate-400 text-sm">Enter a formula below to see your custom stat result</p>
+          </div>
+        )}
+
+        <div className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
               Custom Stat Name:
@@ -166,40 +161,70 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
               type="text"
               value={customStatName}
               onChange={(e) => setCustomStatName(e.target.value)}
-              className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg"
               placeholder="Enter a name for your custom stat..."
             />
           </div>
 
           <FormulaInput formula={formula} onFormulaChange={handleFormulaChange} />
 
+          {showExamples && (
+            <FormulaExamples onFormulaSelect={(selectedFormula) => {
+              setFormula(selectedFormula);
+              handleFormulaChange(selectedFormula);
+              setShowExamples(false);
+            }} />
+          )}
+
           <div className="bg-slate-700 rounded-lg p-4">
-            <div className="text-sm text-slate-400 mb-2">Available Stats:</div>
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-2 text-xs">
+            <div className="text-sm text-slate-400 mb-3 font-medium">Available Player Stats:</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
               {Object.entries(statMappings).map(([key, value]) => (
-                <div key={key} className="text-slate-300">
-                  <span className="font-medium text-orange-300">{key}</span>: {
-                    key.includes('%') ? (value * 100).toFixed(1) + '%' : value.toFixed(1)
-                  }
+                <div key={key} className="bg-slate-600 rounded-lg p-3 text-center">
+                  <div className="text-orange-300 font-bold text-sm">{key}</div>
+                  <div className="text-white font-medium">
+                    {key.includes('%') ? (value * 100).toFixed(1) + '%' : value.toFixed(1)}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
+        </div>
+      </div>
 
-          {calculatedValue !== null && (
-            <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-lg p-4 border border-orange-500/30">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-orange-400" />
-                <div>
-                  <div className="text-slate-300 text-sm">{customStatName}</div>
-                  <div className="text-2xl font-bold text-white">{calculatedValue.toFixed(2)}</div>
-                  <div className="text-xs text-slate-400">
-                    Formula: {formula}
-                  </div>
-                </div>
-              </div>
+      {/* Compact Player Stats */}
+      <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+        <div className="flex items-center gap-2 mb-4">
+          <BarChart3 className="w-5 h-5 text-slate-400" />
+          <h3 className="text-lg font-medium text-white">Season Statistics</h3>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          <div className="bg-slate-700 rounded-lg p-3">
+            <div className="text-slate-400 text-xs">Points</div>
+            <div className="text-orange-400 font-bold">{player.points.toFixed(1)} PPG</div>
+          </div>
+          <div className="bg-slate-700 rounded-lg p-3">
+            <div className="text-slate-400 text-xs">Assists</div>
+            <div className="text-blue-400 font-bold">{player.assists.toFixed(1)} APG</div>
+          </div>
+          <div className="bg-slate-700 rounded-lg p-3">
+            <div className="text-slate-400 text-xs">Rebounds</div>
+            <div className="text-green-400 font-bold">{player.rebounds.toFixed(1)} RPG</div>
+          </div>
+          <div className="bg-slate-700 rounded-lg p-3">
+            <div className="text-slate-400 text-xs">Field Goal %</div>
+            <div className="text-yellow-400 font-bold">{(player.fieldGoalPercentage * 100).toFixed(1)}%</div>
+          </div>
+          <div className="bg-slate-700 rounded-lg p-3">
+            <div className="text-slate-400 text-xs">Plus/Minus</div>
+            <div className={`font-bold ${player.plusMinus >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+              {player.plusMinus > 0 ? '+' : ''}{player.plusMinus.toFixed(1)}
             </div>
-          )}
+          </div>
+          <div className="bg-slate-700 rounded-lg p-3">
+            <div className="text-slate-400 text-xs">Games</div>
+            <div className="text-slate-300 font-bold">{player.gamesPlayed} GP</div>
+          </div>
         </div>
       </div>
     </div>
