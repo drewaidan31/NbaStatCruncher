@@ -114,10 +114,8 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
   };
 
   const handleCalculate = () => {
-    console.log('Calculate button clicked, formula:', formula);
     const value1 = calculateCustomStat(player1);
     const value2 = calculateCustomStat(player2);
-    console.log('Calculated values:', { value1, value2 });
     setPlayer1Value(value1);
     setPlayer2Value(value2);
   };
@@ -137,7 +135,7 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
       });
       
       if (response.ok) {
-        console.log('Stat saved successfully!');
+        alert('Stat saved successfully!');
       }
     } catch (error) {
       console.error('Error saving stat:', error);
