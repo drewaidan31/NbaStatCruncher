@@ -27,7 +27,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log("Fetching NBA data with API key:", rapidApiKey ? "API key present" : "API key missing");
       
-      const response = await fetch("https://api-nba-v1.p.rapidapi.com/players?season=2024", {
+      // Get recent games first to find valid game IDs
+      const gamesResponse = await fetch("https://api-nba-v1.p.rapidapi.com/games?season=2024", {
+        method: "GET",
+        headers: {
+          "X-RapidAPI-Key": rapidApiKey,
+          "X-RapidAPI-Host": "api-nba-v1.p.rapidapi.com"
+        }
+      });
+
+      if (!gamesResponse.ok) {
+        const errorText = await gamesResponse.text();
+        console.log("Games API Error:", errorText);
+        return res.status(500).json({ 
+          message: `Failed to fetch NBA games: ${gamesResponse.status} ${gamesResponse.statusText}` 
+        });
+      }
+
+      const gamesData = await gamesResponse.json();
+      console.log("Games data received:", gamesData?.response?.length || 0, "games");
+
+      if (!gamesData?.response?.length) {
+        return res.status(500).json({ 
+          message: "No NBA games data available from the API" 
+        });
+      }
+
+      // Get a recent game ID
+      const recentGame = gamesData.response[0];
+      const gameId = recentGame.id;
+
+      console.log("Using game ID:", gameId);
+
+      // Now get statistics for players from this game
+      const response = await fetch(`https://api-nba-v1.p.rapidapi.com/players/statistics?game=${gameId}`, {
         method: "GET",
         headers: {
           "X-RapidAPI-Key": rapidApiKey,
@@ -50,22 +83,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Transform NBA API data to our schema
       const players = data.response?.slice(0, 100).map((playerData: any) => ({
-        playerId: playerData.id || 0,
-        name: `${playerData.firstname || ""} ${playerData.lastname || ""}`.trim(),
-        team: playerData.teams?.[playerData.teams.length - 1]?.code || "UNK",
-        position: playerData.leagues?.standard?.pos || "G",
-        gamesPlayed: Math.floor(Math.random() * 82) + 1, // Placeholder until we get stats
-        minutesPerGame: Math.random() * 35 + 10,
-        points: Math.random() * 30 + 5,
-        assists: Math.random() * 10 + 1,
-        rebounds: Math.random() * 12 + 2,
-        steals: Math.random() * 3 + 0.5,
-        blocks: Math.random() * 3 + 0.2,
-        turnovers: Math.random() * 5 + 1,
-        fieldGoalPercentage: Math.random() * 0.6 + 0.3,
-        threePointPercentage: Math.random() * 0.45 + 0.25,
-        freeThrowPercentage: Math.random() * 0.9 + 0.6,
-        plusMinus: (Math.random() - 0.5) * 20,
+        playerId: playerData.player?.id || 0,
+        name: `${playerData.player?.firstname || ""} ${playerData.player?.lastname || ""}`.trim(),
+        team: playerData.team?.code || "UNK",
+        position: playerData.pos || "G",
+        gamesPlayed: 1, // This is per-game data
+        minutesPerGame: parseFloat(playerData.min) || 0,
+        points: parseFloat(playerData.points) || 0,
+        assists: parseFloat(playerData.assists) || 0,
+        rebounds: parseFloat(playerData.totReb) || 0,
+        steals: parseFloat(playerData.steals) || 0,
+        blocks: parseFloat(playerData.blocks) || 0,
+        turnovers: parseFloat(playerData.turnovers) || 0,
+        fieldGoalPercentage: parseFloat(playerData.fgp) / 100 || 0,
+        threePointPercentage: parseFloat(playerData.tpp) / 100 || 0,
+        freeThrowPercentage: parseFloat(playerData.ftp) / 100 || 0,
+        plusMinus: parseFloat(playerData.plusMinus) || 0,
       })) || [];
 
       // Store players in memory
