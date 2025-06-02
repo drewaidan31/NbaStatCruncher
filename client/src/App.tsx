@@ -247,7 +247,7 @@ function MainApp() {
 
   const handleSaveStat = async () => {
     try {
-      const response = await fetch('/api/custom-stats', {
+      const response = await fetch('/api/custom-stats/save', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -257,11 +257,14 @@ function MainApp() {
           formula: formula,
           description: `Custom stat: ${customStatName}`
         }),
+        credentials: 'include',
       });
       
       if (response.ok) {
         alert('Stat saved successfully!');
         fetchSavedStats();
+      } else {
+        console.error('Failed to save stat:', response.statusText);
       }
     } catch (error) {
       console.error('Error saving stat:', error);
@@ -270,7 +273,9 @@ function MainApp() {
 
   const fetchSavedStats = async () => {
     try {
-      const response = await fetch('/api/custom-stats');
+      const response = await fetch('/api/custom-stats/my', {
+        credentials: 'include'
+      });
       if (response.ok) {
         const data = await response.json();
         setSavedStats(data);

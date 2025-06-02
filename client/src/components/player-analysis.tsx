@@ -65,8 +65,8 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
   });
 
   // Query to fetch saved custom stats
-  const { data: savedStats = [], isLoading: isLoadingStats } = useQuery({
-    queryKey: ['/api/custom-stats'],
+  const { data: savedStats = [], isLoading: isLoadingStats, refetch: refetchStats } = useQuery({
+    queryKey: ['/api/custom-stats/my'],
     enabled: showSavedStats,
   });
 
@@ -249,7 +249,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
 
   const handleSaveStat = async () => {
     try {
-      const response = await fetch('/api/custom-stats', {
+      const response = await fetch('/api/custom-stats/save', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -259,11 +259,17 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
           formula: formula,
           description: `Custom stat: ${customStatName}`
         }),
+        credentials: 'include', // Include authentication cookies
       });
       
       if (response.ok) {
-        // You could add a toast notification here
         console.log('Stat saved successfully!');
+        // Refresh the saved stats list if showing them
+        if (showSavedStats) {
+          refetchStats();
+        }
+      } else {
+        console.error('Failed to save stat:', response.statusText);
       }
     } catch (error) {
       console.error('Error saving stat:', error);
