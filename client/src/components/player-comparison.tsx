@@ -63,14 +63,31 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
       const statMappings = getStatMappings(player);
       
       // Replace stat abbreviations with actual values
+      // Handle +/- first since it has special characters
+      if (expression.includes('+/-')) {
+        expression = expression.replace(/\+\/-/g, statMappings['+/-'].toString());
+      }
+      
+      // Handle percentage stats
       Object.entries(statMappings).forEach(([key, value]) => {
-        const regex = new RegExp(`\\b${key.replace(/[+\-%]/g, '\\$&')}\\b`, 'g');
-        expression = expression.replace(regex, value.toString());
+        if (key !== '+/-') {
+          if (key.includes('%')) {
+            // For percentage stats, escape the % character
+            const escapedKey = key.replace(/%/g, '\\%');
+            const regex = new RegExp(`\\b${escapedKey}\\b`, 'g');
+            expression = expression.replace(regex, value.toString());
+          } else {
+            // For regular stats
+            const regex = new RegExp(`\\b${key}\\b`, 'g');
+            expression = expression.replace(regex, value.toString());
+          }
+        }
       });
 
       const result = evaluate(expression);
       return typeof result === 'number' ? result : null;
     } catch (error) {
+      console.error('Custom stat calculation error:', error, 'Formula:', formula, 'Expression:', expression);
       return null;
     }
   };
