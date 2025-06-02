@@ -4,6 +4,13 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
+      "dev": "nodemon server/index.js",
+      "dev:client": "cd client && npm run dev",
+      "dev:all": "concurrently \"npm run dev\" \"npm run dev:client\"",
+      "build": "cd client && npm run build && esbuild server/index.js --platform=node --packages=external --bundle --format=esm --outdir=dist",
+      "start": "NODE_ENV=production node dist/index.js"
+    }
+
     "dev": "NODE_ENV=development tsx server/index.ts",
     "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "NODE_ENV=production node dist/index.js",
