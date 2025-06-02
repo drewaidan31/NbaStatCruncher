@@ -116,6 +116,153 @@ function MainApp() {
     setError("");
   };
 
+  const handlePlayerSelect = (player: Player, season: string) => {
+    setSelectedPlayer(player);
+    setSelectedPlayerSeason(season);
+    setViewMode('analysis');
+  };
+
+  const handleCompareSelect = (comparison: {
+    player1: Player;
+    season1: string;
+    player2: Player;
+    season2: string;
+  }) => {
+    setComparisonData(comparison);
+    setViewMode('comparison');
+  };
+
+  const handleBackToSearch = () => {
+    setViewMode('search');
+  };
+
+  const handleBackToLeaderboard = () => {
+    setViewMode('leaderboard');
+  };
+
+  // Render different views based on view mode
+  const renderCurrentView = () => {
+    if (viewMode === 'analysis' && selectedPlayer) {
+      return (
+        <PlayerAnalysis
+          player={selectedPlayer}
+          season={selectedPlayerSeason}
+          onBack={handleBackToSearch}
+        />
+      );
+    }
+
+    if (viewMode === 'comparison' && comparisonData) {
+      return (
+        <PlayerComparison
+          comparison={comparisonData}
+          onBack={handleBackToSearch}
+        />
+      );
+    }
+
+    if (viewMode === 'search') {
+      return (
+        <PlayerSearch
+          onPlayerSelect={handlePlayerSelect}
+          onCompareSelect={handleCompareSelect}
+        />
+      );
+    }
+
+    // Default leaderboard view
+    return (
+      <div className="space-y-6">
+        <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+          <h2 className="text-lg font-semibold mb-4">NBA Players Loaded ({players.length} players)</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            {players.slice(0, 9).map((player: any) => (
+              <div key={player.id} className="bg-slate-700 p-4 rounded-lg">
+                <div className="font-medium text-slate-50 mb-1">{player.name}</div>
+                <div className="text-sm text-slate-400 mb-2">{player.position} - {player.team}</div>
+                <div className="text-xs text-slate-500 space-y-1">
+                  <div>{player.points.toFixed(1)} PTS, {player.assists.toFixed(1)} AST, {player.rebounds.toFixed(1)} REB</div>
+                  <div>{player.turnovers.toFixed(1)} TOV, {player.steals.toFixed(1)} STL, {player.blocks.toFixed(1)} BLK</div>
+                  <div>FG: {(player.fieldGoalPercentage * 100).toFixed(1)}%, +/-: {player.plusMinus.toFixed(1)}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <StatCalculator 
+            onFormulaChange={setFormula}
+            onCalculate={calculateStats}
+          />
+
+          {results.length > 0 && (
+            <div className="mt-4 flex justify-center">
+              <SaveStatDialog 
+                formula={formula}
+                onSave={handleSaveStat}
+              />
+            </div>
+          )}
+        </div>
+
+        {results.length > 0 && (
+          <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+            <h3 className="text-lg font-semibold mb-4">Custom Statistics Leaderboard</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-slate-600">
+                    <th className="text-left py-2">Rank</th>
+                    <th className="text-left py-2">Player</th>
+                    <th className="text-left py-2">Team</th>
+                    <th className="text-left py-2">Custom Stat</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {results.map((result: any, index) => (
+                    <tr key={result.player.id} className="border-b border-slate-700">
+                      <td className="py-2">{index + 1}</td>
+                      <td className="py-2 font-medium">{result.player.name}</td>
+                      <td className="py-2">{result.player.team}</td>
+                      <td className="py-2">{result.customStat.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {savedStats.length > 0 && (
+          <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+            <h3 className="text-lg font-semibold mb-4">Your Saved Custom Stats</h3>
+            <div className="space-y-4">
+              {savedStats.map((stat) => (
+                <div key={stat.id} className="bg-slate-700 p-4 rounded-lg">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-medium text-slate-50">{stat.name}</h4>
+                    <button
+                      onClick={() => {
+                        setFormula(stat.formula);
+                        calculateStats();
+                      }}
+                      className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition-colors"
+                    >
+                      Use Formula
+                    </button>
+                  </div>
+                  {stat.description && (
+                    <p className="text-sm text-slate-400 mb-2">{stat.description}</p>
+                  )}
+                  <div className="text-xs text-slate-500 font-mono">{stat.formula}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-slate-900 text-white">
       <div className="container mx-auto px-4 py-8">
@@ -126,9 +273,41 @@ function MainApp() {
           <p className="text-xl text-slate-300">
             Create custom basketball statistics with authentic NBA player data
           </p>
-          
-          {/* Season Selector */}
-          <div className="mt-6 flex justify-center">
+        </div>
+
+        {/* Navigation Bar */}
+        <div className="flex justify-center mb-6">
+          <div className="bg-slate-800 rounded-lg p-2 border border-slate-700">
+            <div className="flex gap-2">
+              <button
+                onClick={() => setViewMode('leaderboard')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  viewMode === 'leaderboard'
+                    ? "bg-orange-600 text-white"
+                    : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                }`}
+              >
+                <BarChart3 className="w-4 h-4" />
+                Leaderboards
+              </button>
+              <button
+                onClick={() => setViewMode('search')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  viewMode === 'search'
+                    ? "bg-orange-600 text-white"
+                    : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                }`}
+              >
+                <Search className="w-4 h-4" />
+                Player Search
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Season Selector - Only show for leaderboard view */}
+        {viewMode === 'leaderboard' && (
+          <div className="flex justify-center mb-6">
             <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
               <label htmlFor="season-select" className="block text-sm font-medium text-slate-300 mb-2">
                 Select NBA Season:
@@ -158,7 +337,7 @@ function MainApp() {
               </select>
             </div>
           </div>
-        </div>
+        )}
 
         {error && (
           <div className="bg-red-900 border border-red-600 text-red-200 p-4 rounded mb-6">
@@ -166,103 +345,16 @@ function MainApp() {
           </div>
         )}
 
-        {loading ? (
+        {loading && viewMode === 'leaderboard' ? (
           <div className="text-center py-8">
             <div className="text-lg">Loading NBA player data...</div>
           </div>
-        ) : players.length > 0 ? (
-          <div className="space-y-6">
-            <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-              <h2 className="text-lg font-semibold mb-4">NBA Players Loaded ({players.length} players)</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                {players.slice(0, 9).map((player: any) => (
-                  <div key={player.id} className="bg-slate-700 p-4 rounded-lg">
-                    <div className="font-medium text-slate-50 mb-1">{player.name}</div>
-                    <div className="text-sm text-slate-400 mb-2">{player.position} - {player.team}</div>
-                    <div className="text-xs text-slate-500 space-y-1">
-                      <div>{player.points.toFixed(1)} PTS, {player.assists.toFixed(1)} AST, {player.rebounds.toFixed(1)} REB</div>
-                      <div>{player.turnovers.toFixed(1)} TOV, {player.steals.toFixed(1)} STL, {player.blocks.toFixed(1)} BLK</div>
-                      <div>FG: {(player.fieldGoalPercentage * 100).toFixed(1)}%, +/-: {player.plusMinus.toFixed(1)}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <StatCalculator 
-                onFormulaChange={setFormula}
-                onCalculate={calculateStats}
-              />
-
-              {results.length > 0 && (
-                <div className="mt-4 flex justify-center">
-                  <SaveStatDialog 
-                    formula={formula}
-                    onSave={handleSaveStat}
-                  />
-                </div>
-              )}
-            </div>
-
-            {results.length > 0 && (
-              <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-                <h3 className="text-lg font-semibold mb-4">Custom Statistics Leaderboard</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-slate-600">
-                        <th className="text-left py-2">Rank</th>
-                        <th className="text-left py-2">Player</th>
-                        <th className="text-left py-2">Team</th>
-                        <th className="text-left py-2">Custom Stat</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {results.map((result: any, index) => (
-                        <tr key={result.player.id} className="border-b border-slate-700">
-                          <td className="py-2">{index + 1}</td>
-                          <td className="py-2 font-medium">{result.player.name}</td>
-                          <td className="py-2">{result.player.team}</td>
-                          <td className="py-2">{result.customStat.toFixed(2)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-
-            {savedStats.length > 0 && (
-              <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-                <h3 className="text-lg font-semibold mb-4">Your Saved Custom Stats</h3>
-                <div className="space-y-4">
-                  {savedStats.map((stat) => (
-                    <div key={stat.id} className="bg-slate-700 p-4 rounded-lg">
-                      <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-medium text-slate-50">{stat.name}</h4>
-                        <button
-                          onClick={() => {
-                            setFormula(stat.formula);
-                            calculateStats();
-                          }}
-                          className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition-colors"
-                        >
-                          Use Formula
-                        </button>
-                      </div>
-                      {stat.description && (
-                        <p className="text-sm text-slate-400 mb-2">{stat.description}</p>
-                      )}
-                      <div className="text-xs text-slate-500 font-mono">{stat.formula}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
+        ) : viewMode === 'leaderboard' && players.length === 0 ? (
           <div className="text-center py-8">
             <div className="text-lg text-slate-300">No NBA player data available</div>
           </div>
+        ) : (
+          renderCurrentView()
         )}
       </div>
 
