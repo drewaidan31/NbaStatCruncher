@@ -9,17 +9,17 @@ export default function StatCalculator({ onFormulaChange, onCalculate }: StatCal
   const [display, setDisplay] = useState("");
 
   const stats = [
-    { name: "PTS", value: "points" },
-    { name: "AST", value: "assists" },
-    { name: "REB", value: "rebounds" },
-    { name: "STL", value: "steals" },
-    { name: "BLK", value: "blocks" },
-    { name: "TOV", value: "turnovers" },
-    { name: "FG%", value: "fieldGoalPercentage" },
-    { name: "3P%", value: "threePointPercentage" },
-    { name: "FT%", value: "freeThrowPercentage" },
-    { name: "+/-", value: "plusMinus" },
-    { name: "MIN", value: "minutesPerGame" }
+    { name: "PTS", value: "PTS" },
+    { name: "AST", value: "AST" },
+    { name: "REB", value: "REB" },
+    { name: "STL", value: "STL" },
+    { name: "BLK", value: "BLK" },
+    { name: "TOV", value: "TOV" },
+    { name: "FG%", value: "FG_PCT" },
+    { name: "3P%", value: "THREE_PCT" },
+    { name: "FT%", value: "FT_PCT" },
+    { name: "+/-", value: "PLUS_MINUS" },
+    { name: "MIN", value: "MIN" }
   ];
 
   const operations = [
@@ -130,7 +130,7 @@ export default function StatCalculator({ onFormulaChange, onCalculate }: StatCal
             <div className="space-y-2">
               <button
                 onClick={() => {
-                  const formula = "points + assists + rebounds";
+                  const formula = "PTS + AST + REB";
                   setDisplay(formula);
                   onFormulaChange(formula);
                 }}
@@ -140,7 +140,7 @@ export default function StatCalculator({ onFormulaChange, onCalculate }: StatCal
               </button>
               <button
                 onClick={() => {
-                  const formula = "fieldGoalPercentage * points";
+                  const formula = "FG_PCT * PTS";
                   setDisplay(formula);
                   onFormulaChange(formula);
                 }}
@@ -150,7 +150,7 @@ export default function StatCalculator({ onFormulaChange, onCalculate }: StatCal
               </button>
               <button
                 onClick={() => {
-                  const formula = "(points + assists) / turnovers";
+                  const formula = "(PTS + AST) / TOV";
                   setDisplay(formula);
                   onFormulaChange(formula);
                 }}
