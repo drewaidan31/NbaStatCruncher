@@ -595,6 +595,7 @@ function MainApp() {
                     <th className="text-left py-2">Player</th>
                     <th className="text-left py-2">Team</th>
                     <th className="text-left py-2">Custom Stat</th>
+                    <th className="text-left py-2">Season</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -604,6 +605,7 @@ function MainApp() {
                       <td className="py-2 font-medium">{result.player.name}</td>
                       <td className="py-2">{result.player.team}</td>
                       <td className="py-2">{result.customStat.toFixed(2)}</td>
+                      <td className="py-2 text-orange-400 font-medium">{result.bestSeason}</td>
                     </tr>
                   ))}
                 </tbody>

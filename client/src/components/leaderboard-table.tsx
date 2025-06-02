@@ -336,6 +336,7 @@ export default function LeaderboardTable({
                       {getSortIcon('customStat')}
                     </Button>
                   </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Season</th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-slate-300 uppercase tracking-wider hidden sm:table-cell">PTS</th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-slate-300 uppercase tracking-wider hidden md:table-cell">AST</th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-slate-300 uppercase tracking-wider hidden md:table-cell">REB</th>
@@ -378,6 +379,11 @@ export default function LeaderboardTable({
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-lg font-bold text-slate-50">
                           {result.customStat.toFixed(2)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-orange-400">
+                          {result.bestSeason || player.currentSeason || '2024-25'}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300 hidden sm:table-cell">
