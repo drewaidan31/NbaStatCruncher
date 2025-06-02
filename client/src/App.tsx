@@ -5,7 +5,7 @@ import SaveStatDialog from "./components/save-stat-dialog";
 import PlayerSearch from "./components/player-search";
 import PlayerAnalysis from "./components/player-analysis";
 import PlayerComparison from "./components/player-comparison";
-import { BarChart3, Search, Calculator, TrendingUp, Sparkles } from "lucide-react";
+import { BarChart3, Search, Calculator, TrendingUp, Sparkles, RefreshCw } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { evaluate } from "mathjs";
 
@@ -78,6 +78,7 @@ function MainApp() {
   const [featuredPlayer, setFeaturedPlayer] = useState<Player | null>(null);
   const [featuredStat, setFeaturedStat] = useState<{name: string, formula: string, description: string} | null>(null);
   const [featuredChartData, setFeaturedChartData] = useState<Array<{season: string, value: number, team: string}>>([]);
+  const [refreshCounter, setRefreshCounter] = useState(0);
 
   // Preset custom stat equations for the showcase
   const presetStats = [
@@ -175,11 +176,12 @@ function MainApp() {
     
     if (playersWithMultipleSeasons.length === 0) return;
     
-    // Get a different player and stat each time based on current time
+    // Get a different player and stat each time based on current time + refresh counter
     const now = new Date();
     const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
-    const playerIndex = dayOfYear % playersWithMultipleSeasons.length;
-    const statIndex = Math.floor(dayOfYear / playersWithMultipleSeasons.length) % presetStats.length;
+    const seedValue = dayOfYear + refreshCounter;
+    const playerIndex = seedValue % playersWithMultipleSeasons.length;
+    const statIndex = Math.floor(seedValue / playersWithMultipleSeasons.length) % presetStats.length;
     
     const selectedPlayer = playersWithMultipleSeasons[playerIndex];
     const selectedStat = presetStats[statIndex];
@@ -427,9 +429,23 @@ function MainApp() {
               
               {/* Chart */}
               <div className="bg-slate-700 rounded-lg p-5">
-                <div className="flex items-center gap-2 mb-4">
-                  <TrendingUp className="w-5 h-5 text-orange-400" />
-                  <h4 className="text-lg font-semibold text-white">Career Progression</h4>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-orange-400" />
+                    <h4 className="text-lg font-semibold text-white">Career Progression</h4>
+                  </div>
+                  <button
+                    onClick={() => {
+                      // Increment refresh counter to trigger new random selection
+                      setRefreshCounter(prev => prev + 1);
+                      setResults([]);
+                      setError("");
+                    }}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-slate-600 hover:bg-slate-500 rounded-lg transition-colors text-sm text-slate-300 hover:text-white"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Refresh
+                  </button>
                 </div>
                 <div className="h-48 w-full">
                   <ResponsiveContainer width="100%" height="100%">
