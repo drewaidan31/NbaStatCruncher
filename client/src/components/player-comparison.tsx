@@ -77,19 +77,22 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
         console.log('After +/- replacement:', expression);
       }
       
-      // Handle percentage stats
+      // Handle percentage stats first
+      if (expression.includes('FG%')) {
+        expression = expression.replace(/FG%/g, statMappings['FG%'].toString());
+      }
+      if (expression.includes('3P%')) {
+        expression = expression.replace(/3P%/g, statMappings['3P%'].toString());
+      }
+      if (expression.includes('FT%')) {
+        expression = expression.replace(/FT%/g, statMappings['FT%'].toString());
+      }
+      
+      // Handle regular stats
       Object.entries(statMappings).forEach(([key, value]) => {
-        if (key !== '+/-') {
-          if (key.includes('%')) {
-            // For percentage stats, escape the % character
-            const escapedKey = key.replace(/%/g, '\\%');
-            const regex = new RegExp(`\\b${escapedKey}\\b`, 'g');
-            expression = expression.replace(regex, value.toString());
-          } else {
-            // For regular stats
-            const regex = new RegExp(`\\b${key}\\b`, 'g');
-            expression = expression.replace(regex, value.toString());
-          }
+        if (key !== '+/-' && !key.includes('%')) {
+          const regex = new RegExp(`\\b${key}\\b`, 'g');
+          expression = expression.replace(regex, value.toString());
         }
       });
       
