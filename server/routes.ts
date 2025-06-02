@@ -91,9 +91,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // The NBA API library already provides structured data
       const players = allPlayers;
 
-      // Store players in memory
+      // Store players in database (skip duplicates)
       for (const playerData of players) {
-        await storage.createPlayer(playerData);
+        try {
+          await storage.createPlayer(playerData);
+        } catch (error: any) {
+          // Skip duplicate players (player_id already exists)
+          if (error.code !== '23505') {
+            console.error(`Error inserting player ${playerData.name}:`, error);
+          }
+        }
       }
 
       const storedPlayers = await storage.getAllPlayers();

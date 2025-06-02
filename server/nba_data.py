@@ -28,8 +28,8 @@ def get_nba_players_from_api():
         # Sort by points per game descending
         df = df.sort_values('PTS', ascending=False)
         
-        # Take top 50 players
-        df = df.head(50)
+        # Take top 100 players
+        df = df.head(100)
         
         players_data = []
         for _, row in df.iterrows():
