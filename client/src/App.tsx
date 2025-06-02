@@ -358,7 +358,7 @@ function MainApp() {
             <div className="flex items-center gap-3 mb-4">
               <Sparkles className="w-6 h-6 text-orange-400" />
               <h2 className="text-xl font-bold text-white">Featured Analysis</h2>
-              <span className="text-sm text-slate-400">• Changes daily</span>
+              <span className="text-sm text-slate-400">• Changes each visit</span>
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
