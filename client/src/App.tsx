@@ -2,8 +2,32 @@ import { useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import StatCalculator from "./components/stat-calculator";
 import SaveStatDialog from "./components/save-stat-dialog";
+import PlayerSearch from "./components/player-search";
+import PlayerAnalysis from "./components/player-analysis";
+import PlayerComparison from "./components/player-comparison";
+import { BarChart3, Search, Calculator } from "lucide-react";
 
 const queryClient = new QueryClient();
+
+interface Player {
+  playerId: number;
+  name: string;
+  team: string;
+  position: string;
+  gamesPlayed: number;
+  points: number;
+  assists: number;
+  rebounds: number;
+  steals: number;
+  blocks: number;
+  turnovers: number;
+  fieldGoalPercentage: number;
+  threePointPercentage: number;
+  freeThrowPercentage: number;
+  plusMinus: number;
+}
+
+type ViewMode = 'leaderboard' | 'search' | 'analysis' | 'comparison';
 
 function MainApp() {
   const [players, setPlayers] = useState([]);
@@ -12,6 +36,15 @@ function MainApp() {
   const [formula, setFormula] = useState("");
   const [results, setResults] = useState([]);
   const [selectedSeason, setSelectedSeason] = useState("2024-25");
+  const [viewMode, setViewMode] = useState<ViewMode>('leaderboard');
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [selectedPlayerSeason, setSelectedPlayerSeason] = useState("");
+  const [comparisonData, setComparisonData] = useState<{
+    player1: Player;
+    season1: string;
+    player2: Player;
+    season2: string;
+  } | null>(null);
   const [savedStats, setSavedStats] = useState<Array<{
     id: number;
     name: string;
