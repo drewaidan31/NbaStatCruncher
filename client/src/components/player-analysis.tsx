@@ -152,8 +152,6 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
       'MIN': seasonData.minutesPerGame || 32.5
     };
 
-    console.log('Season stat mappings:', seasonStatMappings);
-
     try {
       let expression = formula;
       
@@ -179,19 +177,15 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
         }
       });
       
-      console.log('Season expression after replacement:', expression);
       const result = evaluate(expression);
-      console.log('Season result:', result);
       return typeof result === 'number' ? result : null;
     } catch (error) {
-      console.error('Season calculation error:', error);
       return null;
     }
   };
 
   const calculateCustomStat = () => {
-    console.log('Starting calculation with formula:', formula);
-    console.log('Stat mappings:', statMappings);
+
     
     try {
       let expression = formula;
@@ -218,20 +212,14 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
         }
       });
       
-      console.log('Expression after replacement:', expression);
-      
       const result = evaluate(expression);
-      console.log('Evaluation result:', result);
       setCalculatedValue(typeof result === 'number' ? result : null);
 
       // Calculate for all seasons to create chart data
       if (player.seasons && formula.trim()) {
-        console.log('Player seasons:', player.seasons);
         const chartDataPoints = player.seasons
           .map(seasonData => {
-            console.log('Processing season:', seasonData.season, seasonData);
             const value = calculateCustomStatForSeason(seasonData);
-            console.log('Season value calculated:', value);
             return value !== null ? {
               season: seasonData.season,
               value: value,
@@ -240,8 +228,6 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
           })
           .filter(point => point !== null)
           .sort((a, b) => a!.season.localeCompare(b!.season));
-        
-        console.log('Chart data points:', chartDataPoints);
         setChartData(chartDataPoints as Array<{season: string, value: number, team: string}>);
       }
     } catch (error) {
