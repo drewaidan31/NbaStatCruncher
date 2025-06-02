@@ -36,10 +36,16 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect }: Player
     queryKey: ["/api/nba/players", selectedSeason],
   });
 
+  // Debug: Log the data structure
+  console.log("Players data:", players);
+  console.log("Search term:", searchTerm);
+
   const filteredPlayers = searchTerm.length >= 1 
-    ? players.filter((player: Player) =>
-        player.name.toLowerCase().includes(searchTerm.toLowerCase())
-      ).slice(0, 10) // Show max 10 suggestions
+    ? players.filter((player: any) => {
+        // Check different possible name fields
+        const name = player.name || player.playerName || player.PLAYER_NAME;
+        return name && name.toLowerCase().includes(searchTerm.toLowerCase());
+      }).slice(0, 10) // Show max 10 suggestions
     : [];
 
   const handlePlayerClick = (player: Player) => {
