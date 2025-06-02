@@ -175,21 +175,35 @@ export default function LeaderboardTable({
     );
   }
 
-  // Show players count if we have data
-  if (players && Array.isArray(players) && players.length > 0) {
+  // Show players and allow formula calculation
+  if (players && Array.isArray(players) && players.length > 0 && (!results || !Array.isArray(results))) {
     return (
       <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-        <h3 className="text-lg font-semibold text-slate-50 mb-4">
-          NBA Players Loaded Successfully
-        </h3>
-        <p className="text-slate-300 mb-4">
-          Found {players.length} authentic NBA players from your API subscription
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {players.slice(0, 6).map((player: any) => (
-            <div key={player.id} className="bg-slate-700 p-3 rounded">
-              <div className="font-medium text-slate-50">{player.name}</div>
-              <div className="text-sm text-slate-400">{player.position} - {player.team}</div>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="text-lg font-semibold text-slate-50 mb-2">
+              NBA Players Ready ({players.length} players)
+            </h3>
+            <p className="text-slate-300">
+              Enter a formula above and click "Calculate Custom Stats" to see the leaderboard
+            </p>
+          </div>
+          <Button 
+            onClick={handleCalculate}
+            disabled={!formula.trim() || calculateMutation.isPending}
+            className="bg-orange-600 hover:bg-orange-700 text-white"
+          >
+            {calculateMutation.isPending ? "Calculating..." : "Calculate Custom Stats"}
+          </Button>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {players.slice(0, 8).map((player: any) => (
+            <div key={player.id} className="bg-slate-700 p-4 rounded-lg">
+              <div className="font-medium text-slate-50 mb-1">{player.name}</div>
+              <div className="text-sm text-slate-400 mb-2">{player.position} - {player.team}</div>
+              <div className="text-xs text-slate-500">
+                {player.points.toFixed(1)} PTS, {player.assists.toFixed(1)} AST, {player.rebounds.toFixed(1)} REB
+              </div>
             </div>
           ))}
         </div>
