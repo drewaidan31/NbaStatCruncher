@@ -108,18 +108,41 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
   };
 
   const calculateCustomStat = () => {
+    console.log('Player analysis calculate clicked, formula:', formula);
+    console.log('Current player data:', currentPlayerData);
+    console.log('Stat mappings:', statMappings);
+    
     try {
       let expression = formula;
       
+      // Handle +/- first since it has special characters
+      if (expression.includes('+/-')) {
+        expression = expression.replace(/\+\/-/g, statMappings['+/-'].toString());
+        console.log('After +/- replacement:', expression);
+      }
+      
       // Replace stat abbreviations with actual values
       Object.entries(statMappings).forEach(([key, value]) => {
-        const regex = new RegExp(`\\b${key.replace(/[+\-%]/g, '\\$&')}\\b`, 'g');
-        expression = expression.replace(regex, value.toString());
+        if (key !== '+/-') {
+          if (key.includes('%')) {
+            // For percentage stats, escape the % character
+            const escapedKey = key.replace(/%/g, '\\%');
+            const regex = new RegExp(`\\b${escapedKey}\\b`, 'g');
+            expression = expression.replace(regex, value.toString());
+          } else {
+            // For regular stats
+            const regex = new RegExp(`\\b${key}\\b`, 'g');
+            expression = expression.replace(regex, value.toString());
+          }
+        }
       });
-
+      
+      console.log('Final expression:', expression);
       const result = evaluate(expression);
+      console.log('Calculation result:', result);
       setCalculatedValue(typeof result === 'number' ? result : null);
     } catch (error) {
+      console.log('Calculation error:', error);
       setCalculatedValue(null);
     }
   };
