@@ -9,19 +9,18 @@ export default function StatCalculator({ onFormulaChange, onCalculate }: StatCal
   const [display, setDisplay] = useState("");
 
   const stats = [
-    { name: "PTS", value: "PTS" },
-    { name: "AST", value: "AST" },
-    { name: "REB", value: "REB" },
-    { name: "STL", value: "STL" },
-    { name: "BLK", value: "BLK" },
-    { name: "TOV", value: "TOV" },
+    { name: "PPG", value: "PTS" },
+    { name: "APG", value: "AST" },
+    { name: "RPG", value: "REB" },
+    { name: "SPG", value: "STL" },
+    { name: "BPG", value: "BLK" },
+    { name: "TPG", value: "TOV" },
     { name: "FG%", value: "FG_PCT" },
     { name: "3P%", value: "THREE_PCT" },
     { name: "FT%", value: "FT_PCT" },
     { name: "+/-", value: "PLUS_MINUS" },
-    { name: "MIN", value: "MIN" },
-    { name: "GP", value: "GP" },
-    { name: "MPG", value: "MPG" }
+    { name: "MPG", value: "MIN" },
+    { name: "GP", value: "GP" }
   ];
 
   const operations = [
@@ -159,6 +158,16 @@ export default function StatCalculator({ onFormulaChange, onCalculate }: StatCal
                 className="w-full text-left bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm py-2 px-3 rounded transition-colors"
               >
                 Ball Security
+              </button>
+              <button
+                onClick={() => {
+                  const formula = "PTS / MIN";
+                  setDisplay(formula);
+                  onFormulaChange(formula);
+                }}
+                className="w-full text-left bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm py-2 px-3 rounded transition-colors"
+              >
+                Points Per Minute
               </button>
             </div>
           </div>
