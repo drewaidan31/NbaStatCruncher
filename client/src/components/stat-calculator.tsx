@@ -45,6 +45,12 @@ export default function StatCalculator({ onFormulaChange, onCalculate }: StatCal
     onFormulaChange("");
   };
 
+  const handleDelete = () => {
+    const newDisplay = display.slice(0, -1);
+    setDisplay(newDisplay);
+    onFormulaChange(newDisplay);
+  };
+
   const handleCalculate = () => {
     onCalculate();
   };
@@ -110,6 +116,13 @@ export default function StatCalculator({ onFormulaChange, onCalculate }: StatCal
         <div>
           <h4 className="text-sm font-medium text-slate-400 mb-3">Actions</h4>
           <div className="space-y-3">
+            <button
+              onClick={handleDelete}
+              disabled={!display.trim()}
+              className="w-full bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2 px-4 rounded transition-colors"
+            >
+              Delete
+            </button>
             <button
               onClick={handleClear}
               className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded transition-colors"
