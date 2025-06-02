@@ -307,6 +307,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Clean up duplicate custom stats (requires authentication)
+  app.post("/api/custom-stats/cleanup-duplicates", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const duplicatesRemoved = await storage.removeDuplicateCustomStats(userId);
+      res.json({ message: `Removed ${duplicatesRemoved} duplicate stats` });
+    } catch (error) {
+      console.error("Error cleaning up duplicates:", error);
+      res.status(500).json({ message: "Failed to clean up duplicates" });
+    }
+  });
+
   // Generate AI name for custom stat formula (public endpoint)
   app.post("/api/custom-stats/generate-name", async (req, res) => {
     try {

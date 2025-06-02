@@ -336,6 +336,30 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
     setShowSavedStats(false);
   };
 
+  const handleCleanDuplicates = async () => {
+    if (!confirm('This will remove all duplicate saved stats, keeping only the oldest version of each. Continue?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/custom-stats/cleanup-duplicates', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Duplicates cleaned:', result.message);
+        alert(result.message);
+        refetchStats();
+      } else {
+        console.error('Failed to clean duplicates:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('Error cleaning duplicates:', error);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -605,19 +629,27 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
             <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold text-white">Saved Custom Stats</h3>
-                <button
-                  onClick={() => {
-                    console.log('Manually refreshing saved stats...');
-                    refetchStats().then((result) => {
-                      console.log('Refetch result:', result);
-                    }).catch((error) => {
-                      console.error('Refetch error:', error);
-                    });
-                  }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors"
-                >
-                  Refresh
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleCleanDuplicates}
+                    className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded text-sm transition-colors"
+                  >
+                    Clean Duplicates
+                  </button>
+                  <button
+                    onClick={() => {
+                      console.log('Manually refreshing saved stats...');
+                      refetchStats().then((result) => {
+                        console.log('Refetch result:', result);
+                      }).catch((error) => {
+                        console.error('Refetch error:', error);
+                      });
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors"
+                  >
+                    Refresh
+                  </button>
+                </div>
               </div>
               {isLoadingStats ? (
                 <div className="text-slate-400">Loading saved stats...</div>

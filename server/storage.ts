@@ -34,6 +34,7 @@ export interface IStorage {
   getUserCustomStats(userId: string): Promise<CustomStat[]>;
   deleteCustomStat(statId: number, userId: string): Promise<boolean>;
   updateCustomStat(statId: number, userId: string, updates: { name?: string; formula?: string; description?: string }): Promise<CustomStat | null>;
+  removeDuplicateCustomStats(userId: string): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -132,6 +133,40 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(customStats.id, statId), eq(customStats.userId, userId)))
       .returning();
     return updatedStat || null;
+  }
+
+  async removeDuplicateCustomStats(userId: string): Promise<number> {
+    // Get all user's custom stats
+    const userStats = await this.getUserCustomStats(userId);
+    
+    // Group by name + formula combination
+    const statGroups = new Map<string, CustomStat[]>();
+    userStats.forEach(stat => {
+      const key = `${stat.name}|${stat.formula}`;
+      if (!statGroups.has(key)) {
+        statGroups.set(key, []);
+      }
+      statGroups.get(key)!.push(stat);
+    });
+    
+    // Remove duplicates (keep the first one, delete the rest)
+    let duplicatesRemoved = 0;
+    for (const [key, stats] of statGroups) {
+      if (stats.length > 1) {
+        // Sort by creation date and keep the first one
+        stats.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        const toDelete = stats.slice(1); // Remove all except the first
+        
+        for (const stat of toDelete) {
+          await db
+            .delete(customStats)
+            .where(and(eq(customStats.id, stat.id), eq(customStats.userId, userId)));
+          duplicatesRemoved++;
+        }
+      }
+    }
+    
+    return duplicatesRemoved;
   }
 }
 
