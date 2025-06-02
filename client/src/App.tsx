@@ -186,9 +186,13 @@ function MainApp() {
     // Get a different player and stat each time based on current time + refresh counter
     const now = new Date();
     const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
-    const seedValue = dayOfYear + refreshCounter;
-    const playerIndex = seedValue % playersWithMultipleSeasons.length;
-    const statIndex = Math.floor(seedValue / playersWithMultipleSeasons.length) % presetStats.length;
+    
+    // Use separate seeds for player and stat to ensure both change
+    const playerSeed = (dayOfYear + refreshCounter) % playersWithMultipleSeasons.length;
+    const statSeed = (dayOfYear * 3 + refreshCounter * 2) % presetStats.length;
+    
+    const playerIndex = playerSeed;
+    const statIndex = statSeed;
     
     const selectedPlayer = playersWithMultipleSeasons[playerIndex];
     const selectedStat = presetStats[statIndex];
