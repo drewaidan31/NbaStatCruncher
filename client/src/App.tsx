@@ -355,17 +355,30 @@ function MainApp() {
                       {featuredPlayer.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2)}
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-white">{featuredPlayer.name}</h3>
+                      <button
+                        onClick={() => handlePlayerSelect(featuredPlayer, featuredPlayer.currentSeason || '2024-25')}
+                        className="text-xl font-bold text-white hover:text-orange-400 transition-colors cursor-pointer text-left"
+                      >
+                        {featuredPlayer.name} →
+                      </button>
                       <p className="text-slate-300">{featuredPlayer.position} • Career Spanning {featuredChartData.length} Seasons</p>
                     </div>
                   </div>
                   
                   <div className="space-y-3">
-                    <div className="bg-slate-600 rounded-lg p-3">
-                      <div className="text-orange-400 font-semibold mb-1">{featuredStat.name}</div>
+                    <button
+                      onClick={() => {
+                        setFormula(featuredStat.formula);
+                        setCustomStatName(featuredStat.name);
+                        calculateStats();
+                      }}
+                      className="w-full bg-slate-600 hover:bg-slate-500 rounded-lg p-3 transition-colors cursor-pointer text-left"
+                    >
+                      <div className="text-orange-400 font-semibold mb-1">{featuredStat.name} →</div>
                       <div className="text-slate-300 text-sm">{featuredStat.description}</div>
                       <div className="text-xs text-slate-400 mt-2 font-mono">{featuredStat.formula}</div>
-                    </div>
+                      <div className="text-xs text-orange-300 mt-2">Click to see all-time leaders</div>
+                    </button>
                     
                     <div className="grid grid-cols-2 gap-3">
                       <div className="bg-slate-600 rounded p-3 text-center">
