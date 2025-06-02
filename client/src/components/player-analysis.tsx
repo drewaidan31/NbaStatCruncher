@@ -102,55 +102,48 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
   }, [selectedSeason, player]);
 
   const statMappings = {
-    'PPG': currentPlayerData.points,
-    'APG': currentPlayerData.assists,
-    'RPG': currentPlayerData.rebounds,
-    'SPG': currentPlayerData.steals,
-    'BPG': currentPlayerData.blocks,
-    'TPG': currentPlayerData.turnovers,
-    'FG%': currentPlayerData.fieldGoalPercentage,
-    '3P%': currentPlayerData.threePointPercentage,
-    'FT%': currentPlayerData.freeThrowPercentage,
+    'PTS': currentPlayerData.points,
+    'AST': currentPlayerData.assists,
+    'REB': currentPlayerData.rebounds,
+    'STL': currentPlayerData.steals,
+    'BLK': currentPlayerData.blocks,
+    'TOV': currentPlayerData.turnovers,
+    'FG_PCT': currentPlayerData.fieldGoalPercentage,
+    'THREE_PCT': currentPlayerData.threePointPercentage,
+    'FT_PCT': currentPlayerData.freeThrowPercentage,
     'GP': currentPlayerData.gamesPlayed,
-    '+/-': currentPlayerData.plusMinus,
+    'PLUS_MINUS': currentPlayerData.plusMinus,
     'MIN': currentPlayerData.minutesPerGame || 32.5
   };
 
   const calculateCustomStatForSeason = (seasonData: any) => {
     const seasonStatMappings = {
-      'PPG': seasonData.points,
-      'APG': seasonData.assists,
-      'RPG': seasonData.rebounds,
-      'SPG': seasonData.steals,
-      'BPG': seasonData.blocks,
-      'TPG': seasonData.turnovers,
-      'FG%': seasonData.fieldGoalPercentage,
-      '3P%': seasonData.threePointPercentage,
-      'FT%': seasonData.freeThrowPercentage,
+      'PTS': seasonData.points,
+      'AST': seasonData.assists,
+      'REB': seasonData.rebounds,
+      'STL': seasonData.steals,
+      'BLK': seasonData.blocks,
+      'TOV': seasonData.turnovers,
+      'FG_PCT': seasonData.fieldGoalPercentage,
+      'THREE_PCT': seasonData.threePointPercentage,
+      'FT_PCT': seasonData.freeThrowPercentage,
       'GP': seasonData.gamesPlayed,
-      '+/-': seasonData.plusMinus,
+      'PLUS_MINUS': seasonData.plusMinus,
       'MIN': seasonData.minutesPerGame || 32.5
     };
 
     try {
       let expression = formula;
       
-      // Handle +/- first since it has special characters
-      if (expression.includes('+/-')) {
-        expression = expression.replace(/\+\/-/g, seasonStatMappings['+/-'].toString());
-      }
-      
       // Replace stat abbreviations with actual values
       Object.entries(seasonStatMappings).forEach(([key, value]) => {
-        if (key !== '+/-') {
-          if (key.includes('%')) {
-            const escapedKey = key.replace(/%/g, '\\%');
-            const regex = new RegExp(`\\b${escapedKey}\\b`, 'g');
-            expression = expression.replace(regex, value.toString());
-          } else {
-            const regex = new RegExp(`\\b${key}\\b`, 'g');
-            expression = expression.replace(regex, value.toString());
-          }
+        if (key.includes('_PCT')) {
+          // Handle percentage stats
+          const regex = new RegExp(`\\b${key}\\b`, 'g');
+          expression = expression.replace(regex, value.toString());
+        } else {
+          const regex = new RegExp(`\\b${key}\\b`, 'g');
+          expression = expression.replace(regex, value.toString());
         }
       });
       
@@ -165,22 +158,15 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
     try {
       let expression = formula;
       
-      // Handle +/- first since it has special characters
-      if (expression.includes('+/-')) {
-        expression = expression.replace(/\+\/-/g, statMappings['+/-'].toString());
-      }
-      
       // Replace stat abbreviations with actual values
       Object.entries(statMappings).forEach(([key, value]) => {
-        if (key !== '+/-') {
-          if (key.includes('%')) {
-            const escapedKey = key.replace(/%/g, '\\%');
-            const regex = new RegExp(`\\b${escapedKey}\\b`, 'g');
-            expression = expression.replace(regex, value.toString());
-          } else {
-            const regex = new RegExp(`\\b${key}\\b`, 'g');
-            expression = expression.replace(regex, value.toString());
-          }
+        if (key.includes('_PCT')) {
+          // Handle percentage stats
+          const regex = new RegExp(`\\b${key}\\b`, 'g');
+          expression = expression.replace(regex, value.toString());
+        } else {
+          const regex = new RegExp(`\\b${key}\\b`, 'g');
+          expression = expression.replace(regex, value.toString());
         }
       });
       
