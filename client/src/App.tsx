@@ -80,13 +80,15 @@ export default function App() {
             <div className="space-y-6">
               <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
                 <h2 className="text-lg font-semibold mb-4">NBA Players Loaded ({players.length} players)</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                  {players.slice(0, 8).map((player) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                  {players.slice(0, 9).map((player: any) => (
                     <div key={player.id} className="bg-slate-700 p-4 rounded-lg">
                       <div className="font-medium text-slate-50 mb-1">{player.name}</div>
                       <div className="text-sm text-slate-400 mb-2">{player.position} - {player.team}</div>
-                      <div className="text-xs text-slate-500">
-                        {player.points.toFixed(1)} PTS, {player.assists.toFixed(1)} AST, {player.rebounds.toFixed(1)} REB
+                      <div className="text-xs text-slate-500 space-y-1">
+                        <div>{player.points.toFixed(1)} PTS, {player.assists.toFixed(1)} AST, {player.rebounds.toFixed(1)} REB</div>
+                        <div>{player.turnovers.toFixed(1)} TOV, {player.steals.toFixed(1)} STL, {player.blocks.toFixed(1)} BLK</div>
+                        <div>FG: {(player.fieldGoalPercentage * 100).toFixed(1)}%, +/-: {player.plusMinus.toFixed(1)}</div>
                       </div>
                     </div>
                   ))}
@@ -101,9 +103,15 @@ export default function App() {
                       type="text"
                       value={formula}
                       onChange={(e) => setFormula(e.target.value)}
-                      placeholder="e.g. points + assists + rebounds"
+                      placeholder="e.g. points + assists + rebounds - turnovers"
                       className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white placeholder-slate-400"
                     />
+                    <div className="mt-2 text-xs text-slate-400">
+                      Available stats: points, assists, rebounds, steals, blocks, turnovers, fieldGoalPercentage, threePointPercentage, freeThrowPercentage, plusMinus, minutesPerGame
+                    </div>
+                    <div className="mt-1 text-xs text-slate-500">
+                      Example formulas: "points + assists + rebounds", "fieldGoalPercentage * points", "(points + assists) / turnovers", "plusMinus + steals + blocks"
+                    </div>
                   </div>
                   <button
                     onClick={calculateStats}
