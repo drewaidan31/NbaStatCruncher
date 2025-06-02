@@ -155,6 +155,9 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
   };
 
   const calculateCustomStat = () => {
+    console.log('Starting calculation with formula:', formula);
+    console.log('Stat mappings:', statMappings);
+    
     try {
       let expression = formula;
       
@@ -170,7 +173,10 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
         }
       });
       
+      console.log('Expression after replacement:', expression);
+      
       const result = evaluate(expression);
+      console.log('Evaluation result:', result);
       setCalculatedValue(typeof result === 'number' ? result : null);
 
       // Calculate for all seasons to create chart data
