@@ -34,12 +34,13 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect }: Player
 
   const { data: players = [], isLoading } = useQuery({
     queryKey: ["/api/nba/players", selectedSeason],
-    enabled: searchTerm.length >= 2,
   });
 
-  const filteredPlayers = players.filter((player: Player) =>
-    player.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredPlayers = searchTerm.length >= 1 
+    ? players.filter((player: Player) =>
+        player.name.toLowerCase().includes(searchTerm.toLowerCase())
+      ).slice(0, 10) // Show max 10 suggestions
+    : [];
 
   const handlePlayerClick = (player: Player) => {
     if (compareMode) {
@@ -117,7 +118,7 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect }: Player
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Type player name (min 2 characters)..."
+            placeholder="Start typing a player's name..."
             className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
         </div>
@@ -151,16 +152,17 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect }: Player
         </div>
       </div>
 
-      {searchTerm.length >= 2 && (
+      {searchTerm.length >= 1 && (
         <div className="space-y-2">
           {isLoading ? (
             <div className="text-center py-4">
-              <div className="text-slate-400">Searching players...</div>
+              <div className="text-slate-400">Loading players...</div>
             </div>
           ) : filteredPlayers.length > 0 ? (
             <>
               <div className="text-sm text-slate-400 mb-2">
-                Found {filteredPlayers.length} player(s)
+                {filteredPlayers.length} suggestion{filteredPlayers.length !== 1 ? 's' : ''}
+                {filteredPlayers.length === 10 ? ' (showing top 10)' : ''}
               </div>
               <div className="max-h-60 overflow-y-auto space-y-1">
                 {filteredPlayers.map((player: Player) => (
@@ -187,22 +189,26 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect }: Player
                 ))}
               </div>
             </>
-          ) : (
+          ) : searchTerm.length >= 1 ? (
             <div className="text-center py-4">
               <div className="text-slate-400">No players found matching "{searchTerm}"</div>
+              <div className="text-xs text-slate-500 mt-1">Try a different spelling or first/last name only</div>
             </div>
-          )}
+          ) : null}
         </div>
       )}
 
-      {searchTerm.length < 2 && (
+      {searchTerm.length === 0 && (
         <div className="text-center py-8">
           <Search className="w-12 h-12 text-slate-500 mx-auto mb-2" />
           <div className="text-slate-400">
             {compareMode 
               ? "Search and select two players to compare their stats"
-              : "Start typing a player's name to search"
+              : "Start typing a player's name to see suggestions"
             }
+          </div>
+          <div className="text-xs text-slate-500 mt-2">
+            Examples: "LeBron", "Curry", "Jokic"
           </div>
         </div>
       )}
