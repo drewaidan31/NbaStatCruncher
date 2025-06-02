@@ -131,6 +131,13 @@ function MainApp() {
     fetchPlayers();
   }, [selectedSeason]);
 
+  // Update featured showcase when refresh counter changes
+  useEffect(() => {
+    if (players && players.length > 0) {
+      setupFeaturedShowcase(players);
+    }
+  }, [refreshCounter]);
+
   const calculateCustomStatForSeason = (seasonData: any, formula: string) => {
     const seasonStatMappings = {
       'PTS': seasonData.points,
