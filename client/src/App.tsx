@@ -81,26 +81,26 @@ function MainApp() {
 
   // Preset custom stat equations for the showcase
   const presetStats = [
-    { name: "Offensive Impact", formula: "PPG + APG * 1.5", description: "Points + weighted assists to measure offensive contribution" },
-    { name: "Complete Player", formula: "PPG + APG + RPG + SPG + BPG", description: "Total production across all major statistical categories" },
-    { name: "Efficiency Rating", formula: "(PPG + RPG + APG) / TPG", description: "Production per turnover - higher is better" },
-    { name: "Clutch Factor", formula: "PPG * FG% + APG", description: "Scoring efficiency combined with playmaking" },
-    { name: "Defensive Impact", formula: "RPG + SPG * 2 + BPG * 2", description: "Rebounds plus weighted steals and blocks" },
-    { name: "Floor General", formula: "APG * 2 + PPG * 0.5", description: "Playmaking focus with scoring support" },
-    { name: "Big Man Index", formula: "PPG + RPG * 1.5 + BPG * 2", description: "Traditional big man stats with emphasis on rebounding and blocks" },
-    { name: "Shooter's Touch", formula: "PPG * FG% * 3P%", description: "Scoring volume multiplied by shooting efficiency" },
-    { name: "Hustle Metric", formula: "RPG + SPG + (GP / 82) * 10", description: "Effort stats plus games played consistency" },
-    { name: "Versatility Score", formula: "PPG + APG + RPG + (SPG + BPG) * 1.5", description: "Well-rounded contribution with defensive bonus" },
-    { name: "Point Guard Rating", formula: "APG * 2.5 + PPG - TPG", description: "Playmaking emphasis with turnover penalty" },
-    { name: "Scoring Punch", formula: "PPG * (FG% + 3P%) / 2", description: "Points weighted by overall shooting efficiency" },
-    { name: "Team Player", formula: "APG * 3 + RPG + (PPG * 0.3)", description: "Pass-first mentality with rebounding help" },
-    { name: "Two-Way Impact", formula: "(PPG + APG) + (SPG + BPG) * 2", description: "Offensive production plus defensive disruption" },
-    { name: "Consistency Factor", formula: "PPG + (GP / 82) * 5", description: "Scoring with games played reliability bonus" },
-    { name: "Clutch Shooter", formula: "PPG * FT% * 3P%", description: "Scoring ability across different shot types" },
-    { name: "Paint Presence", formula: "RPG * 2 + BPG * 3 + PPG * 0.5", description: "Interior dominance measurement" },
-    { name: "Pace Impact", formula: "PPG + APG + (MIN / 36) * 5", description: "Production adjusted for playing time" },
-    { name: "Winning Formula", formula: "PPG + APG + RPG - TPG + (+/-) / 10", description: "Complete stats with team success factor" },
-    { name: "Star Power", formula: "PPG * 1.5 + APG + RPG + (GP / 82) * 3", description: "Scoring emphasis with all-around contribution" }
+    { name: "Offensive Impact", formula: "PTS + AST * 1.5", description: "Points + weighted assists to measure offensive contribution" },
+    { name: "Complete Player", formula: "PTS + AST + REB + STL + BLK", description: "Total production across all major statistical categories" },
+    { name: "Efficiency Rating", formula: "(PTS + REB + AST) / TOV", description: "Production per turnover - higher is better" },
+    { name: "Clutch Factor", formula: "PTS * FG_PCT + AST", description: "Scoring efficiency combined with playmaking" },
+    { name: "Defensive Impact", formula: "REB + STL * 2 + BLK * 2", description: "Rebounds plus weighted steals and blocks" },
+    { name: "Floor General", formula: "AST * 2 + PTS * 0.5", description: "Playmaking focus with scoring support" },
+    { name: "Big Man Index", formula: "PTS + REB * 1.5 + BLK * 2", description: "Traditional big man stats with emphasis on rebounding and blocks" },
+    { name: "Shooter's Touch", formula: "PTS * FG_PCT * THREE_PCT", description: "Scoring volume multiplied by shooting efficiency" },
+    { name: "Hustle Metric", formula: "REB + STL + (GP / 82) * 10", description: "Effort stats plus games played consistency" },
+    { name: "Versatility Score", formula: "PTS + AST + REB + (STL + BLK) * 1.5", description: "Well-rounded contribution with defensive bonus" },
+    { name: "Point Guard Rating", formula: "AST * 2.5 + PTS - TOV", description: "Playmaking emphasis with turnover penalty" },
+    { name: "Scoring Punch", formula: "PTS * (FG_PCT + THREE_PCT) / 2", description: "Points weighted by overall shooting efficiency" },
+    { name: "Team Player", formula: "AST * 3 + REB + (PTS * 0.3)", description: "Pass-first mentality with rebounding help" },
+    { name: "Two-Way Impact", formula: "(PTS + AST) + (STL + BLK) * 2", description: "Offensive production plus defensive disruption" },
+    { name: "Consistency Factor", formula: "PTS + (GP / 82) * 5", description: "Scoring with games played reliability bonus" },
+    { name: "Clutch Shooter", formula: "PTS * FT_PCT * THREE_PCT", description: "Scoring ability across different shot types" },
+    { name: "Paint Presence", formula: "REB * 2 + BLK * 3 + PTS * 0.5", description: "Interior dominance measurement" },
+    { name: "Pace Impact", formula: "PTS + AST + (MIN / 36) * 5", description: "Production adjusted for playing time" },
+    { name: "Winning Formula", formula: "PTS + AST + REB - TOV + PLUS_MINUS / 10", description: "Complete stats with team success factor" },
+    { name: "Star Power", formula: "PTS * 1.5 + AST + REB + (GP / 82) * 3", description: "Scoring emphasis with all-around contribution" }
   ];
 
   useEffect(() => {
@@ -132,39 +132,33 @@ function MainApp() {
 
   const calculateCustomStatForSeason = (seasonData: any, formula: string) => {
     const seasonStatMappings = {
-      'PPG': seasonData.points,
-      'APG': seasonData.assists,
-      'RPG': seasonData.rebounds,
-      'SPG': seasonData.steals,
-      'BPG': seasonData.blocks,
-      'TPG': seasonData.turnovers,
-      'FG%': seasonData.fieldGoalPercentage,
-      '3P%': seasonData.threePointPercentage,
-      'FT%': seasonData.freeThrowPercentage,
+      'PTS': seasonData.points,
+      'AST': seasonData.assists,
+      'REB': seasonData.rebounds,
+      'STL': seasonData.steals,
+      'BLK': seasonData.blocks,
+      'TOV': seasonData.turnovers,
+      'FG_PCT': seasonData.fieldGoalPercentage,
+      'THREE_PCT': seasonData.threePointPercentage,
+      'FT_PCT': seasonData.freeThrowPercentage,
       'GP': seasonData.gamesPlayed,
-      '+/-': seasonData.plusMinus,
+      'PLUS_MINUS': seasonData.plusMinus,
       'MIN': seasonData.minutesPerGame || 32.5
     };
 
     try {
       let expression = formula;
       
-      // Handle +/- first since it has special characters
-      if (expression.includes('+/-')) {
-        expression = expression.replace(/\+\/-/g, seasonStatMappings['+/-'].toString());
+      // Handle PLUS_MINUS first since it has special characters
+      if (expression.includes('PLUS_MINUS')) {
+        expression = expression.replace(/PLUS_MINUS/g, seasonStatMappings['PLUS_MINUS'].toString());
       }
       
       // Replace stat abbreviations with actual values
       Object.entries(seasonStatMappings).forEach(([key, value]) => {
-        if (key !== '+/-') {
-          if (key.includes('%')) {
-            const escapedKey = key.replace(/%/g, '\\%');
-            const regex = new RegExp(`\\b${escapedKey}\\b`, 'g');
-            expression = expression.replace(regex, value.toString());
-          } else {
-            const regex = new RegExp(`\\b${key}\\b`, 'g');
-            expression = expression.replace(regex, value.toString());
-          }
+        if (key !== 'PLUS_MINUS') {
+          const regex = new RegExp(`\\b${key}\\b`, 'g');
+          expression = expression.replace(regex, value.toString());
         }
       });
       
