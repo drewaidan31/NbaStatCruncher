@@ -11,6 +11,7 @@ function MainApp() {
   const [error, setError] = useState("");
   const [formula, setFormula] = useState("");
   const [results, setResults] = useState([]);
+  const [selectedSeason, setSelectedSeason] = useState("2024-25");
   const [savedStats, setSavedStats] = useState<Array<{
     id: number;
     name: string;
@@ -22,7 +23,7 @@ function MainApp() {
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
-        const response = await fetch("/api/nba/players");
+        const response = await fetch(`/api/nba/players?season=${selectedSeason}`);
         if (response.ok) {
           const data = await response.json();
           setPlayers(data);
@@ -39,7 +40,13 @@ function MainApp() {
     };
 
     fetchPlayers();
-  }, []);
+  }, [selectedSeason]);
+
+  const handleSeasonChange = (season: string) => {
+    setSelectedSeason(season);
+    setLoading(true);
+    setResults([]);
+  };
 
   const calculateStats = async () => {
     if (!formula.trim()) return;
@@ -84,8 +91,29 @@ function MainApp() {
             NBA Custom Stats Calculator
           </h1>
           <p className="text-xl text-slate-300">
-            Create custom basketball statistics with authentic 2024-25 NBA player data
+            Create custom basketball statistics with authentic NBA player data
           </p>
+          
+          {/* Season Selector */}
+          <div className="mt-6 flex justify-center">
+            <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
+              <label htmlFor="season-select" className="block text-sm font-medium text-slate-300 mb-2">
+                Select NBA Season:
+              </label>
+              <select
+                id="season-select"
+                value={selectedSeason}
+                onChange={(e) => handleSeasonChange(e.target.value)}
+                className="bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              >
+                <option value="2024-25">2024-25 Season (Current)</option>
+                <option value="2023-24">2023-24 Season</option>
+                <option value="2022-23">2022-23 Season</option>
+                <option value="2021-22">2021-22 Season</option>
+                <option value="2020-21">2020-21 Season</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         {error && (

@@ -10,12 +10,12 @@ try:
 except ImportError:
     NBA_API_AVAILABLE = False
 
-def get_nba_players_from_api():
+def get_nba_players_from_api(season='2024-25'):
     """Get NBA players using the official NBA API"""
     try:
-        # Get 2024-25 season player stats
+        # Get season player stats
         player_stats = leaguedashplayerstats.LeagueDashPlayerStats(
-            season='2024-25',
+            season=season,
             season_type_all_star='Regular Season'
         )
         
@@ -283,9 +283,12 @@ def get_sample_nba_players():
     return players
 
 if __name__ == "__main__":
+    # Get season from command line argument, default to 2024-25
+    season = sys.argv[1] if len(sys.argv) > 1 else '2024-25'
+    
     if NBA_API_AVAILABLE:
         # Try to get data from official NBA API first
-        api_data = get_nba_players_from_api()
+        api_data = get_nba_players_from_api(season)
         if api_data:
             print(json.dumps(api_data))
         else:

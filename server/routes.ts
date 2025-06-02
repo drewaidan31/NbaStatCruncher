@@ -45,10 +45,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json(existingPlayers);
       }
 
-      console.log("Loading authentic NBA player statistics from official NBA API");
+      const season = req.query.season as string || "2024-25";
+      console.log(`Loading authentic NBA player statistics for ${season} season from official NBA API`);
       
       // Use Python script to fetch authentic NBA data
-      const python = spawn("python3", ["server/nba_data.py"]);
+      const python = spawn("python3", ["server/nba_data.py", season]);
       
       let pythonData = "";
       let pythonError = "";
