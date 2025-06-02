@@ -27,7 +27,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log("Fetching NBA data with API key:", rapidApiKey ? "API key present" : "API key missing");
       
-      const response = await fetch("https://api-nba-v1.p.rapidapi.com/players/statistics?season=2024", {
+      const response = await fetch("https://api-nba-v1.p.rapidapi.com/players", {
         method: "GET",
         headers: {
           "X-RapidAPI-Key": rapidApiKey,
