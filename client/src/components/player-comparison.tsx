@@ -58,9 +58,16 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
   });
 
   const calculateCustomStat = (player: Player) => {
+    // Only calculate if formula is not empty and contains at least one stat
+    if (!formula || formula.trim().length === 0) return null;
+    
+    // Check if formula contains at least one valid stat abbreviation
+    const statMappings = getStatMappings(player);
+    const hasValidStat = Object.keys(statMappings).some(stat => formula.includes(stat));
+    if (!hasValidStat) return null;
+    
     try {
       let expression = formula;
-      const statMappings = getStatMappings(player);
       
       // Replace stat abbreviations with actual values
       // Handle +/- first since it has special characters
@@ -87,7 +94,7 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
       const result = evaluate(expression);
       return typeof result === 'number' ? result : null;
     } catch (error) {
-      console.error('Custom stat calculation error:', error, 'Formula:', formula);
+      // Don't log errors for incomplete formulas
       return null;
     }
   };
