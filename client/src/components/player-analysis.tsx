@@ -70,6 +70,20 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
     enabled: showSavedStats,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
+    queryFn: async () => {
+      const response = await fetch('/api/custom-stats/my', {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch saved stats: ${response.status} ${response.statusText}`);
+      }
+      
+      return response.json();
+    },
   });
 
   // Update current player data when season changes
