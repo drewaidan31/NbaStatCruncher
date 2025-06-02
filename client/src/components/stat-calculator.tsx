@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Delete } from "lucide-react";
 
 interface StatCalculatorProps {
   onFormulaChange: (formula: string) => void;
@@ -32,7 +33,7 @@ export default function StatCalculator({ onFormulaChange, onCalculate }: StatCal
     { symbol: ")", value: ")" }
   ];
 
-  const numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "."];
+  const numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0"];
 
   const handleClick = (value: string) => {
     const newDisplay = display + value;
@@ -99,7 +100,7 @@ export default function StatCalculator({ onFormulaChange, onCalculate }: StatCal
             ))}
           </div>
           
-          <div className="grid grid-cols-5 gap-2 mt-4">
+          <div className="grid grid-cols-4 gap-2 mt-4">
             {numbers.map((num) => (
               <button
                 key={num}
@@ -109,6 +110,13 @@ export default function StatCalculator({ onFormulaChange, onCalculate }: StatCal
                 {num}
               </button>
             ))}
+            <button
+              onClick={handleDelete}
+              disabled={!display.trim()}
+              className="bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2 px-3 rounded transition-colors flex items-center justify-center"
+            >
+              <Delete className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
@@ -116,13 +124,6 @@ export default function StatCalculator({ onFormulaChange, onCalculate }: StatCal
         <div>
           <h4 className="text-sm font-medium text-slate-400 mb-3">Actions</h4>
           <div className="space-y-3">
-            <button
-              onClick={handleDelete}
-              disabled={!display.trim()}
-              className="w-full bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2 px-4 rounded transition-colors"
-            >
-              Delete
-            </button>
             <button
               onClick={handleClear}
               className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded transition-colors"
