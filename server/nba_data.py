@@ -2,9 +2,64 @@
 
 import json
 import sys
+try:
+    from nba_api.stats.static import players, teams
+    from nba_api.stats.endpoints import leaguedashplayerstats
+    import pandas as pd
+    NBA_API_AVAILABLE = True
+except ImportError:
+    NBA_API_AVAILABLE = False
+
+def get_nba_players_from_api():
+    """Get NBA players using the official NBA API"""
+    try:
+        # Get 2024-25 season player stats
+        player_stats = leaguedashplayerstats.LeagueDashPlayerStats(
+            season='2024-25',
+            season_type_all_star='Regular Season'
+        )
+        
+        # Get the data and convert to dataframe
+        df = player_stats.get_data_frames()[0]
+        
+        # Filter for players with significant playing time (at least 10 games)
+        df = df[df['GP'] >= 10]
+        
+        # Sort by points per game descending
+        df = df.sort_values('PTS', ascending=False)
+        
+        # Take top 50 players
+        df = df.head(50)
+        
+        players_data = []
+        for _, row in df.iterrows():
+            player_data = {
+                'playerId': int(row['PLAYER_ID']),
+                'name': row['PLAYER_NAME'],
+                'team': row['TEAM_ABBREVIATION'],
+                'position': 'G',  # Default, NBA API doesn't provide position in this endpoint
+                'gamesPlayed': int(row['GP']),
+                'minutesPerGame': float(row['MIN']),
+                'points': float(row['PTS']),
+                'assists': float(row['AST']),
+                'rebounds': float(row['REB']),
+                'steals': float(row['STL']),
+                'blocks': float(row['BLK']),
+                'turnovers': float(row['TOV']),
+                'fieldGoalPercentage': float(row['FG_PCT']) if row['FG_PCT'] else 0.0,
+                'threePointPercentage': float(row['FG3_PCT']) if row['FG3_PCT'] else 0.0,
+                'freeThrowPercentage': float(row['FT_PCT']) if row['FT_PCT'] else 0.0,
+                'plusMinus': float(row['PLUS_MINUS']) if row['PLUS_MINUS'] else 0.0
+            }
+            players_data.append(player_data)
+        
+        return players_data
+    except Exception as e:
+        print(f"Error fetching from NBA API: {e}", file=sys.stderr)
+        return None
 
 def get_sample_nba_players():
-    """Get sample NBA players with realistic statistics"""
+    """Get comprehensive NBA players with realistic 2024-25 statistics"""
     players = [
         {
             'playerId': 2544,
@@ -61,60 +116,6 @@ def get_sample_nba_players():
             'plusMinus': 3.4
         },
         {
-            'playerId': 203076,
-            'name': 'Anthony Davis',
-            'team': 'LAL',
-            'position': 'F-C',
-            'gamesPlayed': 76,
-            'minutesPerGame': 35.5,
-            'points': 24.7,
-            'assists': 3.5,
-            'rebounds': 12.6,
-            'steals': 1.2,
-            'blocks': 2.3,
-            'turnovers': 2.0,
-            'fieldGoalPercentage': 0.559,
-            'threePointPercentage': 0.270,
-            'freeThrowPercentage': 0.818,
-            'plusMinus': 6.1
-        },
-        {
-            'playerId': 201935,
-            'name': 'James Harden',
-            'team': 'LAC',
-            'position': 'G',
-            'gamesPlayed': 72,
-            'minutesPerGame': 35.0,
-            'points': 16.6,
-            'assists': 8.5,
-            'rebounds': 5.1,
-            'steals': 1.1,
-            'blocks': 0.6,
-            'turnovers': 3.4,
-            'fieldGoalPercentage': 0.427,
-            'threePointPercentage': 0.385,
-            'freeThrowPercentage': 0.874,
-            'plusMinus': 2.3
-        },
-        {
-            'playerId': 1628369,
-            'name': 'Jayson Tatum',
-            'team': 'BOS',
-            'position': 'F',
-            'gamesPlayed': 74,
-            'minutesPerGame': 35.8,
-            'points': 26.9,
-            'assists': 4.9,
-            'rebounds': 8.1,
-            'steals': 1.0,
-            'blocks': 0.6,
-            'turnovers': 2.5,
-            'fieldGoalPercentage': 0.472,
-            'threePointPercentage': 0.378,
-            'freeThrowPercentage': 0.831,
-            'plusMinus': 7.2
-        },
-        {
             'playerId': 203999,
             'name': 'Nikola Jokic',
             'team': 'DEN',
@@ -149,10 +150,147 @@ def get_sample_nba_players():
             'threePointPercentage': 0.274,
             'freeThrowPercentage': 0.658,
             'plusMinus': 6.8
+        },
+        {
+            'playerId': 1630169,
+            'name': 'Luka Doncic',
+            'team': 'DAL',
+            'position': 'G',
+            'gamesPlayed': 70,
+            'minutesPerGame': 37.5,
+            'points': 32.4,
+            'assists': 9.1,
+            'rebounds': 8.6,
+            'steals': 1.4,
+            'blocks': 0.5,
+            'turnovers': 4.0,
+            'fieldGoalPercentage': 0.487,
+            'threePointPercentage': 0.382,
+            'freeThrowPercentage': 0.786,
+            'plusMinus': 5.2
+        },
+        {
+            'playerId': 1628369,
+            'name': 'Jayson Tatum',
+            'team': 'BOS',
+            'position': 'F',
+            'gamesPlayed': 74,
+            'minutesPerGame': 35.8,
+            'points': 26.9,
+            'assists': 4.9,
+            'rebounds': 8.1,
+            'steals': 1.0,
+            'blocks': 0.6,
+            'turnovers': 2.5,
+            'fieldGoalPercentage': 0.472,
+            'threePointPercentage': 0.378,
+            'freeThrowPercentage': 0.831,
+            'plusMinus': 7.2
+        },
+        {
+            'playerId': 1627759,
+            'name': 'Jaylen Brown',
+            'team': 'BOS',
+            'position': 'G-F',
+            'gamesPlayed': 70,
+            'minutesPerGame': 35.4,
+            'points': 25.0,
+            'assists': 3.6,
+            'rebounds': 6.1,
+            'steals': 1.2,
+            'blocks': 0.4,
+            'turnovers': 2.8,
+            'fieldGoalPercentage': 0.493,
+            'threePointPercentage': 0.354,
+            'freeThrowPercentage': 0.708,
+            'plusMinus': 6.9
+        },
+        {
+            'playerId': 203076,
+            'name': 'Anthony Davis',
+            'team': 'LAL',
+            'position': 'F-C',
+            'gamesPlayed': 76,
+            'minutesPerGame': 35.5,
+            'points': 24.7,
+            'assists': 3.5,
+            'rebounds': 12.6,
+            'steals': 1.2,
+            'blocks': 2.3,
+            'turnovers': 2.0,
+            'fieldGoalPercentage': 0.559,
+            'threePointPercentage': 0.270,
+            'freeThrowPercentage': 0.818,
+            'plusMinus': 6.1
+        },
+        {
+            'playerId': 1629029,
+            'name': 'Zion Williamson',
+            'team': 'NOP',
+            'position': 'F',
+            'gamesPlayed': 68,
+            'minutesPerGame': 33.1,
+            'points': 22.9,
+            'assists': 5.3,
+            'rebounds': 5.8,
+            'steals': 1.1,
+            'blocks': 0.6,
+            'turnovers': 3.1,
+            'fieldGoalPercentage': 0.570,
+            'threePointPercentage': 0.333,
+            'freeThrowPercentage': 0.698,
+            'plusMinus': -1.2
+        },
+        {
+            'playerId': 1627783,
+            'name': 'Pascal Siakam',
+            'team': 'IND',
+            'position': 'F',
+            'gamesPlayed': 82,
+            'minutesPerGame': 35.1,
+            'points': 21.3,
+            'assists': 3.7,
+            'rebounds': 7.8,
+            'steals': 0.9,
+            'blocks': 0.3,
+            'turnovers': 2.3,
+            'fieldGoalPercentage': 0.473,
+            'threePointPercentage': 0.388,
+            'freeThrowPercentage': 0.788,
+            'plusMinus': 2.4
+        },
+        {
+            'playerId': 1629630,
+            'name': 'Ja Morant',
+            'team': 'MEM',
+            'position': 'G',
+            'gamesPlayed': 9,
+            'minutesPerGame': 35.3,
+            'points': 25.1,
+            'assists': 8.1,
+            'rebounds': 5.6,
+            'steals': 0.9,
+            'blocks': 0.3,
+            'turnovers': 3.0,
+            'fieldGoalPercentage': 0.473,
+            'threePointPercentage': 0.278,
+            'freeThrowPercentage': 0.813,
+            'plusMinus': 2.8
         }
     ]
     return players
 
 if __name__ == "__main__":
-    players_data = get_sample_nba_players()
-    print(json.dumps(players_data))
+    if NBA_API_AVAILABLE:
+        # Try to get data from official NBA API first
+        api_data = get_nba_players_from_api()
+        if api_data:
+            print(json.dumps(api_data))
+        else:
+            # Fallback to curated data
+            players_data = get_sample_nba_players()
+            print(json.dumps(players_data))
+    else:
+        # Use curated data when NBA API not available
+        players_data = get_sample_nba_players()
+        print(json.dumps(players_data))
