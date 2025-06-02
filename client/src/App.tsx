@@ -185,6 +185,8 @@ function MainApp() {
         <PlayerSearch
           onPlayerSelect={handlePlayerSelect}
           onCompareSelect={handleCompareSelect}
+          currentFormula={formula}
+          customStatResults={results}
         />
       );
     }

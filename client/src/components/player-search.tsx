@@ -25,9 +25,11 @@ interface Player {
 interface PlayerSearchProps {
   onPlayerSelect: (player: Player, season: string) => void;
   onCompareSelect: (players: { player1: Player; season1: string; player2: Player; season2: string }) => void;
+  currentFormula?: string;
+  customStatResults?: Array<{ playerId: number; value: number; rank: number }>;
 }
 
-export default function PlayerSearch({ onPlayerSelect, onCompareSelect }: PlayerSearchProps) {
+export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentFormula, customStatResults }: PlayerSearchProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [compareMode, setCompareMode] = useState(false);
   const [selectedPlayer1, setSelectedPlayer1] = useState<Player | null>(null);
@@ -56,6 +58,13 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect }: Player
         return name && name.toLowerCase().includes(searchTerm.toLowerCase());
       }).slice(0, 10) // Show max 10 suggestions
     : [];
+
+  // Helper function to get custom stat value for a player
+  const getCustomStatValue = (player: Player) => {
+    if (!customStatResults || !currentFormula) return null;
+    const result = customStatResults.find(r => r.playerId === player.playerId);
+    return result ? { value: result.value, rank: result.rank } : null;
+  };
 
   const handlePlayerClick = (player: Player) => {
     if (compareMode) {
@@ -168,9 +177,26 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect }: Player
                         )}
                       </div>
                       <div className="text-right text-sm">
-                        <div className="text-orange-400 font-medium">{player.points.toFixed(1)} PPG</div>
-                        <div className="text-slate-400">{player.assists.toFixed(1)} APG</div>
-                        <div className="text-slate-400">{player.rebounds.toFixed(1)} RPG</div>
+                        {(() => {
+                          const customStat = getCustomStatValue(player);
+                          if (customStat && currentFormula) {
+                            return (
+                              <>
+                                <div className="text-green-400 font-bold text-base">#{customStat.rank}</div>
+                                <div className="text-green-300 font-medium">{customStat.value.toFixed(2)}</div>
+                                <div className="text-xs text-slate-400">Custom Stat</div>
+                              </>
+                            );
+                          } else {
+                            return (
+                              <>
+                                <div className="text-orange-400 font-medium">{player.points.toFixed(1)} PPG</div>
+                                <div className="text-slate-400">{player.assists.toFixed(1)} APG</div>
+                                <div className="text-slate-400">{player.rebounds.toFixed(1)} RPG</div>
+                              </>
+                            );
+                          }
+                        })()}
                       </div>
                     </div>
                   </div>
