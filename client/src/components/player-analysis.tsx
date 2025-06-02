@@ -307,6 +307,35 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
     }
   };
 
+  const handleDeleteStat = async (statId: number) => {
+    if (!confirm('Are you sure you want to delete this saved stat?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/custom-stats/${statId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        console.log('Stat deleted successfully!');
+        refetchStats();
+      } else {
+        console.error('Failed to delete stat:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('Error deleting stat:', error);
+    }
+  };
+
+  const handleEditStat = (stat: any) => {
+    setFormula(stat.formula);
+    setCustomStatName(stat.name);
+    handleFormulaChange(stat.formula);
+    setShowSavedStats(false);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -599,22 +628,44 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
                   {savedStats.map((stat: any) => (
                     <div
                       key={stat.id}
-                      className="bg-slate-700 rounded-lg p-4 border border-slate-600 hover:border-slate-500 cursor-pointer transition-colors"
-                      onClick={() => {
-                        setFormula(stat.formula);
-                        setCustomStatName(stat.name);
-                        handleFormulaChange(stat.formula);
-                        setShowSavedStats(false);
-                      }}
+                      className="bg-slate-700 rounded-lg p-4 border border-slate-600 hover:border-slate-500 transition-colors"
                     >
                       <div className="flex justify-between items-start">
-                        <div>
+                        <div 
+                          className="flex-1 cursor-pointer"
+                          onClick={() => {
+                            setFormula(stat.formula);
+                            setCustomStatName(stat.name);
+                            handleFormulaChange(stat.formula);
+                            setShowSavedStats(false);
+                          }}
+                        >
                           <h4 className="text-white font-medium">{stat.name}</h4>
                           <p className="text-slate-400 text-sm mt-1">{stat.formula}</p>
                         </div>
-                        <div className="text-xs text-slate-500">
-                          Click to load
+                        <div className="flex gap-2 ml-4">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditStat(stat);
+                            }}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs transition-colors"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteStat(stat.id);
+                            }}
+                            className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs transition-colors"
+                          >
+                            Delete
+                          </button>
                         </div>
+                      </div>
+                      <div className="text-xs text-slate-500 mt-2">
+                        Click to load
                       </div>
                     </div>
                   ))}

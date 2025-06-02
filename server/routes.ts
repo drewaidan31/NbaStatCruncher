@@ -240,6 +240,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId
       });
       
+      // Check for duplicates (same name and formula for this user)
+      const existingStats = await storage.getUserCustomStats(userId);
+      const duplicate = existingStats.find(stat => 
+        stat.name === validatedData.name && stat.formula === validatedData.formula
+      );
+      
+      if (duplicate) {
+        return res.status(409).json({ message: "A stat with this name and formula already exists" });
+      }
+      
       const savedStat = await storage.saveCustomStat(validatedData);
       res.status(201).json(savedStat);
     } catch (error) {
@@ -257,6 +267,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user custom stats:", error);
       res.status(500).json({ message: "Failed to fetch saved stats" });
+    }
+  });
+
+  // Delete a saved custom stat (requires authentication)
+  app.delete("/api/custom-stats/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const statId = parseInt(req.params.id);
+      
+      const success = await storage.deleteCustomStat(statId, userId);
+      if (success) {
+        res.json({ message: "Custom stat deleted successfully" });
+      } else {
+        res.status(404).json({ message: "Custom stat not found or unauthorized" });
+      }
+    } catch (error) {
+      console.error("Error deleting custom stat:", error);
+      res.status(500).json({ message: "Failed to delete custom stat" });
+    }
+  });
+
+  // Update a saved custom stat (requires authentication)
+  app.put("/api/custom-stats/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const statId = parseInt(req.params.id);
+      const { name, formula, description } = req.body;
+      
+      const updatedStat = await storage.updateCustomStat(statId, userId, { name, formula, description });
+      if (updatedStat) {
+        res.json(updatedStat);
+      } else {
+        res.status(404).json({ message: "Custom stat not found or unauthorized" });
+      }
+    } catch (error) {
+      console.error("Error updating custom stat:", error);
+      res.status(500).json({ message: "Failed to update custom stat" });
     }
   });
 

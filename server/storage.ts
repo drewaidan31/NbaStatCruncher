@@ -11,7 +11,7 @@ import {
   type SaveCustomStat
 } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 export interface IStorage {
   // Player operations
@@ -32,6 +32,8 @@ export interface IStorage {
   // Saved custom stats operations
   saveCustomStat(stat: SaveCustomStat): Promise<CustomStat>;
   getUserCustomStats(userId: string): Promise<CustomStat[]>;
+  deleteCustomStat(statId: number, userId: string): Promise<boolean>;
+  updateCustomStat(statId: number, userId: string, updates: { name?: string; formula?: string; description?: string }): Promise<CustomStat | null>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -114,6 +116,22 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(customStats)
       .where(eq(customStats.userId, userId));
+  }
+
+  async deleteCustomStat(statId: number, userId: string): Promise<boolean> {
+    const result = await db
+      .delete(customStats)
+      .where(and(eq(customStats.id, statId), eq(customStats.userId, userId)));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  async updateCustomStat(statId: number, userId: string, updates: { name?: string; formula?: string; description?: string }): Promise<CustomStat | null> {
+    const [updatedStat] = await db
+      .update(customStats)
+      .set(updates)
+      .where(and(eq(customStats.id, statId), eq(customStats.userId, userId)))
+      .returning();
+    return updatedStat || null;
   }
 }
 
