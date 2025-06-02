@@ -22,14 +22,14 @@ def get_nba_players_from_api():
         # Get the data and convert to dataframe
         df = player_stats.get_data_frames()[0]
         
-        # Filter for players with significant playing time (at least 10 games)
-        df = df[df['GP'] >= 10]
+        # Filter for players with at least 5 games played to include more players
+        df = df[df['GP'] >= 5]
         
         # Sort by points per game descending
         df = df.sort_values('PTS', ascending=False)
         
-        # Take top 100 players
-        df = df.head(100)
+        # Take top 200 players instead of 100
+        df = df.head(200)
         
         players_data = []
         for _, row in df.iterrows():
