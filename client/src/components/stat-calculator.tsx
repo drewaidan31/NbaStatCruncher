@@ -125,52 +125,7 @@ export default function StatCalculator({ onFormulaChange, onCalculate }: StatCal
             </button>
           </div>
 
-          {/* Quick Formulas */}
-          <div className="mt-6">
-            <h5 className="text-sm font-medium text-slate-400 mb-2">Quick Formulas</h5>
-            <div className="space-y-2">
-              <button
-                onClick={() => {
-                  const formula = "PTS + AST + REB";
-                  setDisplay(formula);
-                  onFormulaChange(formula);
-                }}
-                className="w-full text-left bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm py-2 px-3 rounded transition-colors"
-              >
-                Triple-Double Impact
-              </button>
-              <button
-                onClick={() => {
-                  const formula = "FG_PCT * PTS";
-                  setDisplay(formula);
-                  onFormulaChange(formula);
-                }}
-                className="w-full text-left bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm py-2 px-3 rounded transition-colors"
-              >
-                Efficient Scoring
-              </button>
-              <button
-                onClick={() => {
-                  const formula = "(PTS + AST) / TOV";
-                  setDisplay(formula);
-                  onFormulaChange(formula);
-                }}
-                className="w-full text-left bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm py-2 px-3 rounded transition-colors"
-              >
-                Ball Security
-              </button>
-              <button
-                onClick={() => {
-                  const formula = "PTS / MIN";
-                  setDisplay(formula);
-                  onFormulaChange(formula);
-                }}
-                className="w-full text-left bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm py-2 px-3 rounded transition-colors"
-              >
-                Points Per Minute
-              </button>
-            </div>
-          </div>
+
         </div>
       </div>
     </div>
