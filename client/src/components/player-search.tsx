@@ -52,7 +52,7 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect }: Player
   const filteredPlayers = searchTerm.length >= 1
     ? players
       .filter((player: Player) => {
-        const name = player.name || player.playerName || player.PLAYER_NAME;
+        const name = player.name;
         return name && name.toLowerCase().includes(searchTerm.toLowerCase());
       }).slice(0, 10) // Show max 10 suggestions
     : [];

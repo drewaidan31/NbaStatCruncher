@@ -38,8 +38,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Fetch NBA players data from official NBA API
   app.get("/api/nba/players", async (req, res) => {
     try {
-      // Clear existing players to fetch fresh data for unified profiles
-      await storage.deleteAllPlayers();
+      // Check if we already have cached player data
+      const existingPlayers = await storage.getAllPlayers();
+      
+      if (existingPlayers.length > 0) {
+        console.log(`Using cached player data: ${existingPlayers.length} players`);
+        return res.json(existingPlayers);
+      }
 
       console.log(`Loading unified NBA player profiles from official NBA API`);
       
@@ -289,11 +294,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Refresh NBA data
+  // Refresh NBA data by clearing cache and forcing reload
   app.post("/api/nba/refresh", async (req, res) => {
     try {
       await storage.deleteAllPlayers();
-      res.json({ message: "Player data cleared. Next request will fetch fresh data." });
+      
+      // Immediately fetch fresh data
+      console.log(`Refreshing unified NBA player profiles from official NBA API`);
+      const python = spawn("python3", ["server/nba_data.py", "unified"]);
+      
+      let pythonData = "";
+      let pythonError = "";
+      
+      python.stdout.on("data", (data: any) => {
+        pythonData += data.toString();
+      });
+      
+      python.stderr.on("data", (data: any) => {
+        pythonError += data.toString();
+      });
+      
+      await new Promise((resolve, reject) => {
+        python.on("close", (code: number) => {
+          if (code === 0) {
+            resolve(code);
+          } else {
+            console.log("Python script error:", pythonError);
+            reject(new Error(`NBA API script failed: ${pythonError}`));
+          }
+        });
+      });
+
+      if (!pythonData.trim()) {
+        console.log("No data from Python script during refresh");
+        return res.status(500).json({ 
+          message: "Unable to refresh NBA player data" 
+        });
+      }
+
+      const allPlayers = JSON.parse(pythonData);
+      console.log("Refreshed NBA API Data:", allPlayers.length, "players");
+
+      // Store refreshed players in database
+      for (const playerData of allPlayers) {
+        try {
+          await storage.createPlayer(playerData);
+        } catch (error: any) {
+          if (error.code !== '23505') {
+            console.error(`Error inserting player ${playerData.name}:`, error);
+          }
+        }
+      }
+
+      const storedPlayers = await storage.getAllPlayers();
+      res.json({ 
+        message: `Successfully refreshed ${storedPlayers.length} players`,
+        players: storedPlayers
+      });
     } catch (error) {
       console.error("Error refreshing data:", error);
       res.status(500).json({ message: "Failed to refresh data" });
