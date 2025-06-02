@@ -43,6 +43,11 @@ export default function LeaderboardTable({
     queryKey: ["/api/nba/players"],
   });
 
+  // Debug log to see what data we're getting
+  console.log("Players data:", players);
+  console.log("Players error:", playersError);
+  console.log("Players loading:", playersLoading);
+
   // Calculate custom stats mutation
   const calculateMutation = useMutation({
     mutationFn: async (formula: string) => {
@@ -72,7 +77,7 @@ export default function LeaderboardTable({
 
   // Filter and sort results
   const filteredAndSortedResults = useMemo(() => {
-    if (!results) return [];
+    if (!results || !Array.isArray(results)) return [];
 
     let filtered = results.filter((result: PlayerResult) => {
       const player = result.player;
