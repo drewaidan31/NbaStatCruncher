@@ -181,8 +181,17 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
     try {
       let expression = formula;
       
+      // Handle +/- first since it has special characters
+      if (expression.includes('+/-')) {
+        expression = expression.replace(/\+\/-/g, statMappings['+/-'].toString());
+      }
+      
       // Replace stat abbreviations with actual values
       Object.entries(statMappings).forEach(([key, value]) => {
+        if (key === '+/-') {
+          // Skip +/- as we handled it above
+          return;
+        }
         if (key.includes('%')) {
           // Handle percentage stats with special regex
           const escapedKey = key.replace(/%/g, '\\%');
