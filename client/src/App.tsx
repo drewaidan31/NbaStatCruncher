@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import StatCalculator from "./components/stat-calculator";
 import SaveStatDialog from "./components/save-stat-dialog";
@@ -136,7 +136,7 @@ function MainApp() {
     if (players && players.length > 0) {
       setupFeaturedShowcase(players);
     }
-  }, [refreshCounter]);
+  }, [refreshCounter, players]);
 
   const calculateCustomStatForSeason = (seasonData: any, formula: string) => {
     const seasonStatMappings = {
@@ -177,7 +177,7 @@ function MainApp() {
     }
   };
 
-  const setupFeaturedShowcase = (playerData: any[]) => {
+  const setupFeaturedShowcase = useCallback((playerData: any[]) => {
     // Filter players with multiple seasons
     const playersWithMultipleSeasons = playerData.filter(p => p.seasons && p.seasons.length >= 3);
     
@@ -192,6 +192,8 @@ function MainApp() {
     
     const selectedPlayer = playersWithMultipleSeasons[playerIndex];
     const selectedStat = presetStats[statIndex];
+    
+    console.log('Refresh counter:', refreshCounter, 'Player Index:', playerIndex, 'Stat Index:', statIndex, 'Selected Stat:', selectedStat.name);
     
     // Calculate chart data for this player and stat
     const chartDataPoints = selectedPlayer.seasons
@@ -209,7 +211,7 @@ function MainApp() {
     setFeaturedPlayer(selectedPlayer);
     setFeaturedStat(selectedStat);
     setFeaturedChartData(chartDataPoints);
-  };
+  }, [refreshCounter]);
 
   const handleSeasonChange = (season: string) => {
     setSelectedSeason(season);
