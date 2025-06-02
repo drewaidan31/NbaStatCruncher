@@ -69,7 +69,7 @@ export default function FormulaInput({ formula, onFormulaChange }: FormulaInputP
               placeholder="e.g., (PTS + AST + REB) / TOV * PLUS_MINUS"
               value={formula}
               onChange={(e) => onFormulaChange(e.target.value)}
-              className={`w-full px-4 py-3 bg-slate-900 border text-slate-50 placeholder-slate-400 font-mono text-lg pr-24 ${
+              className={`w-full px-4 py-3 bg-slate-900 border text-slate-50 placeholder-slate-400 font-mono text-lg pr-24 focus:text-slate-50 ${
                 validationError 
                   ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
                   : isValid 

@@ -25,7 +25,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const response = await fetch("https://api-nba-v1.p.rapidapi.com/players/statistics", {
+      console.log("Fetching NBA data with API key:", rapidApiKey ? "API key present" : "API key missing");
+      
+      const response = await fetch("https://api-nba-v1.p.rapidapi.com/players/statistics?season=2024", {
         method: "GET",
         headers: {
           "X-RapidAPI-Key": rapidApiKey,
@@ -33,13 +35,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
+      console.log("NBA API Response status:", response.status);
+      
       if (!response.ok) {
+        const errorText = await response.text();
+        console.log("NBA API Error:", errorText);
         return res.status(500).json({ 
-          message: `Failed to fetch NBA data: ${response.status} ${response.statusText}` 
+          message: `Failed to fetch NBA data: ${response.status} ${response.statusText}. ${errorText}` 
         });
       }
 
       const data = await response.json();
+      console.log("NBA API Data received:", data ? "Data exists" : "No data", data?.response?.length || 0, "players");
       
       // Transform NBA API data to our schema
       const players = data.response?.slice(0, 100).map((playerData: any) => ({

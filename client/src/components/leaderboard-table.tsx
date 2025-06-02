@@ -47,10 +47,14 @@ export default function LeaderboardTable({
   const calculateMutation = useMutation({
     mutationFn: async (formula: string) => {
       const response = await apiRequest("POST", "/api/nba/calculate", { formula });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to calculate custom statistics");
+      }
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/nba/calculate"] });
+    onSuccess: (data) => {
+      queryClient.setQueryData(["/api/nba/calculate", formula], data);
     },
   });
 

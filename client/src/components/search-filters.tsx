@@ -40,7 +40,7 @@ export default function SearchFilters({
               placeholder="Search players..."
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-slate-900 border border-slate-600 text-slate-50 placeholder-slate-400 focus:border-orange-500 focus:ring-orange-500 min-w-64"
+              className="pl-10 pr-4 py-2 bg-slate-900 border border-slate-600 text-slate-50 placeholder-slate-400 focus:border-orange-500 focus:ring-orange-500 focus:text-slate-50 min-w-64"
             />
           </div>
           
