@@ -42,12 +42,26 @@ export default function LeaderboardTable({
   const { data: players, isLoading: playersLoading, error: playersError } = useQuery({
     queryKey: ["/api/nba/players"],
     queryFn: async () => {
-      const response = await fetch("/api/nba/players");
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      try {
+        const response = await fetch("/api/nba/players", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`Failed to fetch NBA data: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log("NBA players loaded:", data.length);
+        return data;
+      } catch (error) {
+        console.error("Error fetching NBA players:", error);
+        throw error;
       }
-      return response.json();
     },
+    retry: 3,
+    retryDelay: 1000,
   });
 
 
