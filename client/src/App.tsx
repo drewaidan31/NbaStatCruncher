@@ -367,10 +367,30 @@ function MainApp() {
                   
                   <div className="space-y-3">
                     <button
-                      onClick={() => {
+                      onClick={async () => {
                         setFormula(featuredStat.formula);
                         setCustomStatName(featuredStat.name);
-                        calculateStats();
+                        
+                        // Wait for state to update, then calculate
+                        setTimeout(async () => {
+                          try {
+                            const response = await fetch("/api/nba/calculate", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ formula: featuredStat.formula })
+                            });
+                            
+                            if (response.ok) {
+                              const data = await response.json();
+                              setResults(data);
+                            } else {
+                              setError("Failed to calculate custom statistics");
+                            }
+                          } catch (err) {
+                            console.error("Error calculating stats:", err);
+                            setError("Error calculating statistics");
+                          }
+                        }, 100);
                       }}
                       className="w-full bg-slate-600 hover:bg-slate-500 rounded-lg p-3 transition-colors cursor-pointer text-left"
                     >
