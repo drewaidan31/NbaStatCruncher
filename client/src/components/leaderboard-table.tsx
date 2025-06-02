@@ -38,9 +38,16 @@ export default function LeaderboardTable({
 
   const queryClient = useQueryClient();
 
-  // Fetch player data
+  // Fetch player data with explicit fetch
   const { data: players, isLoading: playersLoading, error: playersError } = useQuery({
     queryKey: ["/api/nba/players"],
+    queryFn: async () => {
+      const response = await fetch("/api/nba/players");
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    },
   });
 
 
