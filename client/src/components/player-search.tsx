@@ -18,6 +18,8 @@ interface Player {
   threePointPercentage: number;
   freeThrowPercentage: number;
   plusMinus: number;
+  currentSeason?: string;
+  availableSeasons?: string[];
 }
 
 interface PlayerSearchProps {
@@ -27,15 +29,13 @@ interface PlayerSearchProps {
 
 export default function PlayerSearch({ onPlayerSelect, onCompareSelect }: PlayerSearchProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedSeason, setSelectedSeason] = useState("2024-25");
   const [compareMode, setCompareMode] = useState(false);
   const [selectedPlayer1, setSelectedPlayer1] = useState<Player | null>(null);
-  const [selectedSeason1, setSelectedSeason1] = useState("2024-25");
 
   const { data: players = [], isLoading, error } = useQuery({
-    queryKey: ["/api/nba/players", selectedSeason],
+    queryKey: ["/api/nba/players"],
     queryFn: async () => {
-      const response = await fetch(`/api/nba/players?season=${selectedSeason}`);
+      const response = await fetch("/api/nba/players");
       if (!response.ok) {
         throw new Error(`Failed to fetch players: ${response.status}`);
       }
@@ -61,19 +61,18 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect }: Player
     if (compareMode) {
       if (!selectedPlayer1) {
         setSelectedPlayer1(player);
-        setSelectedSeason1(selectedSeason);
       } else {
         onCompareSelect({
           player1: selectedPlayer1,
-          season1: selectedSeason1,
+          season1: selectedPlayer1.currentSeason || "2024-25",
           player2: player,
-          season2: selectedSeason
+          season2: player.currentSeason || "2024-25"
         });
         setCompareMode(false);
         setSelectedPlayer1(null);
       }
     } else {
-      onPlayerSelect(player, selectedSeason);
+      onPlayerSelect(player, player.currentSeason || "2024-25");
     }
   };
 
@@ -118,7 +117,7 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect }: Player
         <div className="bg-slate-700 rounded-lg p-3 mb-4 border border-slate-600">
           <div className="text-sm text-slate-300">Selected for comparison:</div>
           <div className="text-white font-medium">
-            {selectedPlayer1.name} ({selectedSeason1}) - {selectedPlayer1.team}
+            {selectedPlayer1.name} ({selectedPlayer1.currentSeason || "2024-25"}) - {selectedPlayer1.team}
           </div>
           <div className="text-xs text-slate-400">Now select a second player to compare</div>
         </div>
