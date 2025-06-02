@@ -63,12 +63,34 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
 
   // Update current player data when season changes
   useEffect(() => {
-    if (seasonPlayerData) {
-      setCurrentPlayerData(seasonPlayerData as Player);
+    if (selectedSeason && player.seasons) {
+      // Find the season data from the player's seasons array
+      const seasonData = player.seasons.find(s => s.season === selectedSeason);
+      if (seasonData) {
+        // Create a player object with the season-specific data
+        const updatedPlayerData = {
+          ...player,
+          team: seasonData.team,
+          position: seasonData.position,
+          gamesPlayed: seasonData.gamesPlayed,
+          minutesPerGame: seasonData.minutesPerGame,
+          points: seasonData.points,
+          assists: seasonData.assists,
+          rebounds: seasonData.rebounds,
+          steals: seasonData.steals,
+          blocks: seasonData.blocks,
+          turnovers: seasonData.turnovers,
+          fieldGoalPercentage: seasonData.fieldGoalPercentage,
+          threePointPercentage: seasonData.threePointPercentage,
+          freeThrowPercentage: seasonData.freeThrowPercentage,
+          plusMinus: seasonData.plusMinus
+        };
+        setCurrentPlayerData(updatedPlayerData);
+      }
     } else if (selectedSeason === player.currentSeason) {
       setCurrentPlayerData(player);
     }
-  }, [seasonPlayerData, selectedSeason, player]);
+  }, [selectedSeason, player]);
 
   const statMappings = {
     'PPG': currentPlayerData.points,
@@ -82,7 +104,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
     'FT%': currentPlayerData.freeThrowPercentage,
     'GP': currentPlayerData.gamesPlayed,
     '+/-': currentPlayerData.plusMinus,
-    'MIN': 32.5 // Default minutes per game
+    'MIN': currentPlayerData.minutesPerGame || 32.5
   };
 
   const calculateCustomStat = () => {
