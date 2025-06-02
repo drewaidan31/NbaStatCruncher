@@ -33,7 +33,7 @@ export default function StatCalculator({ onFormulaChange, onCalculate }: StatCal
     { symbol: ")", value: ")" }
   ];
 
-  const numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0"];
+  const numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "."];
 
   const handleClick = (value: string) => {
     const newDisplay = display + value;
