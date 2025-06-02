@@ -1,12 +1,28 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { formulaCalculationSchema, NBA_STAT_MAPPINGS, type Player } from "@shared/schema";
+import { formulaCalculationSchema, saveCustomStatSchema, NBA_STAT_MAPPINGS, type Player } from "@shared/schema";
 import { evaluate } from "mathjs";
 import { spawn } from "child_process";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
+  // Setup authentication
+  await setupAuth(app);
+
+  // Auth routes
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
   // Clear players cache
   app.post("/api/nba/players/clear", async (req, res) => {
     try {
@@ -172,6 +188,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         message: "Failed to calculate custom statistics. Please verify your formula and try again." 
       });
+    }
+  });
+
+  // Save custom stat with name (requires authentication)
+  app.post("/api/custom-stats/save", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const validatedData = saveCustomStatSchema.parse({
+        ...req.body,
+        userId
+      });
+      
+      const savedStat = await storage.saveCustomStat(validatedData);
+      res.status(201).json(savedStat);
+    } catch (error) {
+      console.error("Error saving custom stat:", error);
+      res.status(400).json({ message: "Failed to save custom stat" });
+    }
+  });
+
+  // Get user's saved custom stats (requires authentication)
+  app.get("/api/custom-stats/my", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const userStats = await storage.getUserCustomStats(userId);
+      res.json(userStats);
+    } catch (error) {
+      console.error("Error fetching user custom stats:", error);
+      res.status(500).json({ message: "Failed to fetch saved stats" });
     }
   });
 

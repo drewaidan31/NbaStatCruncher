@@ -34,64 +34,87 @@ export interface IStorage {
   getUserCustomStats(userId: string): Promise<CustomStat[]>;
 }
 
-export class MemStorage implements IStorage {
-  private players: Map<number, Player>;
-  private customStatsList: Map<number, CustomStat>;
-  private currentPlayerId: number;
-  private currentCustomStatId: number;
-
-  constructor() {
-    this.players = new Map();
-    this.customStatsList = new Map();
-    this.currentPlayerId = 1;
-    this.currentCustomStatId = 1;
-  }
-
+export class DatabaseStorage implements IStorage {
+  // Player operations
   async getAllPlayers(): Promise<Player[]> {
-    return Array.from(this.players.values());
+    return await db.select().from(nbaPlayers);
   }
 
   async getPlayerById(id: number): Promise<Player | undefined> {
-    return this.players.get(id);
+    const [player] = await db.select().from(nbaPlayers).where(eq(nbaPlayers.id, id));
+    return player || undefined;
   }
 
   async createPlayer(insertPlayer: InsertPlayer): Promise<Player> {
-    const id = this.currentPlayerId++;
-    const player: Player = { ...insertPlayer, id };
-    this.players.set(id, player);
+    const [player] = await db
+      .insert(nbaPlayers)
+      .values(insertPlayer)
+      .returning();
     return player;
   }
 
   async updatePlayer(id: number, playerUpdate: Partial<InsertPlayer>): Promise<Player | undefined> {
-    const existingPlayer = this.players.get(id);
-    if (!existingPlayer) {
-      return undefined;
-    }
-    
-    const updatedPlayer: Player = { ...existingPlayer, ...playerUpdate };
-    this.players.set(id, updatedPlayer);
-    return updatedPlayer;
+    const [player] = await db
+      .update(nbaPlayers)
+      .set(playerUpdate)
+      .where(eq(nbaPlayers.id, id))
+      .returning();
+    return player || undefined;
   }
 
   async deleteAllPlayers(): Promise<void> {
-    this.players.clear();
-    this.currentPlayerId = 1;
+    await db.delete(nbaPlayers);
   }
 
+  // Custom stat operations
   async getCustomStats(): Promise<CustomStat[]> {
-    return Array.from(this.customStatsList.values());
+    return await db.select().from(customStats);
   }
 
   async createCustomStat(insertCustomStat: InsertCustomStat): Promise<CustomStat> {
-    const id = this.currentCustomStatId++;
-    const customStat: CustomStat = { 
-      ...insertCustomStat, 
-      id,
-      createdAt: new Date().toISOString()
-    };
-    this.customStatsList.set(id, customStat);
+    const [customStat] = await db
+      .insert(customStats)
+      .values(insertCustomStat)
+      .returning();
     return customStat;
+  }
+
+  // User operations for authentication
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
+  }
+
+  // Saved custom stats operations
+  async saveCustomStat(stat: SaveCustomStat): Promise<CustomStat> {
+    const [savedStat] = await db
+      .insert(customStats)
+      .values(stat)
+      .returning();
+    return savedStat;
+  }
+
+  async getUserCustomStats(userId: string): Promise<CustomStat[]> {
+    return await db
+      .select()
+      .from(customStats)
+      .where(eq(customStats.userId, userId));
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
