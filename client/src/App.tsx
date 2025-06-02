@@ -131,12 +131,19 @@ function MainApp() {
     fetchPlayers();
   }, [selectedSeason]);
 
-  // Update featured showcase when refresh counter changes
+  // Update featured showcase when refresh counter changes or on initial load
   useEffect(() => {
     if (players && players.length > 0) {
       setupFeaturedShowcase(players);
     }
   }, [refreshCounter, players]);
+
+  // Also randomize on component mount to ensure different selection each visit
+  useEffect(() => {
+    if (players && players.length > 0) {
+      setupFeaturedShowcase(players);
+    }
+  }, []);
 
   const calculateCustomStatForSeason = (seasonData: any, formula: string) => {
     const seasonStatMappings = {
@@ -183,16 +190,10 @@ function MainApp() {
     
     if (playersWithMultipleSeasons.length === 0) return;
     
-    // Get a different player and stat each time based on current time + refresh counter
-    const now = new Date();
-    const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
-    
-    // Use separate seeds for player and stat to ensure both change
-    const playerSeed = (dayOfYear + refreshCounter) % playersWithMultipleSeasons.length;
-    const statSeed = (dayOfYear * 3 + refreshCounter * 2) % presetStats.length;
-    
-    const playerIndex = playerSeed;
-    const statIndex = statSeed;
+    // Generate truly random selection each time the function is called
+    // This ensures different players/stats on each website visit or refresh
+    const playerIndex = Math.floor(Math.random() * playersWithMultipleSeasons.length);
+    const statIndex = Math.floor(Math.random() * presetStats.length);
     
     const selectedPlayer = playersWithMultipleSeasons[playerIndex];
     const selectedStat = presetStats[statIndex];
