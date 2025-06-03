@@ -370,10 +370,6 @@ function MainApp() {
       );
     }
 
-    if (viewMode === 'usage-rate') {
-      return <UsageRateLeaderboard season={selectedSeason === 'all-time' ? '2024-25' : selectedSeason} />;
-    }
-
     // Default leaderboard view
     return (
       <div className="space-y-6">
@@ -783,17 +779,6 @@ function MainApp() {
               >
                 <Search className="w-4 h-4" />
                 Player Search
-              </button>
-              <button
-                onClick={() => setViewMode('usage-rate')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  viewMode === 'usage-rate'
-                    ? "bg-orange-600 text-white"
-                    : "bg-slate-700 text-slate-300 hover:bg-slate-600"
-                }`}
-              >
-                <TrendingUp className="w-4 h-4" />
-                Usage Rate
               </button>
             </div>
           </div>
