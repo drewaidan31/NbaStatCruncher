@@ -668,7 +668,9 @@ function MainApp() {
 
         {results.length > 0 && (
           <div id="leaderboard-results" className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-            <h3 className="text-lg font-semibold mb-4">Custom Statistics Leaderboard</h3>
+            <h3 className="text-lg font-semibold mb-4">
+              {customStatName ? `${customStatName} Leaderboard` : "Custom Statistics Leaderboard"}
+            </h3>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -676,7 +678,7 @@ function MainApp() {
                     <th className="text-left py-2">Rank</th>
                     <th className="text-left py-2">Player</th>
                     <th className="text-left py-2">Team</th>
-                    <th className="text-left py-2">Custom Stat</th>
+                    <th className="text-left py-2">{customStatName || "Custom Stat"}</th>
                     <th className="text-left py-2">Season</th>
                   </tr>
                 </thead>
