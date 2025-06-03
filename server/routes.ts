@@ -373,6 +373,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 continue;
               }
               
+              // Check if formula uses percentage stats and apply minimum games filter
+              const formulaUpper = formula.toUpperCase();
+              const percentageStats = ['W_PCT', 'FG_PCT', 'FG%', '3P_PCT', '3P%', 'FT_PCT', 'FT%'];
+              const usesPercentageStats = percentageStats.some(stat => formulaUpper.includes(stat));
+              
+              // Skip players with fewer than 10 games if formula uses percentage stats
+              if (usesPercentageStats && targetSeason.gamesPlayed < 10) {
+                continue;
+              }
+              
               // Calculate custom stat using the specific season's data
               let evaluationFormula = formula.toUpperCase();
               
@@ -401,6 +411,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // For all-time, include ALL seasons for each player
             if (player.seasons && Array.isArray(player.seasons)) {
               for (const seasonData of player.seasons) {
+                // Check if formula uses percentage stats and apply minimum games filter
+                const formulaUpper = formula.toUpperCase();
+                const percentageStats = ['W_PCT', 'FG_PCT', 'FG%', '3P_PCT', '3P%', 'FT_PCT', 'FT%'];
+                const usesPercentageStats = percentageStats.some(stat => formulaUpper.includes(stat));
+                
+                // Skip seasons with fewer than 10 games if formula uses percentage stats
+                if (usesPercentageStats && seasonData.gamesPlayed < 10) {
+                  continue;
+                }
+                
                 let evaluationFormula = formula.toUpperCase();
                 
                 // Replace NBA stat abbreviations with season values
@@ -431,6 +451,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
             } else {
               // Fallback to career averages if no seasons data
+              // Check if formula uses percentage stats and apply minimum games filter
+              const formulaUpper = formula.toUpperCase();
+              const percentageStats = ['W_PCT', 'FG_PCT', 'FG%', '3P_PCT', '3P%', 'FT_PCT', 'FT%'];
+              const usesPercentageStats = percentageStats.some(stat => formulaUpper.includes(stat));
+              
+              // Skip players with fewer than 10 career games if formula uses percentage stats
+              if (usesPercentageStats && player.gamesPlayed < 10) {
+                continue;
+              }
+              
               let evaluationFormula = formula.toUpperCase();
               
               for (const [abbrev, field] of Object.entries(NBA_STAT_MAPPINGS)) {
