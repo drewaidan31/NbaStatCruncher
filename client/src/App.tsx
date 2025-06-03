@@ -693,7 +693,12 @@ function MainApp() {
                         </button>
                       </td>
                       <td className="py-2">{result.player.team}</td>
-                      <td className="py-2">{result.customStat.toFixed(2)}</td>
+                      <td className="py-2">
+                        {formula.includes("eFG%") || formula.includes("TS%") ? 
+                          `${(result.customStat * 100).toFixed(3)}%` : 
+                          result.customStat.toFixed(2)
+                        }
+                      </td>
                       <td className="py-2 text-orange-400 font-medium">{result.bestSeason}</td>
                     </tr>
                   ))}
