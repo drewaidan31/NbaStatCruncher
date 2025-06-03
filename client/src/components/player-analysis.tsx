@@ -375,29 +375,29 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+      <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border border-slate-300 dark:border-slate-700">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-4">
             <button
               onClick={onBack}
-              className="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+              className="p-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg transition-colors"
             >
-              <ArrowLeft className="w-5 h-5 text-white" />
+              <ArrowLeft className="w-5 h-5 text-slate-900 dark:text-white" />
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-white">{player.name}</h1>
-              <p className="text-slate-300">{currentPlayerData.team} • {currentPlayerData.position} • {selectedSeason}</p>
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{player.name}</h1>
+              <p className="text-slate-600 dark:text-slate-300">{currentPlayerData.team} • {currentPlayerData.position} • {selectedSeason}</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
             {/* Season Selector */}
             {player.availableSeasons && player.availableSeasons.length > 1 && (
               <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-slate-400" />
+                <Calendar className="w-4 h-4 text-slate-600 dark:text-slate-400" />
                 <select
                   value={selectedSeason}
                   onChange={(e) => setSelectedSeason(e.target.value)}
-                  className="bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                   disabled={isLoadingSeason}
                 >
                   {player.availableSeasons.map((season) => (
@@ -418,7 +418,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               activeTab === 'overview'
                 ? 'bg-orange-500 text-white'
-                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
             }`}
           >
             <div className="flex items-center gap-2">
@@ -431,7 +431,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               activeTab === 'shooting'
                 ? 'bg-orange-500 text-white'
-                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
             }`}
           >
             <div className="flex items-center gap-2">
@@ -444,7 +444,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               activeTab === 'calculator'
                 ? 'bg-orange-500 text-white'
-                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
             }`}
           >
             <div className="flex items-center gap-2">
