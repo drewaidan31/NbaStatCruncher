@@ -8,6 +8,7 @@ import PlayerComparison from "./components/player-comparison";
 import FormulaExamples from "./components/formula-examples";
 import UsageRateLeaderboard from "./components/usage-rate-leaderboard";
 import UserProfile from "./components/user-profile";
+import ThemeToggle from "./components/theme-toggle";
 
 import { BarChart3, Search, Calculator, TrendingUp, Sparkles, RefreshCw } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -744,32 +745,33 @@ function MainApp() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white">
+    <div className="min-h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition-colors">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-start mb-8">
           <div className="text-center flex-1">
             <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
               NBA Custom Stats Calculator
             </h1>
-            <p className="text-xl text-slate-300">
+            <p className="text-xl text-slate-600 dark:text-slate-300">
               Create custom basketball statistics with authentic NBA player data
             </p>
           </div>
-          <div className="ml-8">
+          <div className="ml-8 flex items-center gap-3">
+            <ThemeToggle />
             <UserProfile />
           </div>
         </div>
 
         {/* Navigation Bar */}
         <div className="flex justify-center mb-6">
-          <div className="bg-slate-800 rounded-lg p-2 border border-slate-700">
+          <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-2 border border-slate-300 dark:border-slate-700">
             <div className="flex gap-2">
               <button
                 onClick={() => setViewMode('leaderboard')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   viewMode === 'leaderboard'
                     ? "bg-orange-600 text-white"
-                    : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                    : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600"
                 }`}
               >
                 <BarChart3 className="w-4 h-4" />

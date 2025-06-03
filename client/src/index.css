@@ -3,6 +3,33 @@
 @tailwind utilities;
 
 :root {
+  /* Light mode colors */
+  --background: 0 0% 100%; /* white */
+  --foreground: 222 84% 5%; /* slate-950 */
+  --muted: 210 40% 96%; /* slate-100 */
+  --muted-foreground: 215 16% 47%; /* slate-500 */
+  --popover: 0 0% 100%; /* white */
+  --popover-foreground: 222 84% 5%; /* slate-950 */
+  --card: 0 0% 100%; /* white */
+  --card-foreground: 222 84% 5%; /* slate-950 */
+  --border: 214 32% 91%; /* slate-200 */
+  --input: 214 32% 91%; /* slate-200 */
+  --primary: 21 90% 48%; /* #ea580c - orange-600 */
+  --primary-foreground: 0 0% 100%; /* white */
+  --secondary: 210 40% 96%; /* slate-100 */
+  --secondary-foreground: 222 84% 5%; /* slate-950 */
+  --accent: 210 40% 96%; /* slate-100 */
+  --accent-foreground: 222 84% 5%; /* slate-950 */
+  --destructive: 0 84% 60%; /* #ef4444 - red-500 */
+  --destructive-foreground: 0 0% 100%; /* white */
+  --ring: 21 90% 48%; /* #ea580c - orange-600 */
+  --radius: 0.75rem;
+  --nba-orange: 21 90% 48%; /* #ea580c */
+  --nba-blue: 213 94% 68%; /* #3b82f6 */
+}
+
+.dark {
+  /* Dark mode colors */
   --background: 210 11% 15%; /* #1e293b - slate-800 */
   --foreground: 210 6% 93%; /* #f1f5f9 - slate-50 */
   --muted: 215 14% 34%; /* #475569 - slate-600 */
