@@ -48,6 +48,11 @@ const EXAMPLE_FORMULAS = [
     description: "Well-rounded production with turnover penalty"
   },
   {
+    name: "Usage Rate (USG%)",
+    formula: "100 * (0.33 * AST + FGA + 0.44 * FTA + TOV) / (MIN * 2.4)",
+    description: "Usage rate - percentage of team possessions used by player (using minutes played × 2.4 as possession estimate)"
+  },
+  {
     name: "Winning Impact",
     formula: "PTS * W_PCT + AST * W_PCT",
     description: "Offensive production weighted by team success when player plays"
