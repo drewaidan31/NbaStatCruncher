@@ -149,9 +149,13 @@ def get_historical_legends():
                             'blocks': float(row['BLK']) / games_played,
                             'turnovers': float(row['TOV']) / games_played,
                             'fieldGoalPercentage': float(row['FG_PCT']) if row['FG_PCT'] else 0.0,
+                            'fieldGoalAttempts': float(row['FGA']) / games_played if row['FGA'] else 0.0,
                             'threePointPercentage': float(row['FG3_PCT']) if row['FG3_PCT'] else 0.0,
+                            'threePointAttempts': float(row['FG3A']) / games_played if row['FG3A'] else 0.0,
                             'freeThrowPercentage': float(row['FT_PCT']) if row['FT_PCT'] else 0.0,
-                            'plusMinus': float(row['PLUS_MINUS']) / games_played if row['PLUS_MINUS'] else 0.0
+                            'freeThrowAttempts': float(row['FTA']) / games_played if row['FTA'] else 0.0,
+                            'plusMinus': float(row['PLUS_MINUS']) / games_played if row['PLUS_MINUS'] else 0.0,
+                            'winPercentage': float(row['W_PCT']) if row['W_PCT'] else 0.0
                         }
                         
                         if player_name not in legends_with_careers:
@@ -230,9 +234,13 @@ def get_all_players_with_seasons():
                         'blocks': float(row['BLK']) / games_played,
                         'turnovers': float(row['TOV']) / games_played,
                         'fieldGoalPercentage': float(row['FG_PCT']) if row['FG_PCT'] else 0.0,
+                        'fieldGoalAttempts': float(row['FGA']) / games_played if row['FGA'] else 0.0,
                         'threePointPercentage': float(row['FG3_PCT']) if row['FG3_PCT'] else 0.0,
+                        'threePointAttempts': float(row['FG3A']) / games_played if row['FG3A'] else 0.0,
                         'freeThrowPercentage': float(row['FT_PCT']) if row['FT_PCT'] else 0.0,
-                        'plusMinus': float(row['PLUS_MINUS']) / games_played if row['PLUS_MINUS'] else 0.0
+                        'freeThrowAttempts': float(row['FTA']) / games_played if row['FTA'] else 0.0,
+                        'plusMinus': float(row['PLUS_MINUS']) / games_played if row['PLUS_MINUS'] else 0.0,
+                        'winPercentage': float(row['W_PCT']) if row['W_PCT'] else 0.0
                     }
                     
                     if player_id not in all_players:
