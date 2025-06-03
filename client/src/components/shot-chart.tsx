@@ -220,7 +220,7 @@ export default function ShotChart({ playerId, playerName, season = "2024-25" }: 
                     <span>{stats.makes}/{stats.attempts}</span>
                     <span>{stats.attempts} attempts</span>
                   </div>
-                  <div className="w-full bg-slate-600 rounded-full h-2 mt-2">
+                  <div className="w-full bg-slate-300 dark:bg-slate-600 rounded-full h-2 mt-2">
                     <div
                       className="h-2 rounded-full"
                       style={{ 
