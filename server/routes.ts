@@ -7,6 +7,7 @@ import { spawn } from "child_process";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { generateStatName } from "./openai-service";
 import { getPlayerShotChart } from "./shot-chart-service";
+import { getTeamPossessionData } from "./team-stats-service";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
