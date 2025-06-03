@@ -618,6 +618,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get team possession data and advanced analytics
+  app.get("/api/nba/teams/possessions", async (req, res) => {
+    try {
+      const season = req.query.season as string || '2024-25';
+      
+      const teamData = await getTeamPossessionData(season);
+      if (!teamData) {
+        return res.status(500).json({ 
+          message: "Failed to fetch team possession data. Please check the NBA API connection." 
+        });
+      }
+      
+      res.json(teamData);
+    } catch (error) {
+      console.error("Error fetching team possession data:", error);
+      res.status(500).json({ message: "Failed to fetch team possession data" });
+    }
+  });
+
+  // Get specific team's possession data
+  app.get("/api/nba/teams/:teamId/possessions", async (req, res) => {
+    try {
+      const { teamId } = req.params;
+      const season = req.query.season as string || '2024-25';
+      
+      const teamData = await getTeamPossessionData(season);
+      if (!teamData) {
+        return res.status(500).json({ 
+          message: "Failed to fetch team possession data" 
+        });
+      }
+      
+      const specificTeam = teamData.teams.find(team => team.teamId === parseInt(teamId));
+      if (!specificTeam) {
+        return res.status(404).json({ message: "Team not found" });
+      }
+      
+      res.json({
+        team: specificTeam,
+        leagueAverage: teamData.leagueAverage
+      });
+    } catch (error) {
+      console.error("Error fetching specific team possession data:", error);
+      res.status(500).json({ message: "Failed to fetch team possession data" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
