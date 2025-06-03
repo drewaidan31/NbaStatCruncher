@@ -47,6 +47,51 @@ html:not(.dark) select {
   border-color: #4b5563 !important;
 }
 
+/* Force input elements to respect light/dark mode styling */
+html:not(.dark) input {
+  background-color: white !important;
+  color: #0f172a !important;
+  border-color: #d1d5db !important;
+}
+
+.dark input {
+  background-color: #374151 !important;
+  color: white !important;
+  border-color: #4b5563 !important;
+}
+
+/* Fix Recharts tooltip styling for light/dark mode */
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  background-color: white !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+.dark .recharts-tooltip-wrapper .recharts-default-tooltip {
+  background-color: #374151 !important;
+  border: 1px solid #4b5563 !important;
+  color: white !important;
+}
+
+.recharts-tooltip-wrapper .recharts-default-tooltip .recharts-tooltip-label {
+  color: #0f172a !important;
+  font-weight: 600 !important;
+}
+
+.dark .recharts-tooltip-wrapper .recharts-default-tooltip .recharts-tooltip-label {
+  color: white !important;
+}
+
+.recharts-tooltip-wrapper .recharts-default-tooltip .recharts-tooltip-item {
+  color: #ea580c !important;
+  font-weight: 500 !important;
+}
+
+.dark .recharts-tooltip-wrapper .recharts-default-tooltip .recharts-tooltip-item {
+  color: #fb923c !important;
+}
+
 .dark {
   /* Dark mode colors */
   --background: 210 11% 15%; /* #1e293b - slate-800 */
