@@ -377,17 +377,17 @@ function MainApp() {
       <div className="space-y-6">
         {/* Featured Player Showcase */}
         {featuredPlayer && featuredStat && featuredChartData.length > 0 && (
-          <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl border border-slate-700 p-6">
+          <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-xl border border-slate-300 dark:border-slate-700 p-6">
             <div className="flex items-center gap-3 mb-4">
               <Sparkles className="w-6 h-6 text-orange-400" />
-              <h2 className="text-xl font-bold text-white">Featured Analysis</h2>
-              <span className="text-sm text-slate-400">• Changes daily</span>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Featured Analysis</h2>
+              <span className="text-sm text-slate-600 dark:text-slate-400">• Changes daily</span>
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Player Info and Stats */}
               <div className="space-y-4">
-                <div className="bg-slate-700 rounded-lg p-5">
+                <div className="bg-slate-200 dark:bg-slate-700 rounded-lg p-5">
                   <div className="flex items-center gap-4 mb-4">
                     <div className="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
                       {featuredPlayer.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2)}
@@ -395,11 +395,11 @@ function MainApp() {
                     <div>
                       <button
                         onClick={() => handlePlayerSelect(featuredPlayer, featuredPlayer.currentSeason || '2024-25')}
-                        className="text-xl font-bold text-white hover:text-orange-400 transition-colors cursor-pointer text-left"
+                        className="text-xl font-bold text-slate-900 dark:text-white hover:text-orange-400 transition-colors cursor-pointer text-left"
                       >
                         {featuredPlayer.name} →
                       </button>
-                      <p className="text-slate-300">{featuredPlayer.position} • Career Spanning {featuredChartData.length} Seasons</p>
+                      <p className="text-slate-600 dark:text-slate-300">{featuredPlayer.position} • Career Spanning {featuredChartData.length} Seasons</p>
                     </div>
                   </div>
                   
@@ -441,7 +441,7 @@ function MainApp() {
                           }
                         }, 100);
                       }}
-                      className="w-full bg-slate-600 hover:bg-slate-500 rounded-lg p-3 transition-colors cursor-pointer text-left"
+                      className="w-full bg-slate-300 dark:bg-slate-600 hover:bg-slate-400 dark:hover:bg-slate-500 rounded-lg p-3 transition-colors cursor-pointer text-left"
                     >
                       <div className="text-orange-400 font-semibold mb-1">{featuredStat.name} →</div>
                       <div className="text-slate-300 text-sm">{featuredStat.description}</div>
@@ -795,15 +795,15 @@ function MainApp() {
         {/* Season Selector - Only show for leaderboard view */}
         {viewMode === 'leaderboard' && (
           <div className="flex justify-center mb-6">
-            <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
-              <label htmlFor="season-select" className="block text-sm font-medium text-slate-300 mb-2">
+            <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-300 dark:border-slate-700">
+              <label htmlFor="season-select" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 Select NBA Season:
               </label>
               <select
                 id="season-select"
                 value={selectedSeason}
                 onChange={(e) => handleSeasonChange(e.target.value)}
-                className="bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
               >
                 <option value="all-time">All-Time Leaders (1996-2025)</option>
                 <option value="2024-25">2024-25 Season (Current)</option>
