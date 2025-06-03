@@ -47,9 +47,9 @@ def get_unique_historical_legends():
             
             df = player_stats.get_data_frames()[0]
             
-            # Filter for high-impact players
-            df = df[(df['GP'] >= 20) & (df['PTS'] >= 8)]
-            df = df.sort_values('PTS', ascending=False).head(10)  # Top 10 per season
+            # Filter for meaningful contributors
+            df = df[(df['GP'] >= 15) & (df['PTS'] >= 6)]
+            df = df.sort_values('PTS', ascending=False).head(15)  # Top 15 per season for better selection
             
             for _, row in df.iterrows():
                 player_name = row['PLAYER_NAME']
