@@ -21,6 +21,7 @@ export default function StatCalculator({ onFormulaChange, onCalculate }: StatCal
     { name: "3P%", value: "THREE_PCT" },
     { name: "3PA", value: "3PA" },
     { name: "FT%", value: "FT_PCT" },
+    { name: "FTA", value: "FTA" },
     { name: "+/-", value: "PLUS_MINUS" },
     { name: "MPG", value: "MIN" },
     { name: "GP", value: "GP" }

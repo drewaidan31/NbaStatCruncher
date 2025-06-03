@@ -23,6 +23,7 @@ interface Player {
   threePointPercentage: number;
   threePointAttempts?: number;
   freeThrowPercentage: number;
+  freeThrowAttempts?: number;
   plusMinus: number;
   currentSeason?: string;
   seasons?: Array<{
@@ -42,6 +43,7 @@ interface Player {
     threePointPercentage: number;
     threePointAttempts?: number;
     freeThrowPercentage: number;
+    freeThrowAttempts?: number;
     plusMinus: number;
   }>;
   availableSeasons?: string[];
