@@ -1,8 +1,10 @@
 import { useAuth } from "@/hooks/useAuth";
-import { User, LogOut, Settings } from "lucide-react";
+import { User as UserIcon, LogOut } from "lucide-react";
+import type { User } from "@shared/schema";
 
 export default function UserProfile() {
   const { user, isAuthenticated, isLoading } = useAuth();
+  const typedUser = user as User | null;
 
   if (isLoading) {
     return (
@@ -19,7 +21,7 @@ export default function UserProfile() {
         onClick={() => window.location.href = '/api/login'}
         className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors"
       >
-        <User className="w-4 h-4" />
+        <UserIcon className="w-4 h-4" />
         Sign In
       </button>
     );
@@ -28,19 +30,19 @@ export default function UserProfile() {
   return (
     <div className="flex items-center gap-3">
       <div className="flex items-center gap-2 px-3 py-2 bg-slate-700 rounded-lg">
-        {user?.profileImageUrl ? (
+        {typedUser?.profileImageUrl ? (
           <img 
-            src={user.profileImageUrl} 
+            src={typedUser.profileImageUrl} 
             alt="Profile" 
             className="w-6 h-6 rounded-full object-cover"
           />
         ) : (
           <div className="w-6 h-6 bg-orange-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-            {user?.firstName?.[0] || user?.email?.[0] || 'U'}
+            {typedUser?.firstName?.[0] || typedUser?.email?.[0] || 'U'}
           </div>
         )}
         <span className="text-white text-sm">
-          {user?.firstName || user?.email?.split('@')[0] || 'User'}
+          {typedUser?.firstName || typedUser?.email?.split('@')[0] || 'User'}
         </span>
       </div>
       
