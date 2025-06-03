@@ -831,7 +831,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
           )}
 
           <div className="bg-slate-700 rounded-lg p-4">
-            <div className="text-sm text-slate-400 mb-3 font-medium">Available Player Stats:</div>
+            <div className="text-sm text-slate-400 mb-3 font-medium">Available Player Stats (Per Game):</div>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
               {Object.entries(statMappings).map(([key, value]) => (
                 <div key={key} className="bg-slate-600 rounded-lg p-3 text-center">
