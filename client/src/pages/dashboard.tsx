@@ -75,6 +75,8 @@ export default function Dashboard() {
           </div>
         </div>
         
+        <FormulaExamples onFormulaSelect={setFormula} />
+        
         <LeaderboardTable
           formula={formula}
           searchTerm={searchTerm}
@@ -82,8 +84,6 @@ export default function Dashboard() {
           selectedPosition={selectedPosition}
           selectedSeason={selectedSeason}
         />
-        
-        <FormulaExamples onFormulaSelect={setFormula} />
       </main>
       
       <Footer />
