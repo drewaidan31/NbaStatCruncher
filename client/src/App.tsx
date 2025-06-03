@@ -443,24 +443,24 @@ function MainApp() {
                       }}
                       className="w-full bg-slate-300 dark:bg-slate-600 hover:bg-slate-400 dark:hover:bg-slate-500 rounded-lg p-3 transition-colors cursor-pointer text-left"
                     >
-                      <div className="text-orange-400 font-semibold mb-1">{featuredStat.name} →</div>
-                      <div className="text-slate-300 text-sm">{featuredStat.description}</div>
-                      <div className="text-xs text-slate-400 mt-2 font-mono">{featuredStat.formula}</div>
-                      <div className="text-xs text-orange-300 mt-2">Click to see all-time leaders</div>
+                      <div className="text-orange-600 dark:text-orange-400 font-semibold mb-1">{featuredStat.name} →</div>
+                      <div className="text-slate-700 dark:text-slate-300 text-sm">{featuredStat.description}</div>
+                      <div className="text-xs text-slate-600 dark:text-slate-400 mt-2 font-mono">{featuredStat.formula}</div>
+                      <div className="text-xs text-orange-500 dark:text-orange-300 mt-2">Click to see all-time leaders</div>
                     </button>
                     
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="bg-slate-600 rounded p-3 text-center">
-                        <div className="text-slate-400 text-xs">Current Value</div>
-                        <div className="text-white font-bold">{
+                      <div className="bg-slate-300 dark:bg-slate-600 rounded p-3 text-center">
+                        <div className="text-slate-600 dark:text-slate-400 text-xs">Current Value</div>
+                        <div className="text-slate-900 dark:text-white font-bold">{
                           featuredChartData.length > 0 ? 
                           featuredChartData[featuredChartData.length - 1].value.toFixed(1) : 
                           'N/A'
                         }</div>
                       </div>
-                      <div className="bg-slate-600 rounded p-3 text-center">
-                        <div className="text-slate-400 text-xs">Peak Value</div>
-                        <div className="text-orange-400 font-bold">{
+                      <div className="bg-slate-300 dark:bg-slate-600 rounded p-3 text-center">
+                        <div className="text-slate-600 dark:text-slate-400 text-xs">Peak Value</div>
+                        <div className="text-orange-600 dark:text-orange-400 font-bold">{
                           Math.max(...featuredChartData.map(d => d.value)).toFixed(1)
                         }</div>
                       </div>
@@ -470,11 +470,11 @@ function MainApp() {
               </div>
               
               {/* Chart */}
-              <div className="bg-slate-700 rounded-lg p-5">
+              <div className="bg-slate-200 dark:bg-slate-700 rounded-lg p-5">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <TrendingUp className="w-5 h-5 text-orange-400" />
-                    <h4 className="text-lg font-semibold text-white">Career Progression</h4>
+                    <h4 className="text-lg font-semibold text-slate-900 dark:text-white">Career Progression</h4>
                   </div>
                   <button
                     onClick={() => {
@@ -483,7 +483,7 @@ function MainApp() {
                       setResults([]);
                       setError("");
                     }}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-slate-600 hover:bg-slate-500 rounded-lg transition-colors text-sm text-slate-300 hover:text-white"
+                    className="flex items-center gap-2 px-3 py-1.5 bg-slate-300 dark:bg-slate-600 hover:bg-slate-400 dark:hover:bg-slate-500 rounded-lg transition-colors text-sm text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
                   >
                     <RefreshCw className="w-4 h-4" />
                     Refresh
@@ -492,16 +492,16 @@ function MainApp() {
                 <div className="h-48 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={featuredChartData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
                       <XAxis 
                         dataKey="season" 
-                        stroke="#9CA3AF"
+                        stroke="var(--chart-text)"
                         fontSize={10}
                         angle={-45}
                         textAnchor="end"
                         height={40}
                       />
-                      <YAxis stroke="#9CA3AF" fontSize={10} />
+                      <YAxis stroke="var(--chart-text)" fontSize={10} />
                       <Tooltip 
                         contentStyle={{ 
                           backgroundColor: '#1F2937', 
