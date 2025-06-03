@@ -1,46 +1,122 @@
-import OpenAI from "openai";
-
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-export async function generateStatName(formula: string): Promise<{ name: string; description: string }> {
-  try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: `You are an NBA statistics expert who creates catchy, memorable names for custom basketball stats. 
-          
-          Given a formula using NBA stats (PTS=points, AST=assists, REB=rebounds, TOV=turnovers, STL=steals, BLK=blocks, FG_PCT=field goal %, THREE_PCT=3-point %, FT_PCT=free throw %, PLUS_MINUS=plus/minus, MIN=minutes), create:
-          
-          1. A short, catchy name (2-4 words max) that captures what the stat measures
-          2. A brief description (1-2 sentences) explaining what it represents
-          
-          Make names creative but clear - think like ESPN stat names. Avoid generic terms like "Custom Stat" or "Player Rating".
-          
-          Respond with JSON in this exact format: { "name": "short catchy name", "description": "brief explanation" }`
-        },
-        {
-          role: "user",
-          content: `Create a name and description for this NBA stat formula: ${formula}`
-        }
-      ],
-      response_format: { type: "json_object" },
-      max_tokens: 200,
-    });
-
-    const result = JSON.parse(response.choices[0].message.content || "{}");
+// Local rule-based stat name generator
+export function generateStatName(formula: string): { name: string; description: string } {
+  const upperFormula = formula.toUpperCase();
+  
+  // Define stat categories and their keywords
+  const statPatterns = {
+    // Offensive patterns
+    scoring: ['PTS', 'PPG', 'FG', 'THREE', 'FT'],
+    playmaking: ['AST', 'APG'],
+    rebounding: ['REB', 'RPG'],
     
-    return {
-      name: result.name || "Custom Stat",
-      description: result.description || "Custom basketball statistic"
-    };
-  } catch (error) {
-    console.error("Error generating stat name:", error);
-    return {
-      name: "Custom Stat",
-      description: "Custom basketball statistic"
-    };
+    // Defensive patterns
+    defense: ['STL', 'BLK', 'SPG', 'BPG'],
+    
+    // Efficiency patterns
+    efficiency: ['/', 'TOV', 'TPG'],
+    shooting: ['FG_PCT', 'FG%', 'THREE_PCT', '3P%', 'FT_PCT', 'FT%'],
+    
+    // Impact patterns
+    impact: ['PLUS_MINUS', '+/-'],
+    durability: ['GP', 'MIN']
+  };
+  
+  // Count occurrences of each category
+  const categoryScores = Object.entries(statPatterns).map(([category, keywords]) => ({
+    category,
+    score: keywords.reduce((sum, keyword) => sum + (upperFormula.includes(keyword) ? 1 : 0), 0)
+  })).sort((a, b) => b.score - a.score);
+  
+  // Analyze formula structure
+  const hasDivision = formula.includes('/');
+  const hasMultiplication = formula.includes('*');
+  const hasAddition = formula.includes('+');
+  const hasSubtraction = formula.includes('-');
+  
+  // Generate names based on patterns
+  let name = "Custom Metric";
+  let description = "A custom basketball statistic";
+  
+  const topCategories = categoryScores.filter(c => c.score > 0).slice(0, 2);
+  
+  if (topCategories.length > 0) {
+    const primary = topCategories[0].category;
+    const secondary = topCategories[1]?.category;
+    
+    // Efficiency-based names (has division)
+    if (hasDivision && upperFormula.includes('TOV')) {
+      name = "Efficiency Rating";
+      description = "Measures productive output while minimizing turnovers";
+    } else if (hasDivision) {
+      name = "Production Rate";
+      description = "Calculates statistical output per unit of measurement";
+    }
+    
+    // Multi-category combinations
+    else if (primary === 'scoring' && secondary === 'playmaking') {
+      name = "Offensive Impact";
+      description = "Combines scoring and playmaking contributions";
+    } else if (primary === 'scoring' && secondary === 'rebounding') {
+      name = "Big Man Index";
+      description = "Measures traditional big man statistical production";
+    } else if (primary === 'defense' && secondary === 'rebounding') {
+      name = "Defensive Presence";
+      description = "Quantifies defensive impact through blocks, steals, and rebounds";
+    } else if (primary === 'playmaking' && secondary === 'scoring') {
+      name = "Point Guard Rating";
+      description = "Emphasizes playmaking with scoring support";
+    } else if (primary === 'shooting' && secondary === 'scoring') {
+      name = "Shooter's Touch";
+      description = "Measures scoring efficiency across different shot types";
+    }
+    
+    // Single category focus
+    else if (primary === 'scoring') {
+      if (hasMultiplication) {
+        name = "Scoring Punch";
+        description = "Weighted scoring metric emphasizing volume and efficiency";
+      } else {
+        name = "Offensive Output";
+        description = "Measures total offensive statistical production";
+      }
+    } else if (primary === 'defense') {
+      name = "Defensive Impact";
+      description = "Tracks defensive contributions through steals and blocks";
+    } else if (primary === 'playmaking') {
+      name = "Floor General";
+      description = "Focuses on playmaking and team facilitation";
+    } else if (primary === 'rebounding') {
+      name = "Board Control";
+      description = "Measures rebounding dominance and presence";
+    } else if (primary === 'efficiency') {
+      name = "Smart Play Index";
+      description = "Rewards efficient play while penalizing mistakes";
+    } else if (primary === 'impact') {
+      name = "Winning Impact";
+      description = "Incorporates team success metrics with individual stats";
+    }
+    
+    // Special pattern recognition
+    if (upperFormula.includes('PTS') && upperFormula.includes('AST') && upperFormula.includes('REB')) {
+      if (upperFormula.includes('STL') || upperFormula.includes('BLK')) {
+        name = "Complete Player";
+        description = "Comprehensive metric covering all major statistical categories";
+      } else {
+        name = "Triple Threat";
+        description = "Measures scoring, rebounding, and playmaking ability";
+      }
+    }
+    
+    if (hasSubtraction && upperFormula.includes('TOV')) {
+      name = "Clean Game Score";
+      description = "Rewards positive contributions while penalizing turnovers";
+    }
+    
+    if (upperFormula.includes('GP') || upperFormula.includes('MIN')) {
+      name = "Durability Factor";
+      description = "Incorporates games played or minutes as a reliability measure";
+    }
   }
+  
+  return { name, description };
 }

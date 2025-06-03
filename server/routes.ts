@@ -24,6 +24,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Generate stat name
+  app.post("/api/nba/generate-name", async (req, res) => {
+    try {
+      const { formula } = req.body;
+      if (!formula || typeof formula !== 'string') {
+        return res.status(400).json({ message: "Formula is required" });
+      }
+      
+      const result = generateStatName(formula);
+      res.json(result);
+    } catch (error) {
+      console.error("Error generating stat name:", error);
+      res.status(500).json({ message: "Failed to generate stat name" });
+    }
+  });
+
   // Clear players cache
   app.post("/api/nba/players/clear", async (req, res) => {
     try {

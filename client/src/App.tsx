@@ -554,13 +554,37 @@ function MainApp() {
               <label className="block text-sm font-medium text-slate-300 mb-2">
                 Custom Stat Name:
               </label>
-              <input
-                type="text"
-                value={customStatName}
-                onChange={(e) => setCustomStatName(e.target.value)}
-                placeholder="Enter stat name (e.g., Total Impact)"
-                className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={customStatName}
+                  onChange={(e) => setCustomStatName(e.target.value)}
+                  placeholder="Enter stat name (e.g., Total Impact)"
+                  className="flex-1 bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500"
+                />
+                <button
+                  onClick={async () => {
+                    if (!formula.trim()) return;
+                    try {
+                      const response = await fetch('/api/nba/generate-name', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ formula })
+                      });
+                      if (response.ok) {
+                        const result = await response.json();
+                        setCustomStatName(result.name);
+                      }
+                    } catch (error) {
+                      console.error('Error generating name:', error);
+                    }
+                  }}
+                  disabled={!formula.trim()}
+                  className="bg-purple-600 hover:bg-purple-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white px-3 py-2 rounded-lg transition-colors text-sm"
+                >
+                  Auto-Name
+                </button>
+              </div>
             </div>
             
             <div className="flex gap-3">
