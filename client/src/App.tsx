@@ -694,6 +694,7 @@ function MainApp() {
                       </td>
                       <td className="py-2">{result.player.team}</td>
                       <td className="py-2">
+                        {console.log("Checking formula for percentage:", formula, "includes TS%:", formula.includes("TS%"), "includes eFG%:", formula.includes("eFG%"))}
                         {formula.includes("eFG%") || formula.includes("TS%") ? 
                           `${(result.customStat * 100).toFixed(1)}%` : 
                           result.customStat.toFixed(2)
