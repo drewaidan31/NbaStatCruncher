@@ -556,6 +556,7 @@ function MainApp() {
           <StatCalculator 
             onFormulaChange={setFormula}
             onCalculate={calculateStats}
+            formula={formula}
           />
 
           {/* Save functionality for main menu */}

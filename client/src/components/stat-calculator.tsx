@@ -1,13 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Delete } from "lucide-react";
 
 interface StatCalculatorProps {
   onFormulaChange: (formula: string) => void;
   onCalculate: () => void;
+  formula?: string;
 }
 
-export default function StatCalculator({ onFormulaChange, onCalculate }: StatCalculatorProps) {
+export default function StatCalculator({ onFormulaChange, onCalculate, formula = "" }: StatCalculatorProps) {
   const [display, setDisplay] = useState("");
+
+  // Update display when formula prop changes
+  useEffect(() => {
+    if (formula !== display) {
+      setDisplay(formula);
+    }
+  }, [formula]);
 
   const stats = [
     { name: "PPG", value: "PTS" },

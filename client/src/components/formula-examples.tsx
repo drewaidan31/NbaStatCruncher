@@ -58,7 +58,10 @@ export default function FormulaExamples({ onFormulaSelect }: FormulaExamplesProp
           <Card
             key={index}
             className="bg-slate-900 border-slate-600 cursor-pointer hover:bg-slate-700 transition-colors group"
-            onClick={() => onFormulaSelect(example.formula)}
+            onClick={() => {
+              console.log("Formula selected:", example.formula);
+              onFormulaSelect(example.formula);
+            }}
           >
             <CardContent className="p-4">
               <h4 className="font-medium text-slate-50 mb-2">{example.name}</h4>
