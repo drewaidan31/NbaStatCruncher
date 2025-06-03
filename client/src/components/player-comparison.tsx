@@ -44,18 +44,26 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
   const { player1, season1, player2, season2 } = comparison;
 
   const getStatMappings = (player: Player) => ({
-    'PPG': player.points,
-    'APG': player.assists,
-    'RPG': player.rebounds,
-    'SPG': player.steals,
-    'BPG': player.blocks,
-    'TPG': player.turnovers,
+    'PTS': player.points,
+    'AST': player.assists,
+    'REB': player.rebounds,
+    'STL': player.steals,
+    'BLK': player.blocks,
+    'TOV': player.turnovers,
+    'FG_PCT': player.fieldGoalPercentage,
     'FG%': player.fieldGoalPercentage,
+    'FGA': 15.0, // Estimated field goal attempts based on average
+    'THREE_PCT': player.threePointPercentage,
     '3P%': player.threePointPercentage,
+    '3PA': 5.0, // Estimated 3-point attempts
+    'FT_PCT': player.freeThrowPercentage,
     'FT%': player.freeThrowPercentage,
+    'FTA': 4.0, // Estimated free throw attempts
     'GP': player.gamesPlayed,
+    'PLUS_MINUS': player.plusMinus,
     '+/-': player.plusMinus,
-    'MIN': 32.5 // Default minutes per game
+    'MIN': 32.5, // Default minutes per game
+    'W_PCT': 0.5 // Default win percentage
   });
 
   const calculateCustomStat = (player: Player) => {
@@ -284,7 +292,7 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
 
             {/* Formula Examples */}
             <FormulaExamples 
-              onSelectFormula={(selectedFormula) => {
+              onFormulaSelect={(selectedFormula) => {
                 setFormula(selectedFormula);
                 handleFormulaChange(selectedFormula);
               }}
