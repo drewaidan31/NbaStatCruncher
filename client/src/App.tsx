@@ -561,9 +561,9 @@ function MainApp() {
           </div>
         )}
 
-        <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-          <h2 className="text-lg font-semibold mb-4">NBA Custom Stats Calculator</h2>
-          <p className="text-slate-300 mb-6">Build your own basketball analytics formulas using real NBA player data. Create custom stats, compare players, and discover new insights.</p>
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 p-6">
+          <h2 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">NBA Custom Stats Calculator</h2>
+          <p className="text-slate-600 dark:text-slate-300 mb-6">Build your own basketball analytics formulas using real NBA player data. Create custom stats, compare players, and discover new insights.</p>
 
           <StatCalculator 
             onFormulaChange={setFormula}
@@ -574,7 +574,7 @@ function MainApp() {
           {/* Save functionality for main menu */}
           <div className="space-y-4 mt-6">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                 Custom Stat Name:
               </label>
               <div className="flex gap-2">
@@ -583,7 +583,7 @@ function MainApp() {
                   value={customStatName}
                   onChange={(e) => setCustomStatName(e.target.value)}
                   placeholder="Enter stat name (e.g., Total Impact)"
-                  className="flex-1 bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500"
+                  className="flex-1 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:border-orange-500"
                 />
                 <button
                   onClick={async () => {
@@ -645,20 +645,20 @@ function MainApp() {
 
           {/* Saved Stats Display */}
           {showSavedStats && (
-            <div className="bg-slate-700 rounded-lg p-4 mt-4">
-              <h4 className="text-lg font-medium text-slate-50 mb-3">Your Saved Stats</h4>
+            <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-4 mt-4">
+              <h4 className="text-lg font-medium text-slate-900 dark:text-slate-50 mb-3">Your Saved Stats</h4>
               <div className="space-y-2">
                 {savedStats.length === 0 ? (
-                  <p className="text-slate-400">No saved stats yet</p>
+                  <p className="text-slate-600 dark:text-slate-400">No saved stats yet</p>
                 ) : (
                   savedStats.map((stat) => (
                     <button
                       key={stat.id}
                       onClick={() => loadSavedStat(stat)}
-                      className="w-full text-left bg-slate-600 hover:bg-slate-500 p-3 rounded-lg transition-colors"
+                      className="w-full text-left bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 p-3 rounded-lg transition-colors"
                     >
-                      <div className="font-medium text-slate-50">{stat.name}</div>
-                      <div className="text-sm text-slate-300">{stat.formula}</div>
+                      <div className="font-medium text-slate-900 dark:text-slate-50">{stat.name}</div>
+                      <div className="text-sm text-slate-600 dark:text-slate-300">{stat.formula}</div>
                     </button>
                   ))
                 )}
