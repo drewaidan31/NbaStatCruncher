@@ -137,6 +137,37 @@ html:not(.dark) .bg-slate-100.dark\:bg-slate-700 {
   background-color: #f8fafc !important;
 }
 
+/* Force ALL elements with dark background classes to be light */
+html:not(.dark) [class*="bg-slate-"] {
+  background-color: white !important;
+}
+
+html:not(.dark) [class*="dark:bg-slate-"] {
+  background-color: white !important;
+}
+
+html:not(.dark) .bg-slate-600,
+html:not(.dark) .dark\:bg-slate-600 {
+  background-color: #f1f5f9 !important;
+}
+
+html:not(.dark) .bg-slate-500,
+html:not(.dark) .dark\:bg-slate-500 {
+  background-color: #e2e8f0 !important;
+}
+
+/* Ensure main page background stays correct */
+html:not(.dark) .bg-slate-900 {
+  background-color: white !important;
+}
+
+/* Force any remaining dark elements to light colors */
+html:not(.dark) [style*="background-color: rgb(51, 65, 85)"],
+html:not(.dark) [style*="background-color: rgb(71, 85, 105)"],
+html:not(.dark) [style*="background-color: rgb(100, 116, 139)"] {
+  background-color: white !important;
+}
+
 /* Fix Recharts tooltip styling for light/dark mode */
 .recharts-tooltip-wrapper .recharts-default-tooltip {
   background-color: white !important;
