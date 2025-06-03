@@ -31,6 +31,7 @@ export default function StatCalculator({ onFormulaChange, onCalculate, formula =
     { name: "FT%", value: "FT_PCT" },
     { name: "FTA", value: "FTA" },
     { name: "+/-", value: "PLUS_MINUS" },
+    { name: "W%", value: "W_PCT" },
     { name: "MPG", value: "MIN" },
     { name: "GP", value: "GP" }
   ];
