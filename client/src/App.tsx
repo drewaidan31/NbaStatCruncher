@@ -231,7 +231,7 @@ function MainApp() {
       const response = await fetch("/api/nba/calculate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ formula })
+        body: JSON.stringify({ formula, season: selectedSeason })
       });
       
       if (response.ok) {
