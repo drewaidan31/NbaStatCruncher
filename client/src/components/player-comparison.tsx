@@ -220,22 +220,22 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
       </div>
 
       {/* Custom Stat Calculator */}
-      <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+      <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border border-slate-300 dark:border-slate-700">
         <div className="flex items-center gap-2 mb-4">
           <Calculator className="w-5 h-5 text-orange-400" />
-          <h2 className="text-xl font-bold text-white">Custom Stat Comparison</h2>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Custom Stat Comparison</h2>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-2">
               Custom Stat Name:
             </label>
             <input
               type="text"
               value={customStatName}
               onChange={(e) => setCustomStatName(e.target.value)}
-              className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
               placeholder="Enter a name for your custom stat..."
             />
           </div>
@@ -243,12 +243,12 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
           {/* Interactive Calculator Interface */}
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-2">
                 Formula Builder:
               </label>
-              <div className="bg-slate-900 rounded-lg p-4 border border-slate-600">
-                <div className="text-slate-300 text-sm mb-1">Formula:</div>
-                <div className="text-white text-lg font-mono min-h-[2rem] break-all">
+              <div className="bg-slate-100 dark:bg-slate-900 rounded-lg p-4 border border-slate-300 dark:border-slate-600">
+                <div className="text-slate-600 dark:text-slate-300 text-sm mb-1">Formula:</div>
+                <div className="text-slate-900 dark:text-white text-lg font-mono min-h-[2rem] break-all">
                   {formula || "Click stats and operations to build your formula"}
                 </div>
               </div>
@@ -258,14 +258,14 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
                 <button
                   onClick={handleCalculate}
                   disabled={!formula}
-                  className="bg-orange-600 hover:bg-orange-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium py-2 px-6 rounded-lg transition-colors"
+                  className="bg-orange-600 hover:bg-orange-700 disabled:bg-slate-400 dark:disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium py-2 px-6 rounded-lg transition-colors"
                 >
                   Calculate
                 </button>
                 <button
                   onClick={handleSaveStat}
                   disabled={!formula || !customStatName || (player1Value === null && player2Value === null)}
-                  className="bg-green-600 hover:bg-green-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                  className="bg-green-600 hover:bg-green-700 disabled:bg-slate-400 dark:disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors"
                 >
                   Save Stat
                 </button>
@@ -274,7 +274,7 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
                     setFormula("");
                     handleFormulaChange("");
                   }}
-                  className="bg-slate-600 hover:bg-slate-500 text-white py-2 px-4 rounded-lg transition-colors"
+                  className="bg-slate-400 dark:bg-slate-600 hover:bg-slate-500 dark:hover:bg-slate-500 text-white py-2 px-4 rounded-lg transition-colors"
                 >
                   Clear
                 </button>
@@ -284,7 +284,7 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Statistics */}
               <div>
-                <h4 className="text-sm font-medium text-slate-400 mb-3">Player Statistics</h4>
+                <h4 className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">Player Statistics</h4>
                 <div className="grid grid-cols-2 gap-2">
                   {[
                     { name: "PPG", value: "PTS" },
@@ -321,7 +321,7 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
 
               {/* Operations */}
               <div>
-                <h4 className="text-sm font-medium text-slate-400 mb-3">Operations</h4>
+                <h4 className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">Operations</h4>
                 <div className="grid grid-cols-3 gap-2">
                   {[
                     { symbol: "+", value: " + " },
@@ -348,7 +348,7 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
 
               {/* Numbers */}
               <div>
-                <h4 className="text-sm font-medium text-slate-400 mb-3">Numbers</h4>
+                <h4 className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">Numbers</h4>
                 <div className="grid grid-cols-3 gap-2">
                   {["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "."].map((num) => (
                     <button
@@ -358,7 +358,7 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
                         setFormula(newFormula);
                         handleFormulaChange(newFormula);
                       }}
-                      className="bg-slate-600 hover:bg-slate-500 text-white text-sm py-2 px-3 rounded transition-colors"
+                      className="bg-slate-400 dark:bg-slate-600 hover:bg-slate-500 dark:hover:bg-slate-500 text-white text-sm py-2 px-3 rounded transition-colors"
                     >
                       {num}
                     </button>
