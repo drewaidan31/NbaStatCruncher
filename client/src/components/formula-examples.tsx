@@ -28,11 +28,6 @@ const EXAMPLE_FORMULAS = [
     description: "Per-minute impact weighted by team performance"
   },
   {
-    name: "Triple-Double Potential",
-    formula: "PTS + AST + REB - 30",
-    description: "How close a player gets to triple-double numbers"
-  },
-  {
     name: "Shooting Efficiency",
     formula: "PTS * FG_PCT * FT_PCT",
     description: "Points scored weighted by shooting accuracy"
