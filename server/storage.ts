@@ -20,6 +20,7 @@ export interface IStorage {
   createPlayer(player: InsertPlayer): Promise<Player>;
   updatePlayer(id: number, player: Partial<InsertPlayer>): Promise<Player | undefined>;
   deleteAllPlayers(): Promise<void>;
+  clearAllPlayers(): Promise<void>;
   
   // Custom stat operations
   getCustomStats(): Promise<CustomStat[]>;
@@ -66,6 +67,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteAllPlayers(): Promise<void> {
+    await db.delete(nbaPlayers);
+  }
+
+  async clearAllPlayers(): Promise<void> {
     await db.delete(nbaPlayers);
   }
 

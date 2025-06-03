@@ -166,9 +166,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if we already have cached player data
       const existingPlayers = await storage.getAllPlayers();
       
-      if (existingPlayers.length > 0) {
+      // Force refresh if we have fewer than expected players (should be 553+ with historical data)
+      if (existingPlayers.length >= 550) {
         console.log(`Using cached player data: ${existingPlayers.length} players`);
         return res.json(existingPlayers);
+      }
+      
+      console.log(`Player count: ${existingPlayers.length}, refreshing to include historical players`);
+      
+      // Clear existing data to force refresh
+      try {
+        await storage.clearAllPlayers();
+      } catch (error) {
+        console.log("Could not clear existing players, continuing...");
       }
 
       console.log(`Loading unified NBA player profiles from official NBA API`);
