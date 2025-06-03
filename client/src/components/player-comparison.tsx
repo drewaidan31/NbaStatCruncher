@@ -164,14 +164,14 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
     const betterPlayer = getBetterPlayer();
 
     return (
-      <div className="bg-slate-700 rounded-lg p-4">
-        <div className="text-slate-400 text-sm mb-2">{label}</div>
+      <div className="bg-slate-200 dark:bg-slate-700 rounded-lg p-4">
+        <div className="text-slate-600 dark:text-slate-400 text-sm mb-2">{label}</div>
         <div className="flex justify-between items-center">
-          <div className={`font-bold ${betterPlayer === 1 ? 'text-green-400' : 'text-slate-300'}`}>
+          <div className={`font-bold ${betterPlayer === 1 ? 'text-green-600 dark:text-green-400' : 'text-slate-700 dark:text-slate-300'}`}>
             {formatValue(value1)}
           </div>
-          <div className="text-slate-500 text-sm">vs</div>
-          <div className={`font-bold ${betterPlayer === 2 ? 'text-green-400' : 'text-slate-300'}`}>
+          <div className="text-slate-500 dark:text-slate-500 text-sm">vs</div>
+          <div className={`font-bold ${betterPlayer === 2 ? 'text-green-600 dark:text-green-400' : 'text-slate-700 dark:text-slate-300'}`}>
             {formatValue(value2)}
           </div>
         </div>
@@ -182,23 +182,23 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+      <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border border-slate-300 dark:border-slate-700">
         <div className="flex items-center gap-4 mb-4">
           <button
             onClick={onBack}
-            className="p-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+            className="p-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg transition-colors"
           >
-            <ArrowLeft className="w-5 h-5 text-white" />
+            <ArrowLeft className="w-5 h-5 text-slate-900 dark:text-white" />
           </button>
           <div className="flex items-center gap-4">
             <div>
-              <h2 className="text-xl font-bold text-white">{player1.name}</h2>
-              <p className="text-slate-300">{player1.team} • {season1}</p>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">{player1.name}</h2>
+              <p className="text-slate-600 dark:text-slate-300">{player1.team} • {season1}</p>
             </div>
             <GitCompare className="w-8 h-8 text-orange-400" />
             <div>
-              <h2 className="text-xl font-bold text-white">{player2.name}</h2>
-              <p className="text-slate-300">{player2.team} • {season2}</p>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">{player2.name}</h2>
+              <p className="text-slate-600 dark:text-slate-300">{player2.team} • {season2}</p>
             </div>
           </div>
         </div>

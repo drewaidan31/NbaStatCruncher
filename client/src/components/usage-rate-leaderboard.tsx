@@ -41,13 +41,13 @@ export default function UsageRateLeaderboard({ season = "2024-25" }: UsageRateLe
 
   if (isLoading) {
     return (
-      <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 p-6">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
           <Trophy className="w-5 h-5 text-yellow-500" />
           Usage Rate Leaders
         </h3>
         <div className="flex items-center justify-center h-32">
-          <div className="text-slate-400">Loading usage rate data...</div>
+          <div className="text-slate-600 dark:text-slate-400">Loading usage rate data...</div>
         </div>
       </div>
     );
@@ -55,13 +55,13 @@ export default function UsageRateLeaderboard({ season = "2024-25" }: UsageRateLe
 
   if (error || !leaderboardData) {
     return (
-      <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 p-6">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
           <Trophy className="w-5 h-5 text-yellow-500" />
           Usage Rate Leaders
         </h3>
         <div className="flex items-center justify-center h-32">
-          <div className="text-slate-400">Unable to load usage rate data</div>
+          <div className="text-slate-600 dark:text-slate-400">Unable to load usage rate data</div>
         </div>
       </div>
     );
@@ -70,19 +70,19 @@ export default function UsageRateLeaderboard({ season = "2024-25" }: UsageRateLe
   const topPlayers = leaderboardData.slice(0, 10);
 
   return (
-    <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 p-6">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
           <Trophy className="w-5 h-5 text-yellow-500" />
           Usage Rate Leaders
         </h3>
         
         <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-slate-400" />
+          <Calendar className="w-4 h-4 text-slate-600 dark:text-slate-400" />
           <select
             value={selectedSeason}
             onChange={(e) => setSelectedSeason(e.target.value)}
-            className="bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
           >
             {availableSeasons.map((season) => (
               <option key={season} value={season}>
