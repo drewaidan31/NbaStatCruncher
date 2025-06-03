@@ -23,6 +23,7 @@ export const nbaPlayers = pgTable("nba_players", {
   freeThrowPercentage: real("free_throw_percentage").notNull().default(0),
   freeThrowAttempts: real("free_throw_attempts").notNull().default(0),
   plusMinus: real("plus_minus").notNull().default(0),
+  winPercentage: real("win_percentage").notNull().default(0),
   currentSeason: text("current_season"),
   seasons: jsonb("seasons"),
   availableSeasons: text("available_seasons").array(),
@@ -104,6 +105,7 @@ export const NBA_STAT_MAPPINGS = {
   'STL': 'steals',
   'BLK': 'blocks',
   'GP': 'gamesPlayed',
+  'W_PCT': 'winPercentage',
 } as const;
 
 export const NBA_STAT_DESCRIPTIONS = {
@@ -122,4 +124,5 @@ export const NBA_STAT_DESCRIPTIONS = {
   'STL': 'Steals per game',
   'BLK': 'Blocks per game',
   'GP': 'Games Played',
+  'W_PCT': 'Win Percentage when player plays',
 } as const;

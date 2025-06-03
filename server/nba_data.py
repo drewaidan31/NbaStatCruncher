@@ -57,7 +57,9 @@ def get_nba_players_from_api(season='2024-25'):
                 'threePointPercentage': float(row['FG3_PCT']) if row['FG3_PCT'] else 0.0,
                 'threePointAttempts': float(row['FG3A']) / games_played if row['FG3A'] else 0.0,
                 'freeThrowPercentage': float(row['FT_PCT']) if row['FT_PCT'] else 0.0,
-                'plusMinus': float(row['PLUS_MINUS']) / games_played if row['PLUS_MINUS'] else 0.0
+                'freeThrowAttempts': float(row['FTA']) / games_played if row['FTA'] else 0.0,
+                'plusMinus': float(row['PLUS_MINUS']) / games_played if row['PLUS_MINUS'] else 0.0,
+                'winPercentage': float(row['W_PCT']) if row['W_PCT'] else 0.0
             }
             players_data.append(player_data)
         

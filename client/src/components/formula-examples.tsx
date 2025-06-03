@@ -46,6 +46,11 @@ const EXAMPLE_FORMULAS = [
     name: "Balanced Scorer",
     formula: "(PTS + AST + REB) / (TOV + 1)",
     description: "Well-rounded production with turnover penalty"
+  },
+  {
+    name: "Winning Impact",
+    formula: "PTS * W_PCT + AST * W_PCT",
+    description: "Offensive production weighted by team success when player plays"
   }
 ];
 
