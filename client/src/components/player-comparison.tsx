@@ -392,24 +392,24 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
             </div>
           </div>
 
-          <div className="bg-slate-700 rounded-lg p-4">
-            <div className="text-sm text-slate-400 mb-2">Available Stats (PPG, APG, RPG, SPG, BPG, TPG, FG%, 3P%, FT%, GP, +/-, MIN)</div>
+          <div className="bg-slate-200 dark:bg-slate-700 rounded-lg p-4">
+            <div className="text-sm text-slate-600 dark:text-slate-400 mb-2">Available Stats (PPG, APG, RPG, SPG, BPG, TPG, FG%, 3P%, FT%, GP, +/-, MIN)</div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
               <div>
-                <div className="font-medium text-blue-300 mb-1">{player1.name} ({season1})</div>
+                <div className="font-medium text-blue-600 dark:text-blue-300 mb-1">{player1.name} ({season1})</div>
                 {Object.entries(getStatMappings(player1)).map(([key, value]) => (
-                  <div key={key} className="text-slate-300">
-                    <span className="font-medium text-orange-300">{key}</span>: {
+                  <div key={key} className="text-slate-700 dark:text-slate-300">
+                    <span className="font-medium text-orange-600 dark:text-orange-300">{key}</span>: {
                       key.includes('%') ? (value * 100).toFixed(1) + '%' : value.toFixed(1)
                     }
                   </div>
                 ))}
               </div>
               <div>
-                <div className="font-medium text-blue-300 mb-1">{player2.name} ({season2})</div>
+                <div className="font-medium text-blue-600 dark:text-blue-300 mb-1">{player2.name} ({season2})</div>
                 {Object.entries(getStatMappings(player2)).map(([key, value]) => (
-                  <div key={key} className="text-slate-300">
-                    <span className="font-medium text-orange-300">{key}</span>: {
+                  <div key={key} className="text-slate-700 dark:text-slate-300">
+                    <span className="font-medium text-orange-600 dark:text-orange-300">{key}</span>: {
                       key.includes('%') ? (value * 100).toFixed(1) + '%' : value.toFixed(1)
                     }
                   </div>
