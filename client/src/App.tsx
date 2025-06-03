@@ -18,6 +18,7 @@ interface Player {
   team: string;
   position: string;
   gamesPlayed: number;
+  minutesPerGame?: number;
   points: number;
   assists: number;
   rebounds: number;
@@ -25,7 +26,9 @@ interface Player {
   blocks: number;
   turnovers: number;
   fieldGoalPercentage: number;
+  fieldGoalAttempts?: number;
   threePointPercentage: number;
+  threePointAttempts?: number;
   freeThrowPercentage: number;
   plusMinus: number;
   currentSeason?: string;
@@ -42,7 +45,9 @@ interface Player {
     blocks: number;
     turnovers: number;
     fieldGoalPercentage: number;
+    fieldGoalAttempts?: number;
     threePointPercentage: number;
+    threePointAttempts?: number;
     freeThrowPercentage: number;
     plusMinus: number;
   }>;
