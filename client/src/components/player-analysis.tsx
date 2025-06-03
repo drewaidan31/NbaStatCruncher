@@ -65,6 +65,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
   const [selectedSeason, setSelectedSeason] = useState(player.currentSeason || season);
   const [currentPlayerData, setCurrentPlayerData] = useState(player);
   const [chartData, setChartData] = useState<Array<{season: string, value: number, team: string}>>([]);
+  const [activeTab, setActiveTab] = useState<'overview' | 'shooting' | 'calculator'>('overview');
 
   // Query to fetch specific season data for the player
   const { data: seasonPlayerData, isLoading: isLoadingSeason } = useQuery({
@@ -148,7 +149,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
     'FG_PCT': currentPlayerData.fieldGoalPercentage,
     'FG%': currentPlayerData.fieldGoalPercentage, // Support both formats
     'FGA': currentPlayerData.fieldGoalAttempts || 0,
-    'THREE_PCT': currentPlayerData.threePointPercentage,
+    '3P_PCT': currentPlayerData.threePointPercentage,
     '3P%': currentPlayerData.threePointPercentage, // Support both formats
     '3PA': currentPlayerData.threePointAttempts || 0,
     'FT_PCT': currentPlayerData.freeThrowPercentage,
@@ -159,7 +160,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
     'MIN': currentPlayerData.minutesPerGame || 32.5
   };
 
-  const calculateCustomStatForSeason = (seasonData: any) => {
+  const calculateStatForSeason = (formula: string, seasonData: any) => {
     const seasonStatMappings = {
       'PTS': seasonData.points,
       'PPG': seasonData.points, // Support both formats
@@ -176,7 +177,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
       'FG_PCT': seasonData.fieldGoalPercentage,
       'FG%': seasonData.fieldGoalPercentage, // Support both formats
       'FGA': seasonData.fieldGoalAttempts || 0,
-      'THREE_PCT': seasonData.threePointPercentage,
+      '3P_PCT': seasonData.threePointPercentage,
       '3P%': seasonData.threePointPercentage, // Support both formats
       '3PA': seasonData.threePointAttempts || 0,
       'FT_PCT': seasonData.freeThrowPercentage,
@@ -261,73 +262,81 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
       
       console.log('Final expression:', expression);
       const result = evaluate(expression);
-      console.log('Calculation result:', result);
+      console.log('Calculated result:', result);
+      
       setCalculatedValue(typeof result === 'number' ? result : null);
-
-      // Calculate for all seasons to create chart data
-      if (player.seasons && formula.trim()) {
-        const chartDataPoints = player.seasons
+      
+      // Build chart data if seasons are available
+      if (player.seasons && player.seasons.length > 0) {
+        const chartPoints = player.seasons
           .map(seasonData => {
-            const value = calculateCustomStatForSeason(seasonData);
-            return value !== null ? {
+            const seasonResult = calculateStatForSeason(formula, seasonData);
+            return seasonResult !== null ? {
               season: seasonData.season,
-              value: value,
+              value: seasonResult,
               team: seasonData.team
             } : null;
           })
-          .filter(point => point !== null)
-          .sort((a, b) => a!.season.localeCompare(b!.season));
-        setChartData(chartDataPoints as Array<{season: string, value: number, team: string}>);
+          .filter(point => point !== null);
+        
+        setChartData(chartPoints);
       }
+      
     } catch (error) {
-      console.error('Calculation error:', error);
+      console.error('Error calculating custom stat:', error);
       setCalculatedValue(null);
-      setChartData([]);
     }
   };
 
   const handleFormulaChange = (newFormula: string) => {
     setFormula(newFormula);
-    // Reset calculated value when formula changes
-    setCalculatedValue(null);
+    if (newFormula.trim()) {
+      calculateCustomStat();
+    } else {
+      setCalculatedValue(null);
+      setChartData([]);
+    }
   };
 
-  const handleCalculate = () => {
-    calculateCustomStat();
-  };
+  const saveStat = async () => {
+    if (!customStatName.trim() || !formula.trim() || calculatedValue === null) {
+      alert('Please provide a stat name and valid formula');
+      return;
+    }
 
-  const handleSaveStat = async () => {
     try {
-      const response = await fetch('/api/custom-stats/save', {
+      const response = await fetch('/api/custom-stats', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
-          name: customStatName,
-          formula: formula,
-          description: `Custom stat: ${customStatName}`
+          name: customStatName.trim(),
+          formula: formula.trim(),
+          value: calculatedValue,
+          playerId: player.playerId,
+          playerName: player.name,
+          season: selectedSeason
         }),
-        credentials: 'include', // Include authentication cookies
       });
-      
+
       if (response.ok) {
-        const savedStat = await response.json();
-        console.log('Stat saved successfully!', savedStat);
-        // Always refresh the saved stats after saving
+        alert('Custom stat saved successfully!');
+        setCustomStatName('');
         refetchStats();
       } else {
-        console.error('Failed to save stat:', response.status, response.statusText);
-        const errorText = await response.text();
-        console.error('Error details:', errorText);
+        const errorData = await response.text();
+        alert(`Failed to save stat: ${errorData}`);
       }
     } catch (error) {
       console.error('Error saving stat:', error);
+      alert('Failed to save stat');
     }
   };
 
   const handleDeleteStat = async (statId: number) => {
-    if (!confirm('Are you sure you want to delete this saved stat?')) {
+    if (!confirm('Are you sure you want to delete this custom stat?')) {
       return;
     }
 
@@ -338,13 +347,13 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
       });
 
       if (response.ok) {
-        console.log('Stat deleted successfully!');
         refetchStats();
       } else {
-        console.error('Failed to delete stat:', response.status, response.statusText);
+        alert('Failed to delete stat');
       }
     } catch (error) {
       console.error('Error deleting stat:', error);
+      alert('Failed to delete stat');
     }
   };
 
@@ -352,31 +361,6 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
     setFormula(stat.formula);
     setCustomStatName(stat.name);
     handleFormulaChange(stat.formula);
-    setShowSavedStats(false);
-  };
-
-  const handleCleanDuplicates = async () => {
-    if (!confirm('This will remove all duplicate saved stats, keeping only the oldest version of each. Continue?')) {
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/custom-stats/cleanup-duplicates', {
-        method: 'POST',
-        credentials: 'include',
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Duplicates cleaned:', result.message);
-        alert(result.message);
-        refetchStats();
-      } else {
-        console.error('Failed to clean duplicates:', response.status, response.statusText);
-      }
-    } catch (error) {
-      console.error('Error cleaning duplicates:', error);
-    }
   };
 
   return (
@@ -415,192 +399,253 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
                 </select>
               </div>
             )}
-            <div className="text-right">
-              <p className="text-slate-400 text-sm">Custom Stat Calculator</p>
-              <p className="text-orange-400 font-medium">Build your own analytics</p>
-            </div>
           </div>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="flex space-x-1 mb-4">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'overview'
+                ? 'bg-orange-500 text-white'
+                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Overview
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('shooting')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'shooting'
+                ? 'bg-orange-500 text-white'
+                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Target className="w-4 h-4" />
+              Shot Chart
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('calculator')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'calculator'
+                ? 'bg-orange-500 text-white'
+                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Calculator className="w-4 h-4" />
+              Custom Stats
+            </div>
+          </button>
         </div>
       </div>
 
-      {/* Custom Stat Calculator - Main Focus */}
-      <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg p-8 border border-orange-500/30 shadow-xl">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-orange-500/20 rounded-full">
-              <Calculator className="w-6 h-6 text-orange-400" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-white">Custom Stat Calculator</h2>
-              <p className="text-slate-400">Create your own performance metrics</p>
-            </div>
-          </div>
-          <button
-            onClick={() => setShowExamples(!showExamples)}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-slate-300 text-sm transition-colors"
-          >
-            <Sparkles className="w-4 h-4" />
-            Formula Examples
-          </button>
-          <button
-            onClick={() => setShowSavedStats(!showSavedStats)}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-slate-300 text-sm transition-colors"
-          >
-            <BarChart3 className="w-4 h-4" />
-            Saved Stats
-          </button>
-        </div>
-
-        {/* Result Display - Prominent */}
-        {calculatedValue !== null && (
-          <>
-            <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-xl p-6 mb-6 text-center shadow-lg">
-              <div className="flex items-center justify-center gap-3 mb-2">
-                <TrendingUp className="w-6 h-6 text-white" />
-                <h3 className="text-xl font-bold text-white">{customStatName}</h3>
-              </div>
-              <div className="text-5xl font-bold text-white mb-2">{calculatedValue.toFixed(2)}</div>
-              <div className="text-orange-100 text-sm bg-black/20 rounded-lg px-3 py-1 inline-block">
-                Formula: {formula}
-              </div>
-            </div>
-
-            {/* Custom Stat Chart - Right after result */}
-            {chartData.length > 0 && (
-              <div className="bg-slate-800 rounded-lg p-6 border border-slate-700 mb-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <TrendingUp className="w-5 h-5 text-orange-400" />
-                  <h3 className="text-lg font-medium text-white">{customStatName} Over Time</h3>
-                  <span className="text-sm text-slate-400">({chartData.length} seasons)</span>
-                </div>
-                <div className="h-64 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                      <XAxis 
-                        dataKey="season" 
-                        stroke="#9CA3AF"
-                        fontSize={12}
-                        angle={-45}
-                        textAnchor="end"
-                        height={60}
-                      />
-                      <YAxis stroke="#9CA3AF" fontSize={12} />
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: '#1F2937', 
-                          border: '1px solid #374151',
-                          borderRadius: '8px',
-                          color: '#F9FAFB'
-                        }}
-                        labelFormatter={(label) => {
-                          const point = chartData.find(d => d.season === label);
-                          return `${label} (${point?.team || 'N/A'})`;
-                        }}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="value" 
-                        stroke="#F97316" 
-                        strokeWidth={3}
-                        dot={{ fill: '#F97316', strokeWidth: 2, r: 4 }}
-                        activeDot={{ r: 6, stroke: '#F97316', strokeWidth: 2 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="mt-4 text-sm text-slate-400">
-                  Track how {customStatName.toLowerCase()} changed throughout {player.name}'s career across different teams and seasons.
-                </div>
-              </div>
-            )}
-          </>
-        )}
-
-        {/* No Result State */}
-        {calculatedValue === null && (
-          <div className="bg-slate-700/50 rounded-xl p-8 mb-6 text-center border-2 border-dashed border-slate-600">
-            <BarChart3 className="w-12 h-12 text-slate-500 mx-auto mb-3" />
-            <h3 className="text-lg font-medium text-slate-300 mb-2">Ready to Calculate</h3>
-            <p className="text-slate-400 text-sm">Enter a formula below to see your custom stat result</p>
-          </div>
-        )}
-
+      {/* Tab Content */}
+      {activeTab === 'overview' && (
         <div className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Custom Stat Name:
-            </label>
-            <input
-              type="text"
-              value={customStatName}
-              onChange={(e) => setCustomStatName(e.target.value)}
-              className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg"
-              placeholder="Enter a name for your custom stat..."
-            />
+          {/* Compact Player Stats */}
+          <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+            <div className="flex items-center gap-2 mb-4">
+              <BarChart3 className="w-5 h-5 text-slate-400" />
+              <h3 className="text-lg font-medium text-white">Season Statistics</h3>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              <div className="bg-slate-700 rounded-lg p-3">
+                <div className="text-slate-400 text-xs">Points</div>
+                <div className="text-orange-400 font-bold">{currentPlayerData.points.toFixed(1)} PPG</div>
+              </div>
+              <div className="bg-slate-700 rounded-lg p-3">
+                <div className="text-slate-400 text-xs">Assists</div>
+                <div className="text-blue-400 font-bold">{currentPlayerData.assists.toFixed(1)} APG</div>
+              </div>
+              <div className="bg-slate-700 rounded-lg p-3">
+                <div className="text-slate-400 text-xs">Rebounds</div>
+                <div className="text-green-400 font-bold">{currentPlayerData.rebounds.toFixed(1)} RPG</div>
+              </div>
+              <div className="bg-slate-700 rounded-lg p-3">
+                <div className="text-slate-400 text-xs">Field Goal %</div>
+                <div className="text-yellow-400 font-bold">{(currentPlayerData.fieldGoalPercentage * 100).toFixed(1)}%</div>
+              </div>
+              <div className="bg-slate-700 rounded-lg p-3">
+                <div className="text-slate-400 text-xs">Plus/Minus</div>
+                <div className={`font-bold ${currentPlayerData.plusMinus >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {currentPlayerData.plusMinus > 0 ? '+' : ''}{currentPlayerData.plusMinus.toFixed(1)}
+                </div>
+              </div>
+              <div className="bg-slate-700 rounded-lg p-3">
+                <div className="text-slate-400 text-xs">Games Played</div>
+                <div className="text-purple-400 font-bold">{currentPlayerData.gamesPlayed}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'shooting' && (
+        <ShotChart
+          playerId={player.playerId}
+          playerName={player.name}
+          season={selectedSeason}
+        />
+      )}
+
+      {activeTab === 'calculator' && (
+        <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg p-8 border border-orange-500/30 shadow-xl">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-orange-500/20 rounded-full">
+                <Calculator className="w-6 h-6 text-orange-400" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white">Custom Stat Calculator</h2>
+                <p className="text-slate-400">Create your own performance metrics</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowExamples(!showExamples)}
+                className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-slate-300 text-sm transition-colors"
+              >
+                <Sparkles className="w-4 h-4" />
+                Formula Examples
+              </button>
+              <button
+                onClick={() => setShowSavedStats(!showSavedStats)}
+                className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-slate-300 text-sm transition-colors"
+              >
+                <BarChart3 className="w-4 h-4" />
+                Saved Stats
+              </button>
+            </div>
           </div>
 
-          {/* Interactive Calculator Interface */}
-          <div className="space-y-4">
+          {/* Result Display - Prominent */}
+          {calculatedValue !== null && (
+            <>
+              <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-xl p-6 mb-6 text-center shadow-lg">
+                <div className="flex items-center justify-center gap-3 mb-2">
+                  <TrendingUp className="w-6 h-6 text-white" />
+                  <h3 className="text-xl font-bold text-white">{customStatName || "Custom Stat"}</h3>
+                </div>
+                <div className="text-5xl font-bold text-white mb-2">{calculatedValue.toFixed(2)}</div>
+                <div className="text-orange-100 text-sm bg-black/20 rounded-lg px-3 py-1 inline-block">
+                  Formula: {formula}
+                </div>
+              </div>
+
+              {/* Custom Stat Chart - Right after result */}
+              {chartData.length > 0 && (
+                <div className="bg-slate-800 rounded-lg p-6 border border-slate-700 mb-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <TrendingUp className="w-5 h-5 text-orange-400" />
+                    <h3 className="text-lg font-medium text-white">{customStatName || "Custom Stat"} Over Time</h3>
+                    <span className="text-sm text-slate-400">({chartData.length} seasons)</span>
+                  </div>
+                  <div className="h-64 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <XAxis 
+                          dataKey="season" 
+                          stroke="#9CA3AF"
+                          fontSize={12}
+                          angle={-45}
+                          textAnchor="end"
+                          height={60}
+                        />
+                        <YAxis stroke="#9CA3AF" fontSize={12} />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: '#1F2937', 
+                            border: '1px solid #374151',
+                            borderRadius: '8px',
+                            color: '#F9FAFB'
+                          }}
+                          labelFormatter={(label) => {
+                            const point = chartData.find(d => d.season === label);
+                            return `${label} (${point?.team || 'N/A'})`;
+                          }}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="value" 
+                          stroke="#F97316" 
+                          strokeWidth={3}
+                          dot={{ fill: '#F97316', strokeWidth: 2, r: 4 }}
+                          activeDot={{ r: 6, fill: '#EA580C' }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Formula Input */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
-                Formula Builder:
+                Custom Stat Name
               </label>
-              <div className="bg-slate-900 rounded-lg p-4 border border-slate-600">
-                <div className="text-slate-300 text-sm mb-1">Formula:</div>
-                <div className="text-white text-lg font-mono min-h-[2rem] break-all">
-                  {formula || "Click stats and operations to build your formula"}
-                </div>
-              </div>
-              
-              {/* Calculate Button */}
-              <div className="flex gap-3">
-                <button
-                  onClick={handleCalculate}
-                  disabled={!formula}
-                  className="bg-orange-600 hover:bg-orange-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium py-2 px-6 rounded-lg transition-colors"
-                >
-                  Calculate
-                </button>
-                <button
-                  onClick={handleSaveStat}
-                  disabled={!formula || !customStatName || calculatedValue === null}
-                  className="bg-green-600 hover:bg-green-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors"
-                >
-                  Save Stat
-                </button>
-                <button
-                  onClick={() => {
-                    setFormula("");
-                    handleFormulaChange("");
-                  }}
-                  className="bg-slate-600 hover:bg-slate-500 text-white py-2 px-4 rounded-lg transition-colors"
-                >
-                  Clear
-                </button>
-              </div>
+              <input
+                type="text"
+                value={customStatName}
+                onChange={(e) => setCustomStatName(e.target.value)}
+                placeholder="e.g., Impact Score, Efficiency Rating"
+                className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
             </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Formula
+              </label>
+              <input
+                type="text"
+                value={formula}
+                onChange={(e) => handleFormulaChange(e.target.value)}
+                placeholder="e.g., PTS + AST + REB"
+                className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+          </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Statistics */}
+          {/* Save Button */}
+          <div className="mb-6">
+            <button
+              onClick={saveStat}
+              disabled={!customStatName.trim() || !formula.trim() || calculatedValue === null}
+              className="bg-green-600 hover:bg-green-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg transition-colors"
+            >
+              Save Custom Stat
+            </button>
+          </div>
+
+          {/* Quick Calculator */}
+          <div className="bg-slate-800 rounded-lg p-6 border border-slate-700 mb-6">
+            <h3 className="text-lg font-medium text-white mb-4">Quick Calculator</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Player Stats */}
               <div>
-                <h4 className="text-sm font-medium text-slate-400 mb-3">Player Statistics</h4>
+                <h4 className="text-sm font-medium text-slate-400 mb-3">Player Stats</h4>
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    { name: "PPG", value: "PTS" },
-                    { name: "APG", value: "AST" },
-                    { name: "RPG", value: "REB" },
-                    { name: "SPG", value: "STL" },
-                    { name: "BPG", value: "BLK" },
-                    { name: "TPG", value: "TOV" },
-                    { name: "FG%", value: "FG_PCT" },
-                    { name: "FGA", value: "FGA" },
-                    { name: "3P%", value: "THREE_PCT" },
-                    { name: "3PA", value: "3PA" },
-                    { name: "FT%", value: "FT_PCT" },
-                    { name: "FTA", value: "FTA" },
-                    { name: "+/-", value: "PLUS_MINUS" },
-                    { name: "W%", value: "W_PCT" },
+                    { name: "PTS", value: "PTS" },
+                    { name: "AST", value: "AST" },
+                    { name: "REB", value: "REB" },
+                    { name: "STL", value: "STL" },
+                    { name: "BLK", value: "BLK" },
+                    { name: "TOV", value: "TOV" },
+                    { name: "FG%", value: "FG%" },
+                    { name: "3P%", value: "3P%" },
+                    { name: "FT%", value: "FT%" },
+                    { name: "+/-", value: "+/-" },
                     { name: "GP", value: "GP" },
                     { name: "MIN", value: "MIN" }
                   ].map((stat) => (
@@ -668,7 +713,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
             </div>
 
             {/* Calculator Controls */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 mt-4">
               <button
                 onClick={() => {
                   setFormula("");
@@ -703,54 +748,34 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
           {showSavedStats && (
             <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-white">Saved Custom Stats</h3>
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleCleanDuplicates}
-                    className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded text-sm transition-colors"
-                  >
-                    Clean Duplicates
-                  </button>
-                  <button
-                    onClick={() => {
-                      console.log('Manually refreshing saved stats...');
-                      refetchStats().then((result) => {
-                        console.log('Refetch result:', result);
-                      }).catch((error) => {
-                        console.error('Refetch error:', error);
-                      });
-                    }}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors"
-                  >
-                    Refresh
-                  </button>
-                </div>
+                <h3 className="text-lg font-medium text-white">Saved Custom Stats</h3>
+                <button
+                  onClick={() => setShowSavedStats(false)}
+                  className="text-slate-400 hover:text-white"
+                >
+                  ×
+                </button>
               </div>
               {isLoadingStats ? (
-                <div className="text-slate-400">Loading saved stats...</div>
+                <div className="text-center text-slate-400 py-4">Loading saved stats...</div>
               ) : savedStats.length === 0 ? (
-                <div className="text-slate-400">No saved stats yet. Create and save a stat to see it here!</div>
+                <div className="text-center text-slate-400 py-4">No saved stats yet</div>
               ) : (
-                <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {savedStats.map((stat: any) => (
                     <div
                       key={stat.id}
-                      className="bg-slate-700 rounded-lg p-4 border border-slate-600 hover:border-slate-500 transition-colors"
+                      className="bg-slate-700 rounded-lg p-4 cursor-pointer hover:bg-slate-600 transition-colors"
+                      onClick={() => {
+                        setFormula(stat.formula);
+                        setCustomStatName(stat.name);
+                        handleFormulaChange(stat.formula);
+                        setShowSavedStats(false);
+                      }}
                     >
-                      <div className="flex justify-between items-start">
-                        <div 
-                          className="flex-1 cursor-pointer"
-                          onClick={() => {
-                            setFormula(stat.formula);
-                            setCustomStatName(stat.name);
-                            handleFormulaChange(stat.formula);
-                            setShowSavedStats(false);
-                          }}
-                        >
-                          <h4 className="text-white font-medium">{stat.name}</h4>
-                          <p className="text-slate-400 text-sm mt-1">{stat.formula}</p>
-                        </div>
-                        <div className="flex gap-2 ml-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <h4 className="font-medium text-white">{stat.name}</h4>
+                        <div className="flex gap-1">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -771,6 +796,8 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
                           </button>
                         </div>
                       </div>
+                      <div className="text-sm text-slate-300 mb-1">Formula: {stat.formula}</div>
+                      <div className="text-lg font-bold text-orange-400">{stat.value?.toFixed(2)}</div>
                       <div className="text-xs text-slate-500 mt-2">
                         Click to load
                       </div>
@@ -795,45 +822,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
             </div>
           </div>
         </div>
-      </div>
-
-
-
-      {/* Compact Player Stats */}
-      <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-        <div className="flex items-center gap-2 mb-4">
-          <BarChart3 className="w-5 h-5 text-slate-400" />
-          <h3 className="text-lg font-medium text-white">Season Statistics</h3>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-          <div className="bg-slate-700 rounded-lg p-3">
-            <div className="text-slate-400 text-xs">Points</div>
-            <div className="text-orange-400 font-bold">{currentPlayerData.points.toFixed(1)} PPG</div>
-          </div>
-          <div className="bg-slate-700 rounded-lg p-3">
-            <div className="text-slate-400 text-xs">Assists</div>
-            <div className="text-blue-400 font-bold">{currentPlayerData.assists.toFixed(1)} APG</div>
-          </div>
-          <div className="bg-slate-700 rounded-lg p-3">
-            <div className="text-slate-400 text-xs">Rebounds</div>
-            <div className="text-green-400 font-bold">{currentPlayerData.rebounds.toFixed(1)} RPG</div>
-          </div>
-          <div className="bg-slate-700 rounded-lg p-3">
-            <div className="text-slate-400 text-xs">Field Goal %</div>
-            <div className="text-yellow-400 font-bold">{(currentPlayerData.fieldGoalPercentage * 100).toFixed(1)}%</div>
-          </div>
-          <div className="bg-slate-700 rounded-lg p-3">
-            <div className="text-slate-400 text-xs">Plus/Minus</div>
-            <div className={`font-bold ${currentPlayerData.plusMinus >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-              {currentPlayerData.plusMinus > 0 ? '+' : ''}{currentPlayerData.plusMinus.toFixed(1)}
-            </div>
-          </div>
-          <div className="bg-slate-700 rounded-lg p-3">
-            <div className="text-slate-400 text-xs">Games</div>
-            <div className="text-slate-300 font-bold">{currentPlayerData.gamesPlayed} GP</div>
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
