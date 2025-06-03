@@ -41,12 +41,17 @@ export default function LeaderboardTable({
 
   const queryClient = useQueryClient();
 
-  // Fetch player data with explicit fetch
+  // Fetch player data with season filtering
   const { data: players, isLoading: playersLoading, error: playersError } = useQuery({
-    queryKey: ["/api/nba/players"],
+    queryKey: ["/api/nba/players", selectedSeason],
     queryFn: async () => {
       try {
-        const response = await fetch("/api/nba/players", {
+        let url = "/api/nba/players";
+        if (selectedSeason && selectedSeason !== "all-time") {
+          url = `/api/nba/players/season/${selectedSeason}`;
+        }
+        
+        const response = await fetch(url, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -56,7 +61,7 @@ export default function LeaderboardTable({
           throw new Error(`Failed to fetch NBA data: ${response.status}`);
         }
         const data = await response.json();
-        console.log("NBA players loaded:", data.length);
+        console.log(`NBA players loaded for ${selectedSeason}:`, data.length);
         return data;
       } catch (error) {
         console.error("Error fetching NBA players:", error);
