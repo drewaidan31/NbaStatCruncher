@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ArrowLeft, Calculator, TrendingUp, GitCompare } from "lucide-react";
 
 import { evaluate } from "mathjs";
+import FormulaExamples from "./formula-examples";
 
 interface Player {
   playerId: number;
@@ -280,6 +281,14 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
                 </button>
               </div>
             </div>
+
+            {/* Formula Examples */}
+            <FormulaExamples 
+              onSelectFormula={(selectedFormula) => {
+                setFormula(selectedFormula);
+                handleFormulaChange(selectedFormula);
+              }}
+            />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Statistics */}
