@@ -11,6 +11,7 @@ export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTeam, setSelectedTeam] = useState("all");
   const [selectedPosition, setSelectedPosition] = useState("all");
+  const [selectedSeason, setSelectedSeason] = useState("all-time");
 
   return (
     <div className="bg-slate-900 text-slate-50 min-h-screen">

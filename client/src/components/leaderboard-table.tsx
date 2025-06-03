@@ -13,6 +13,7 @@ interface LeaderboardTableProps {
   searchTerm: string;
   selectedTeam: string;
   selectedPosition: string;
+  selectedSeason?: string;
 }
 
 interface PlayerResult {
@@ -20,6 +21,7 @@ interface PlayerResult {
   customStat: number;
   rank: number;
   formula: string;
+  bestSeason?: string;
 }
 
 type SortField = 'rank' | 'player' | 'team' | 'customStat';
@@ -30,6 +32,7 @@ export default function LeaderboardTable({
   searchTerm,
   selectedTeam,
   selectedPosition,
+  selectedSeason = "all-time",
 }: LeaderboardTableProps) {
   const [sortField, setSortField] = useState<SortField>('customStat');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
@@ -68,8 +71,8 @@ export default function LeaderboardTable({
 
   // Calculate custom stats mutation
   const calculateMutation = useMutation({
-    mutationFn: async (formula: string) => {
-      const response = await apiRequest("POST", "/api/nba/calculate", { formula });
+    mutationFn: async ({ formula, season }: { formula: string; season?: string }) => {
+      const response = await apiRequest("POST", "/api/nba/calculate", { formula, season });
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || "Failed to calculate custom statistics");
@@ -89,7 +92,7 @@ export default function LeaderboardTable({
 
   const handleCalculate = () => {
     if (formula.trim()) {
-      calculateMutation.mutate(formula);
+      calculateMutation.mutate({ formula, season: selectedSeason });
     }
   };
 
