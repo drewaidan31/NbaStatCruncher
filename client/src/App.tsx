@@ -63,7 +63,7 @@ function MainApp() {
   const [error, setError] = useState("");
   const [formula, setFormula] = useState("");
   const [results, setResults] = useState([]);
-  const [selectedSeason, setSelectedSeason] = useState("2024-25");
+  const [selectedSeason, setSelectedSeason] = useState("all-time");
   const [viewMode, setViewMode] = useState<ViewMode>('leaderboard');
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [selectedPlayerSeason, setSelectedPlayerSeason] = useState("");
