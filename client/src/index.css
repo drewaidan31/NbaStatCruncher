@@ -108,6 +108,35 @@ html:not(.dark) .dark\:border-slate-700 {
   border-color: #e2e8f0 !important;
 }
 
+/* Force all container backgrounds to be light in light mode */
+html:not(.dark) [class*="bg-slate-800"],
+html:not(.dark) [class*="dark:bg-slate-800"] {
+  background-color: white !important;
+}
+
+html:not(.dark) [class*="bg-slate-900"],
+html:not(.dark) [class*="dark:bg-slate-900"] {
+  background-color: #f8fafc !important;
+}
+
+html:not(.dark) [class*="bg-slate-700"],
+html:not(.dark) [class*="dark:bg-slate-700"] {
+  background-color: white !important;
+}
+
+/* Override specific component containers */
+html:not(.dark) .bg-white.dark\:bg-slate-800 {
+  background-color: white !important;
+}
+
+html:not(.dark) .bg-slate-100.dark\:bg-slate-900 {
+  background-color: #f8fafc !important;
+}
+
+html:not(.dark) .bg-slate-100.dark\:bg-slate-700 {
+  background-color: #f8fafc !important;
+}
+
 /* Fix Recharts tooltip styling for light/dark mode */
 .recharts-tooltip-wrapper .recharts-default-tooltip {
   background-color: white !important;
