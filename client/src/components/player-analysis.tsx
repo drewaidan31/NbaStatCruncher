@@ -459,37 +459,37 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
       {activeTab === 'overview' && (
         <div className="space-y-6">
           {/* Compact Player Stats */}
-          <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+          <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border border-slate-300 dark:border-slate-700">
             <div className="flex items-center gap-2 mb-4">
-              <BarChart3 className="w-5 h-5 text-slate-400" />
-              <h3 className="text-lg font-medium text-white">Season Statistics</h3>
+              <BarChart3 className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+              <h3 className="text-lg font-medium text-slate-900 dark:text-white">Season Statistics</h3>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-              <div className="bg-slate-700 rounded-lg p-3">
-                <div className="text-slate-400 text-xs">Points</div>
-                <div className="text-orange-400 font-bold">{currentPlayerData.points.toFixed(1)} PPG</div>
+              <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-3">
+                <div className="text-slate-600 dark:text-slate-400 text-xs">Points</div>
+                <div className="text-orange-600 dark:text-orange-400 font-bold">{currentPlayerData.points.toFixed(1)} PPG</div>
               </div>
-              <div className="bg-slate-700 rounded-lg p-3">
-                <div className="text-slate-400 text-xs">Assists</div>
-                <div className="text-blue-400 font-bold">{currentPlayerData.assists.toFixed(1)} APG</div>
+              <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-3">
+                <div className="text-slate-600 dark:text-slate-400 text-xs">Assists</div>
+                <div className="text-blue-600 dark:text-blue-400 font-bold">{currentPlayerData.assists.toFixed(1)} APG</div>
               </div>
-              <div className="bg-slate-700 rounded-lg p-3">
-                <div className="text-slate-400 text-xs">Rebounds</div>
-                <div className="text-green-400 font-bold">{currentPlayerData.rebounds.toFixed(1)} RPG</div>
+              <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-3">
+                <div className="text-slate-600 dark:text-slate-400 text-xs">Rebounds</div>
+                <div className="text-green-600 dark:text-green-400 font-bold">{currentPlayerData.rebounds.toFixed(1)} RPG</div>
               </div>
-              <div className="bg-slate-700 rounded-lg p-3">
-                <div className="text-slate-400 text-xs">Field Goal %</div>
-                <div className="text-yellow-400 font-bold">{(currentPlayerData.fieldGoalPercentage * 100).toFixed(1)}%</div>
+              <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-3">
+                <div className="text-slate-600 dark:text-slate-400 text-xs">Field Goal %</div>
+                <div className="text-yellow-600 dark:text-yellow-400 font-bold">{(currentPlayerData.fieldGoalPercentage * 100).toFixed(1)}%</div>
               </div>
-              <div className="bg-slate-700 rounded-lg p-3">
-                <div className="text-slate-400 text-xs">Plus/Minus</div>
-                <div className={`font-bold ${currentPlayerData.plusMinus >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+              <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-3">
+                <div className="text-slate-600 dark:text-slate-400 text-xs">Plus/Minus</div>
+                <div className={`font-bold ${currentPlayerData.plusMinus >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                   {currentPlayerData.plusMinus > 0 ? '+' : ''}{currentPlayerData.plusMinus.toFixed(1)}
                 </div>
               </div>
-              <div className="bg-slate-700 rounded-lg p-3">
-                <div className="text-slate-400 text-xs">Games Played</div>
-                <div className="text-purple-400 font-bold">{currentPlayerData.gamesPlayed}</div>
+              <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-3">
+                <div className="text-slate-600 dark:text-slate-400 text-xs">Games Played</div>
+                <div className="text-purple-600 dark:text-purple-400 font-bold">{currentPlayerData.gamesPlayed}</div>
               </div>
             </div>
           </div>

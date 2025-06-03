@@ -200,15 +200,15 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
         <div className="space-y-2">
           {isLoading ? (
             <div className="text-center py-4">
-              <div className="text-slate-400">Loading players...</div>
+              <div className="text-slate-600 dark:text-slate-400">Loading players...</div>
             </div>
           ) : filteredPlayers.length > 0 ? (
             <>
-              <div className="text-sm text-slate-400 mb-2">
+              <div className="text-sm text-slate-600 dark:text-slate-400 mb-2">
                 {filteredPlayers.length} suggestion{filteredPlayers.length !== 1 ? 's' : ''}
                 {filteredPlayers.length === 10 ? ' (showing top 10)' : ''}
                 {currentFormula && customStatResults && (
-                  <span className="text-green-400 ml-2">• Showing custom stat: {currentFormula}</span>
+                  <span className="text-green-600 dark:text-green-400 ml-2">• Showing custom stat: {currentFormula}</span>
                 )}
               </div>
               <div className="max-h-60 overflow-y-auto space-y-1">
@@ -216,16 +216,16 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
                   <div
                     key={player.playerId}
                     onClick={() => handlePlayerClick(player)}
-                    className="bg-slate-700 hover:bg-slate-600 p-3 rounded-lg cursor-pointer transition-colors border border-slate-600"
+                    className="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 p-3 rounded-lg cursor-pointer transition-colors border border-slate-300 dark:border-slate-600"
                   >
                     <div className="flex justify-between items-start">
                       <div>
-                        <div className="font-medium text-white">{player.name}</div>
-                        <div className="text-sm text-slate-300">
+                        <div className="font-medium text-slate-900 dark:text-white">{player.name}</div>
+                        <div className="text-sm text-slate-600 dark:text-slate-300">
                           {player.team} • {player.position} • {player.currentSeason || "2024-25"}
                         </div>
                         {player.availableSeasons && player.availableSeasons.length > 1 && (
-                          <div className="text-xs text-slate-400 mt-1">
+                          <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                             Played in {player.availableSeasons.length} seasons
                           </div>
                         )}
@@ -236,17 +236,17 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
                           if (customStat && currentFormula) {
                             return (
                               <>
-                                <div className="text-green-400 font-bold text-base">#{customStat.rank}</div>
-                                <div className="text-green-300 font-medium">{customStat.value.toFixed(2)}</div>
-                                <div className="text-xs text-slate-400">Custom Stat</div>
+                                <div className="text-green-600 dark:text-green-400 font-bold text-base">#{customStat.rank}</div>
+                                <div className="text-green-700 dark:text-green-300 font-medium">{customStat.value.toFixed(2)}</div>
+                                <div className="text-xs text-slate-500 dark:text-slate-400">Custom Stat</div>
                               </>
                             );
                           } else {
                             return (
                               <>
-                                <div className="text-orange-400 font-medium">{player.points.toFixed(1)} PPG</div>
-                                <div className="text-slate-400">{player.assists.toFixed(1)} APG</div>
-                                <div className="text-slate-400">{player.rebounds.toFixed(1)} RPG</div>
+                                <div className="text-orange-600 dark:text-orange-400 font-medium">{player.points.toFixed(1)} PPG</div>
+                                <div className="text-slate-600 dark:text-slate-400">{player.assists.toFixed(1)} APG</div>
+                                <div className="text-slate-600 dark:text-slate-400">{player.rebounds.toFixed(1)} RPG</div>
                               </>
                             );
                           }
