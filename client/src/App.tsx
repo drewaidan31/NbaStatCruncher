@@ -636,9 +636,16 @@ function MainApp() {
                 </thead>
                 <tbody>
                   {results.map((result: any, index) => (
-                    <tr key={result.player.id} className="border-b border-slate-700">
+                    <tr key={`${result.player.id}-${result.bestSeason}-${index}`} className="border-b border-slate-700">
                       <td className="py-2">{index + 1}</td>
-                      <td className="py-2 font-medium">{result.player.name}</td>
+                      <td className="py-2 font-medium">
+                        <button
+                          onClick={() => handlePlayerSelect(result.player, result.bestSeason)}
+                          className="text-white hover:text-orange-400 transition-colors cursor-pointer text-left underline decoration-slate-500 hover:decoration-orange-400"
+                        >
+                          {result.player.name}
+                        </button>
+                      </td>
                       <td className="py-2">{result.player.team}</td>
                       <td className="py-2">{result.customStat.toFixed(2)}</td>
                       <td className="py-2 text-orange-400 font-medium">{result.bestSeason}</td>
