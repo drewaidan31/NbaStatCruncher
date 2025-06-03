@@ -307,7 +307,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           
           return {
-            player,
+            player: {
+              ...player,
+              team: targetSeason?.team || player.team // Use team from specific season
+            },
             customStat: typeof customStat === 'number' ? 
               Number(customStat.toFixed(2)) : 0,
             bestSeason: targetSeason?.season || player.currentSeason || '2024-25',
@@ -316,9 +319,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } catch (error) {
           console.error(`Error calculating stat for ${player.name}:`, error);
           return {
-            player,
+            player: {
+              ...player,
+              team: targetSeason?.team || player.team
+            },
             customStat: 0,
-            bestSeason: player.currentSeason || '2024-25',
+            bestSeason: targetSeason?.season || player.currentSeason || '2024-25',
             formula
           };
         }
