@@ -137,19 +137,36 @@ html:not(.dark) .bg-slate-100.dark\:bg-slate-700 {
   background-color: #f8fafc !important;
 }
 
-/* Nuclear option - force ALL elements to respect light mode */
-html:not(.dark) * {
-  /* Force any element with dark background to be white */
+/* FORCE LIGHT MODE - Override everything */
+html * {
+  /* Override ALL dark backgrounds regardless of theme */
 }
 
-html:not(.dark) *[class*="bg-slate-8"],
-html:not(.dark) *[class*="dark:bg-slate-8"] {
+*[class*="bg-slate-8"],
+*[class*="dark:bg-slate-8"],
+*.bg-white.dark\:bg-slate-800 {
   background-color: white !important;
 }
 
-html:not(.dark) *[class*="bg-slate-9"],
-html:not(.dark) *[class*="dark:bg-slate-9"] {
+*[class*="bg-slate-9"],
+*[class*="dark:bg-slate-9"] {
   background-color: #f8fafc !important;
+}
+
+*[class*="bg-slate-7"],
+*[class*="dark:bg-slate-7"] {
+  background-color: white !important;
+}
+
+/* Force text colors to be dark in all cases */
+*[class*="text-white"],
+*[class*="dark:text-white"] {
+  color: #0f172a !important;
+}
+
+*[class*="text-slate-50"],
+*[class*="dark:text-slate-50"] {
+  color: #0f172a !important;
 }
 
 /* Force ALL elements with dark background classes to be light */
