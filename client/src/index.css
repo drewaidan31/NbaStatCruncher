@@ -124,8 +124,8 @@ html:not(.dark) [class*="dark:bg-slate-700"] {
   background-color: white !important;
 }
 
-/* Override specific component containers */
-html:not(.dark) .bg-white.dark\:bg-slate-800 {
+/* Override specific component containers with highest specificity */
+html:not(.dark) div.bg-white.dark\:bg-slate-800 {
   background-color: white !important;
 }
 
@@ -134,6 +134,21 @@ html:not(.dark) .bg-slate-100.dark\:bg-slate-900 {
 }
 
 html:not(.dark) .bg-slate-100.dark\:bg-slate-700 {
+  background-color: #f8fafc !important;
+}
+
+/* Nuclear option - force ALL elements to respect light mode */
+html:not(.dark) * {
+  /* Force any element with dark background to be white */
+}
+
+html:not(.dark) *[class*="bg-slate-8"],
+html:not(.dark) *[class*="dark:bg-slate-8"] {
+  background-color: white !important;
+}
+
+html:not(.dark) *[class*="bg-slate-9"],
+html:not(.dark) *[class*="dark:bg-slate-9"] {
   background-color: #f8fafc !important;
 }
 
