@@ -558,22 +558,22 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
                   <div className="h-64 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={chartData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#94A3B8" />
                         <XAxis 
                           dataKey="season" 
-                          stroke="var(--chart-text)"
+                          stroke="#64748B"
                           fontSize={12}
                           angle={-45}
                           textAnchor="end"
                           height={60}
                         />
-                        <YAxis stroke="var(--chart-text)" fontSize={12} />
+                        <YAxis stroke="#64748B" fontSize={12} />
                         <Tooltip 
                           contentStyle={{ 
-                            backgroundColor: 'var(--chart-tooltip-bg)', 
-                            border: '1px solid var(--chart-tooltip-border)',
+                            backgroundColor: '#FFFFFF', 
+                            border: '1px solid #E2E8F0',
                             borderRadius: '8px',
-                            color: 'var(--chart-tooltip-text)'
+                            color: '#1E293B'
                           }}
                           labelFormatter={(label) => {
                             const point = chartData.find(d => d.season === label);
@@ -583,10 +583,10 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
                         <Line 
                           type="monotone" 
                           dataKey="value" 
-                          stroke="var(--chart-line)" 
+                          stroke="#F97316" 
                           strokeWidth={3}
-                          dot={{ fill: 'var(--chart-line)', strokeWidth: 2, r: 4 }}
-                          activeDot={{ r: 6, fill: 'var(--chart-line-active)' }}
+                          dot={{ fill: '#F97316', strokeWidth: 2, r: 4 }}
+                          activeDot={{ r: 6, fill: '#EA580C' }}
                         />
                       </LineChart>
                     </ResponsiveContainer>

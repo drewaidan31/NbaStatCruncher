@@ -234,16 +234,16 @@ export default function LeaderboardTable({
   }
 
   return (
-    <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 overflow-hidden">
       {/* Header */}
-      <div className="bg-slate-700 px-6 py-4 border-b border-slate-600">
+      <div className="bg-slate-100 dark:bg-slate-700 px-6 py-4 border-b border-slate-300 dark:border-slate-600">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-slate-50">
+          <h3 className="font-semibold text-slate-900 dark:text-slate-50">
             {formula ? `Results: ${formula}` : "Custom Stat Leaderboard"}
           </h3>
           <div className="flex items-center gap-4">
             {filteredAndSortedResults.length > 0 && (
-              <span className="text-sm text-slate-400">
+              <span className="text-sm text-slate-600 dark:text-slate-400">
                 Showing {filteredAndSortedResults.length} players
               </span>
             )}
