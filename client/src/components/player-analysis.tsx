@@ -139,8 +139,10 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
     'TPG': currentPlayerData.turnovers, // Support both formats
     'FG_PCT': currentPlayerData.fieldGoalPercentage,
     'FG%': currentPlayerData.fieldGoalPercentage, // Support both formats
+    'FGA': currentPlayerData.fieldGoalAttempts || 0,
     'THREE_PCT': currentPlayerData.threePointPercentage,
     '3P%': currentPlayerData.threePointPercentage, // Support both formats
+    '3PA': currentPlayerData.threePointAttempts || 0,
     'FT_PCT': currentPlayerData.freeThrowPercentage,
     'FT%': currentPlayerData.freeThrowPercentage, // Support both formats
     'GP': currentPlayerData.gamesPlayed,
@@ -165,8 +167,10 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
       'TPG': seasonData.turnovers, // Support both formats
       'FG_PCT': seasonData.fieldGoalPercentage,
       'FG%': seasonData.fieldGoalPercentage, // Support both formats
+      'FGA': seasonData.fieldGoalAttempts || 0,
       'THREE_PCT': seasonData.threePointPercentage,
       '3P%': seasonData.threePointPercentage, // Support both formats
+      '3PA': seasonData.threePointAttempts || 0,
       'FT_PCT': seasonData.freeThrowPercentage,
       'FT%': seasonData.freeThrowPercentage, // Support both formats
       'GP': seasonData.gamesPlayed,
