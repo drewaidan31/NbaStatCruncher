@@ -122,8 +122,11 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
           blocks: seasonData.blocks,
           turnovers: seasonData.turnovers,
           fieldGoalPercentage: seasonData.fieldGoalPercentage,
+          fieldGoalAttempts: seasonData.fieldGoalAttempts,
           threePointPercentage: seasonData.threePointPercentage,
+          threePointAttempts: seasonData.threePointAttempts,
           freeThrowPercentage: seasonData.freeThrowPercentage,
+          freeThrowAttempts: seasonData.freeThrowAttempts,
           plusMinus: seasonData.plusMinus
         };
         setCurrentPlayerData(updatedPlayerData);
@@ -154,6 +157,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
     '3PA': currentPlayerData.threePointAttempts || 0,
     'FT_PCT': currentPlayerData.freeThrowPercentage,
     'FT%': currentPlayerData.freeThrowPercentage, // Support both formats
+    'FTA': currentPlayerData.freeThrowAttempts || 0,
     'GP': currentPlayerData.gamesPlayed,
     'PLUS_MINUS': currentPlayerData.plusMinus,
     '+/-': currentPlayerData.plusMinus, // Support both formats
