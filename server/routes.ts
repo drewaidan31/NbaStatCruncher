@@ -228,58 +228,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Calculate custom stat for each player's best season
+      // Calculate custom stat for each player
       const results = players.map(player => {
         try {
-          let bestSeason = null;
-          let bestCustomStat = -Infinity;
+          let targetSeason = null;
+          let customStat = 0;
           
-          // If player has seasons data, find their best season for this formula
-          if (player.seasons && Array.isArray(player.seasons)) {
-            for (const season of player.seasons) {
+          if (season && season !== "all-time") {
+            // For specific season, use only that season's data
+            if (player.seasons && Array.isArray(player.seasons)) {
+              targetSeason = player.seasons.find(s => s.season === season);
+              if (!targetSeason) {
+                // Player didn't play in this season, skip them
+                return null;
+              }
+              
+              // Calculate custom stat using the specific season's data
               let evaluationFormula = formula.toUpperCase();
               
-              // Replace NBA stat abbreviations with season values
               for (const [abbrev, field] of Object.entries(NBA_STAT_MAPPINGS)) {
-                const value = season[field] as number || 0;
+                const value = targetSeason[field] as number || 0;
                 evaluationFormula = evaluationFormula.replace(
                   new RegExp(`\\b${abbrev}\\b`, 'g'), 
                   value.toString()
                 );
               }
               
-              try {
-                const seasonCustomStat = evaluate(evaluationFormula);
-                if (typeof seasonCustomStat === 'number' && seasonCustomStat > bestCustomStat) {
-                  bestCustomStat = seasonCustomStat;
-                  bestSeason = season;
-                }
-              } catch (seasonError) {
-                // Skip invalid seasons
-                continue;
-              }
+              customStat = evaluate(evaluationFormula);
+            } else {
+              // No season data available, skip
+              return null;
             }
           } else {
-            // Fallback to career averages if no seasons data
-            let evaluationFormula = formula.toUpperCase();
+            // For all-time, find their best season
+            let bestSeason = null;
+            let bestCustomStat = -Infinity;
             
-            for (const [abbrev, field] of Object.entries(NBA_STAT_MAPPINGS)) {
-              const value = player[field as keyof Player] as number;
-              evaluationFormula = evaluationFormula.replace(
-                new RegExp(`\\b${abbrev}\\b`, 'g'), 
-                value.toString()
-              );
+            if (player.seasons && Array.isArray(player.seasons)) {
+              for (const seasonData of player.seasons) {
+                let evaluationFormula = formula.toUpperCase();
+                
+                // Replace NBA stat abbreviations with season values
+                for (const [abbrev, field] of Object.entries(NBA_STAT_MAPPINGS)) {
+                  const value = seasonData[field] as number || 0;
+                  evaluationFormula = evaluationFormula.replace(
+                    new RegExp(`\\b${abbrev}\\b`, 'g'), 
+                    value.toString()
+                  );
+                }
+                
+                try {
+                  const seasonCustomStat = evaluate(evaluationFormula);
+                  if (typeof seasonCustomStat === 'number' && seasonCustomStat > bestCustomStat) {
+                    bestCustomStat = seasonCustomStat;
+                    bestSeason = seasonData;
+                  }
+                } catch (seasonError) {
+                  continue;
+                }
+              }
+              targetSeason = bestSeason;
+              customStat = bestCustomStat;
+            } else {
+              // Fallback to career averages if no seasons data
+              let evaluationFormula = formula.toUpperCase();
+              
+              for (const [abbrev, field] of Object.entries(NBA_STAT_MAPPINGS)) {
+                const value = player[field as keyof Player] as number;
+                evaluationFormula = evaluationFormula.replace(
+                  new RegExp(`\\b${abbrev}\\b`, 'g'), 
+                  value.toString()
+                );
+              }
+              
+              customStat = evaluate(evaluationFormula);
+              targetSeason = { season: player.currentSeason || '2024-25' };
             }
-            
-            bestCustomStat = evaluate(evaluationFormula);
-            bestSeason = { season: player.currentSeason || '2024-25' };
           }
           
           return {
             player,
-            customStat: typeof bestCustomStat === 'number' ? 
-              Number(bestCustomStat.toFixed(2)) : 0,
-            bestSeason: bestSeason?.season || player.currentSeason || '2024-25',
+            customStat: typeof customStat === 'number' ? 
+              Number(customStat.toFixed(2)) : 0,
+            bestSeason: targetSeason?.season || player.currentSeason || '2024-25',
             formula
           };
         } catch (error) {
@@ -293,11 +324,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
+      // Filter out null results (players who didn't play in the selected season)
+      const validResults = results.filter((result): result is NonNullable<typeof result> => result !== null);
+
       // Sort by custom stat value (highest first)
-      results.sort((a, b) => b.customStat - a.customStat);
+      validResults.sort((a, b) => b.customStat - a.customStat);
       
       // Add rank
-      const rankedResults = results.map((result, index) => ({
+      const rankedResults = validResults.map((result, index) => ({
         ...result,
         rank: index + 1
       }));
