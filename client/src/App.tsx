@@ -7,6 +7,7 @@ import PlayerAnalysis from "./components/player-analysis";
 import PlayerComparison from "./components/player-comparison";
 import FormulaExamples from "./components/formula-examples";
 import UsageRateLeaderboard from "./components/usage-rate-leaderboard";
+import UserProfile from "./components/user-profile";
 
 import { BarChart3, Search, Calculator, TrendingUp, Sparkles, RefreshCw } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -745,13 +746,18 @@ function MainApp() {
   return (
     <div className="min-h-screen bg-slate-900 text-white">
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
-            NBA Custom Stats Calculator
-          </h1>
-          <p className="text-xl text-slate-300">
-            Create custom basketball statistics with authentic NBA player data
-          </p>
+        <div className="flex justify-between items-start mb-8">
+          <div className="text-center flex-1">
+            <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
+              NBA Custom Stats Calculator
+            </h1>
+            <p className="text-xl text-slate-300">
+              Create custom basketball statistics with authentic NBA player data
+            </p>
+          </div>
+          <div className="ml-8">
+            <UserProfile />
+          </div>
         </div>
 
         {/* Navigation Bar */}

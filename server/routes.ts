@@ -26,6 +26,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User custom stats routes
+  app.post('/api/custom-stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { name, formula, description } = req.body;
+      
+      if (!name || !formula) {
+        return res.status(400).json({ message: "Name and formula are required" });
+      }
+
+      const customStat = await storage.saveCustomStat({
+        name,
+        formula,
+        description,
+        userId
+      });
+
+      res.json(customStat);
+    } catch (error) {
+      console.error("Error saving custom stat:", error);
+      res.status(500).json({ message: "Failed to save custom stat" });
+    }
+  });
+
+  app.get('/api/custom-stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const customStats = await storage.getUserCustomStats(userId);
+      res.json(customStats);
+    } catch (error) {
+      console.error("Error fetching custom stats:", error);
+      res.status(500).json({ message: "Failed to fetch custom stats" });
+    }
+  });
+
+  app.delete('/api/custom-stats/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const statId = parseInt(req.params.id);
+      
+      if (isNaN(statId)) {
+        return res.status(400).json({ message: "Invalid stat ID" });
+      }
+
+      const deleted = await storage.deleteCustomStat(statId, userId);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Custom stat not found" });
+      }
+
+      res.json({ message: "Custom stat deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting custom stat:", error);
+      res.status(500).json({ message: "Failed to delete custom stat" });
+    }
+  });
+
+  app.put('/api/custom-stats/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const statId = parseInt(req.params.id);
+      const { name, formula, description } = req.body;
+      
+      if (isNaN(statId)) {
+        return res.status(400).json({ message: "Invalid stat ID" });
+      }
+
+      const updatedStat = await storage.updateCustomStat(statId, userId, {
+        name,
+        formula,
+        description
+      });
+
+      if (!updatedStat) {
+        return res.status(404).json({ message: "Custom stat not found" });
+      }
+
+      res.json(updatedStat);
+    } catch (error) {
+      console.error("Error updating custom stat:", error);
+      res.status(500).json({ message: "Failed to update custom stat" });
+    }
+  });
+
   // Generate stat name
   app.post("/api/nba/generate-name", async (req, res) => {
     try {
