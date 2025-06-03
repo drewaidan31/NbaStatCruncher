@@ -695,7 +695,7 @@ function MainApp() {
                       <td className="py-2">{result.player.team}</td>
                       <td className="py-2">
                         {formula.includes("eFG%") || formula.includes("TS%") ? 
-                          `${(result.customStat * 100).toFixed(3)}%` : 
+                          `${(result.customStat * 100).toFixed(1)}%` : 
                           result.customStat.toFixed(2)
                         }
                       </td>
