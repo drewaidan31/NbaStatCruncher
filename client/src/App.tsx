@@ -13,6 +13,7 @@ import PlayerComparison from "./components/player-comparison";
 import FormulaExamples from "./components/formula-examples";
 import UsageRateLeaderboard from "./components/usage-rate-leaderboard";
 import UserProfile from "./components/user-profile";
+import TeamStats from "./components/team-stats";
 
 
 import { BarChart3, Search, Calculator, TrendingUp, Sparkles, RefreshCw, ChevronDown } from "lucide-react";
