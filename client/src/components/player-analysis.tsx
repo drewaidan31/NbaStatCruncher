@@ -588,6 +588,193 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
                   </div>
                 </div>
               )}
+
+              {/* Player Career Progression Charts */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                {/* Points Progression */}
+                <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+                  <div className="flex items-center gap-2 mb-4">
+                    <TrendingUp className="w-5 h-5 text-orange-400" />
+                    <h3 className="text-lg font-medium text-white">Points Per Game</h3>
+                    <span className="text-sm text-slate-400">Career Progression</span>
+                  </div>
+                  <div className="h-48 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={player.seasons?.map(s => ({ season: s.season, value: s.points, team: s.team })) || []}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <XAxis 
+                          dataKey="season" 
+                          stroke="#9CA3AF"
+                          fontSize={10}
+                          angle={-45}
+                          textAnchor="end"
+                          height={50}
+                        />
+                        <YAxis stroke="#9CA3AF" fontSize={10} />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: '#1F2937', 
+                            border: '1px solid #374151',
+                            borderRadius: '8px',
+                            color: '#F9FAFB'
+                          }}
+                          labelFormatter={(label) => {
+                            const point = player.seasons?.find(s => s.season === label);
+                            return `${label} (${point?.team || 'N/A'})`;
+                          }}
+                          formatter={(value) => [`${Number(value).toFixed(1)} PPG`, 'Points']}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="value" 
+                          stroke="#F97316" 
+                          strokeWidth={2}
+                          dot={{ fill: '#F97316', strokeWidth: 1, r: 3 }}
+                          activeDot={{ r: 5, fill: '#EA580C' }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Assists Progression */}
+                <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+                  <div className="flex items-center gap-2 mb-4">
+                    <BarChart3 className="w-5 h-5 text-blue-400" />
+                    <h3 className="text-lg font-medium text-white">Assists Per Game</h3>
+                    <span className="text-sm text-slate-400">Career Progression</span>
+                  </div>
+                  <div className="h-48 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={player.seasons?.map(s => ({ season: s.season, value: s.assists, team: s.team })) || []}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <XAxis 
+                          dataKey="season" 
+                          stroke="#9CA3AF"
+                          fontSize={10}
+                          angle={-45}
+                          textAnchor="end"
+                          height={50}
+                        />
+                        <YAxis stroke="#9CA3AF" fontSize={10} />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: '#1F2937', 
+                            border: '1px solid #374151',
+                            borderRadius: '8px',
+                            color: '#F9FAFB'
+                          }}
+                          labelFormatter={(label) => {
+                            const point = player.seasons?.find(s => s.season === label);
+                            return `${label} (${point?.team || 'N/A'})`;
+                          }}
+                          formatter={(value) => [`${Number(value).toFixed(1)} APG`, 'Assists']}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="value" 
+                          stroke="#3B82F6" 
+                          strokeWidth={2}
+                          dot={{ fill: '#3B82F6', strokeWidth: 1, r: 3 }}
+                          activeDot={{ r: 5, fill: '#1D4ED8' }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Rebounds Progression */}
+                <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Target className="w-5 h-5 text-green-400" />
+                    <h3 className="text-lg font-medium text-white">Rebounds Per Game</h3>
+                    <span className="text-sm text-slate-400">Career Progression</span>
+                  </div>
+                  <div className="h-48 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={player.seasons?.map(s => ({ season: s.season, value: s.rebounds, team: s.team })) || []}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <XAxis 
+                          dataKey="season" 
+                          stroke="#9CA3AF"
+                          fontSize={10}
+                          angle={-45}
+                          textAnchor="end"
+                          height={50}
+                        />
+                        <YAxis stroke="#9CA3AF" fontSize={10} />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: '#1F2937', 
+                            border: '1px solid #374151',
+                            borderRadius: '8px',
+                            color: '#F9FAFB'
+                          }}
+                          labelFormatter={(label) => {
+                            const point = player.seasons?.find(s => s.season === label);
+                            return `${label} (${point?.team || 'N/A'})`;
+                          }}
+                          formatter={(value) => [`${Number(value).toFixed(1)} RPG`, 'Rebounds']}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="value" 
+                          stroke="#10B981" 
+                          strokeWidth={2}
+                          dot={{ fill: '#10B981', strokeWidth: 1, r: 3 }}
+                          activeDot={{ r: 5, fill: '#059669' }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Field Goal Percentage Progression */}
+                <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+                  <div className="flex items-center gap-2 mb-4">
+                    <BarChart3 className="w-5 h-5 text-yellow-400" />
+                    <h3 className="text-lg font-medium text-white">Field Goal %</h3>
+                    <span className="text-sm text-slate-400">Career Progression</span>
+                  </div>
+                  <div className="h-48 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={player.seasons?.map(s => ({ season: s.season, value: s.fieldGoalPercentage * 100, team: s.team })) || []}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <XAxis 
+                          dataKey="season" 
+                          stroke="#9CA3AF"
+                          fontSize={10}
+                          angle={-45}
+                          textAnchor="end"
+                          height={50}
+                        />
+                        <YAxis stroke="#9CA3AF" fontSize={10} />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: '#1F2937', 
+                            border: '1px solid #374151',
+                            borderRadius: '8px',
+                            color: '#F9FAFB'
+                          }}
+                          labelFormatter={(label) => {
+                            const point = player.seasons?.find(s => s.season === label);
+                            return `${label} (${point?.team || 'N/A'})`;
+                          }}
+                          formatter={(value) => [`${Number(value).toFixed(1)}%`, 'FG%']}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="value" 
+                          stroke="#F59E0B" 
+                          strokeWidth={2}
+                          dot={{ fill: '#F59E0B', strokeWidth: 1, r: 3 }}
+                          activeDot={{ r: 5, fill: '#D97706' }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
             </>
           )}
 
