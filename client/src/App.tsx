@@ -5,7 +5,7 @@ import SaveStatDialog from "./components/save-stat-dialog";
 import PlayerSearch from "./components/player-search";
 import PlayerAnalysis from "./components/player-analysis";
 import PlayerComparison from "./components/player-comparison";
-import TeamLeaderboard from "./components/team-leaderboard";
+
 import { BarChart3, Search, Calculator, TrendingUp, Sparkles, RefreshCw } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { evaluate } from "mathjs";
@@ -80,7 +80,6 @@ function MainApp() {
   const [featuredStat, setFeaturedStat] = useState<{name: string, formula: string, description: string} | null>(null);
   const [featuredChartData, setFeaturedChartData] = useState<Array<{season: string, value: number, team: string}>>([]);
   const [refreshCounter, setRefreshCounter] = useState(0);
-  const [showTeamLeaderboard, setShowTeamLeaderboard] = useState(false);
 
   // Preset custom stat equations for the showcase
   const presetStats = [
@@ -621,33 +620,7 @@ function MainApp() {
           )}
         </div>
 
-        {/* Add Team Leaderboard Toggle */}
-        <div className="mb-6 flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="team-view-toggle"
-              checked={showTeamLeaderboard}
-              onChange={(e) => setShowTeamLeaderboard(e.target.checked)}
-              className="w-4 h-4 text-orange-600 bg-slate-700 border-slate-600 rounded focus:ring-orange-500"
-            />
-            <label htmlFor="team-view-toggle" className="text-sm text-slate-300">
-              Team Leaderboard View
-            </label>
-          </div>
-          <div className="text-xs text-slate-400">
-            {showTeamLeaderboard ? "View teams ranked by average formula scores" : "View individual player rankings"}
-          </div>
-        </div>
-
-        {/* Display Team Leaderboard or Regular Results */}
-        {showTeamLeaderboard && formula.trim() ? (
-          <TeamLeaderboard
-            formula={formula}
-            selectedSeason={selectedSeason}
-            searchTerm=""
-          />
-        ) : results.length > 0 ? (
+        {results.length > 0 && (
           <div id="leaderboard-results" className="bg-slate-800 rounded-xl border border-slate-700 p-6">
             <h3 className="text-lg font-semibold mb-4">Custom Statistics Leaderboard</h3>
             <div className="overflow-x-auto">
@@ -675,7 +648,7 @@ function MainApp() {
               </table>
             </div>
           </div>
-        ) : null}
+        )}
 
         {savedStats.length > 0 && (
           <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
