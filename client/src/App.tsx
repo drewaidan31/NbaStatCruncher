@@ -803,7 +803,8 @@ function MainApp() {
                 id="season-select"
                 value={selectedSeason}
                 onChange={(e) => handleSeasonChange(e.target.value)}
-                className="bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 appearance-none"
+                style={{ colorScheme: 'light dark' }}
               >
                 <option value="all-time">All-Time Leaders (1996-2025)</option>
                 <option value="2024-25">2024-25 Season (Current)</option>
