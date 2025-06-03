@@ -6,6 +6,7 @@ import { evaluate } from "mathjs";
 import { spawn } from "child_process";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { generateStatName } from "./openai-service";
+import { getPlayerShotChart } from "./shot-chart-service";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -48,6 +49,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error clearing players:", error);
       res.status(500).json({ message: "Failed to clear player cache" });
+    }
+  });
+
+  // Get player shot chart data
+  app.get("/api/nba/players/:playerId/shots", async (req, res) => {
+    try {
+      const playerId = parseInt(req.params.playerId);
+      const season = req.query.season as string || '2024-25';
+      
+      if (isNaN(playerId)) {
+        return res.status(400).json({ message: "Invalid player ID" });
+      }
+      
+      const shotData = await getPlayerShotChart(playerId, season);
+      
+      if (!shotData) {
+        return res.status(404).json({ message: "Shot chart data not available" });
+      }
+      
+      res.json(shotData);
+    } catch (error) {
+      console.error("Error fetching shot chart:", error);
+      res.status(500).json({ message: "Failed to fetch shot chart data" });
     }
   });
 

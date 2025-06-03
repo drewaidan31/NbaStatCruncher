@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Calculator, TrendingUp, Sparkles, BarChart3, Calendar } from "lucide-react";
+import { ArrowLeft, Calculator, TrendingUp, Sparkles, BarChart3, Calendar, Target } from "lucide-react";
 import FormulaExamples from "./formula-examples";
+import ShotChart from "./shot-chart";
 import { evaluate } from "mathjs";
 import { useQuery } from "@tanstack/react-query";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
