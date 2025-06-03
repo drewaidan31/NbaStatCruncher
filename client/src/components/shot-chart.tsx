@@ -171,12 +171,11 @@ export default function ShotChart({ playerId, playerName, season = "2024-25" }: 
                     cx={coords.x}
                     cy={coords.y}
                     r="3"
-                    fill={shot.shotMade ? "#10B981" : "#EF4444"}
-                    fillOpacity="0.7"
-                    stroke={shot.shotMade ? "#059669" : "#DC2626"}
-                    strokeWidth="1"
+                    fill={shot.shotMade ? "#0F766E" : "#B45309"}
+                    fillOpacity="0.8"
+                    stroke={shot.shotMade ? "#134E4A" : "#92400E"}
+                    strokeWidth="2"
                     className="hover:r-4 transition-all cursor-pointer"
-                    title={`${shot.actionType} - ${shot.shotMade ? 'Made' : 'Missed'} (${shot.shotDistance}ft)`}
                   />
                 );
               })}
@@ -185,11 +184,11 @@ export default function ShotChart({ playerId, playerName, season = "2024-25" }: 
           
           <div className="flex items-center justify-center gap-4 mt-3 text-sm">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              <div className="w-3 h-3 rounded-full border-2" style={{ backgroundColor: "#0F766E", borderColor: "#134E4A" }}></div>
               <span className="text-slate-300">Made ({summary.totalMakes})</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+              <div className="w-3 h-3 rounded-full border-2" style={{ backgroundColor: "#B45309", borderColor: "#92400E" }}></div>
               <span className="text-slate-300">Missed ({summary.totalAttempts - summary.totalMakes})</span>
             </div>
           </div>
@@ -223,8 +222,11 @@ export default function ShotChart({ playerId, playerName, season = "2024-25" }: 
                   </div>
                   <div className="w-full bg-slate-600 rounded-full h-2 mt-2">
                     <div
-                      className="bg-orange-500 h-2 rounded-full"
-                      style={{ width: `${Math.min(stats.percentage, 100)}%` }}
+                      className="h-2 rounded-full"
+                      style={{ 
+                        width: `${Math.min(stats.percentage, 100)}%`,
+                        backgroundColor: "#0F766E"
+                      }}
                     ></div>
                   </div>
                 </div>
