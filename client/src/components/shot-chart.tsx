@@ -66,10 +66,10 @@ export default function ShotChart({ playerId, playerName, season = "2024-25" }: 
 
   if (isLoading) {
     return (
-      <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">Shot Chart - {playerName}</h3>
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 p-6">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Shot Chart - {playerName}</h3>
         <div className="flex items-center justify-center h-64">
-          <div className="text-slate-400">Loading shot chart data...</div>
+          <div className="text-slate-600 dark:text-slate-400">Loading shot chart data...</div>
         </div>
       </div>
     );
@@ -77,10 +77,10 @@ export default function ShotChart({ playerId, playerName, season = "2024-25" }: 
 
   if (error || !shotData) {
     return (
-      <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">Shot Chart - {playerName}</h3>
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 p-6">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Shot Chart - {playerName}</h3>
         <div className="flex items-center justify-center h-64">
-          <div className="text-slate-400">Shot chart data not available for this season</div>
+          <div className="text-slate-600 dark:text-slate-400">Shot chart data not available for this season</div>
         </div>
       </div>
     );
@@ -89,36 +89,36 @@ export default function ShotChart({ playerId, playerName, season = "2024-25" }: 
   const { shots, summary } = shotData;
 
   return (
-    <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-white">Shot Chart - {playerName}</h3>
-        <div className="text-sm text-slate-400">{season} Season</div>
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Shot Chart - {playerName}</h3>
+        <div className="text-sm text-slate-600 dark:text-slate-400">{season} Season</div>
       </div>
 
       {/* Summary Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-slate-700 rounded-lg p-3 text-center">
-          <div className="text-slate-400 text-xs">Total Attempts</div>
-          <div className="text-white font-bold text-lg">{summary.totalAttempts}</div>
+        <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-3 text-center">
+          <div className="text-slate-600 dark:text-slate-400 text-xs">Total Attempts</div>
+          <div className="text-slate-900 dark:text-white font-bold text-lg">{summary.totalAttempts}</div>
         </div>
-        <div className="bg-slate-700 rounded-lg p-3 text-center">
-          <div className="text-slate-400 text-xs">Makes</div>
-          <div className="text-green-400 font-bold text-lg">{summary.totalMakes}</div>
+        <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-3 text-center">
+          <div className="text-slate-600 dark:text-slate-400 text-xs">Makes</div>
+          <div className="text-green-600 dark:text-green-400 font-bold text-lg">{summary.totalMakes}</div>
         </div>
-        <div className="bg-slate-700 rounded-lg p-3 text-center">
-          <div className="text-slate-400 text-xs">FG%</div>
-          <div className="text-orange-400 font-bold text-lg">{summary.fieldGoalPercentage.toFixed(1)}%</div>
+        <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-3 text-center">
+          <div className="text-slate-600 dark:text-slate-400 text-xs">FG%</div>
+          <div className="text-orange-600 dark:text-orange-400 font-bold text-lg">{summary.fieldGoalPercentage.toFixed(1)}%</div>
         </div>
-        <div className="bg-slate-700 rounded-lg p-3 text-center">
-          <div className="text-slate-400 text-xs">Avg Distance</div>
-          <div className="text-blue-400 font-bold text-lg">{summary.averageDistance.toFixed(1)} ft</div>
+        <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-3 text-center">
+          <div className="text-slate-600 dark:text-slate-400 text-xs">Avg Distance</div>
+          <div className="text-blue-600 dark:text-blue-400 font-bold text-lg">{summary.averageDistance.toFixed(1)} ft</div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Court Visualization */}
-        <div className="bg-slate-900 rounded-lg p-4">
-          <h4 className="text-white font-medium mb-3">Shot Locations</h4>
+        <div className="bg-slate-200 dark:bg-slate-900 rounded-lg p-4">
+          <h4 className="text-slate-900 dark:text-white font-medium mb-3">Shot Locations</h4>
           <div className="relative">
             <svg 
               width={COURT_WIDTH} 
@@ -185,18 +185,18 @@ export default function ShotChart({ playerId, playerName, season = "2024-25" }: 
           <div className="flex items-center justify-center gap-4 mt-3 text-sm">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full border-2" style={{ backgroundColor: "#0F766E", borderColor: "#134E4A" }}></div>
-              <span className="text-slate-300">Made ({summary.totalMakes})</span>
+              <span className="text-slate-700 dark:text-slate-300">Made ({summary.totalMakes})</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full border-2" style={{ backgroundColor: "#B45309", borderColor: "#92400E" }}></div>
-              <span className="text-slate-300">Missed ({summary.totalAttempts - summary.totalMakes})</span>
+              <span className="text-slate-700 dark:text-slate-300">Missed ({summary.totalAttempts - summary.totalMakes})</span>
             </div>
           </div>
         </div>
 
         {/* Zone Breakdown */}
-        <div className="bg-slate-900 rounded-lg p-4">
-          <h4 className="text-white font-medium mb-3">Zone Efficiency</h4>
+        <div className="bg-slate-200 dark:bg-slate-900 rounded-lg p-4">
+          <h4 className="text-slate-900 dark:text-white font-medium mb-3">Zone Efficiency</h4>
           <div className="space-y-3 max-h-80 overflow-y-auto">
             {Object.entries(summary.zoneBreakdown)
               .sort((a, b) => b[1].attempts - a[1].attempts)
@@ -205,18 +205,18 @@ export default function ShotChart({ playerId, playerName, season = "2024-25" }: 
                   key={zone}
                   className={`p-3 rounded-lg border transition-colors cursor-pointer ${
                     selectedZone === zone 
-                      ? 'bg-slate-700 border-orange-500' 
-                      : 'bg-slate-800 border-slate-600 hover:border-slate-500'
+                      ? 'bg-slate-300 dark:bg-slate-700 border-orange-500' 
+                      : 'bg-slate-100 dark:bg-slate-800 border-slate-400 dark:border-slate-600 hover:border-slate-500'
                   }`}
                   onClick={() => setSelectedZone(selectedZone === zone ? null : zone)}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <div className="text-white font-medium text-sm">{zone}</div>
-                    <div className="text-orange-400 font-bold">
+                    <div className="text-slate-900 dark:text-white font-medium text-sm">{zone}</div>
+                    <div className="text-orange-600 dark:text-orange-400 font-bold">
                       {stats.percentage.toFixed(1)}%
                     </div>
                   </div>
-                  <div className="flex items-center justify-between text-xs text-slate-400">
+                  <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
                     <span>{stats.makes}/{stats.attempts}</span>
                     <span>{stats.attempts} attempts</span>
                   </div>
