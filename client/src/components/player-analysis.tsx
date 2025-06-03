@@ -586,16 +586,20 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
                 <h4 className="text-sm font-medium text-slate-400 mb-3">Player Statistics</h4>
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    { name: "PPG", value: "PPG" },
-                    { name: "APG", value: "APG" },
-                    { name: "RPG", value: "RPG" },
-                    { name: "SPG", value: "SPG" },
-                    { name: "BPG", value: "BPG" },
-                    { name: "TPG", value: "TPG" },
-                    { name: "FG%", value: "FG%" },
-                    { name: "3P%", value: "3P%" },
-                    { name: "FT%", value: "FT%" },
-                    { name: "+/-", value: "+/-" },
+                    { name: "PPG", value: "PTS" },
+                    { name: "APG", value: "AST" },
+                    { name: "RPG", value: "REB" },
+                    { name: "SPG", value: "STL" },
+                    { name: "BPG", value: "BLK" },
+                    { name: "TPG", value: "TOV" },
+                    { name: "FG%", value: "FG_PCT" },
+                    { name: "FGA", value: "FGA" },
+                    { name: "3P%", value: "THREE_PCT" },
+                    { name: "3PA", value: "3PA" },
+                    { name: "FT%", value: "FT_PCT" },
+                    { name: "FTA", value: "FTA" },
+                    { name: "+/-", value: "PLUS_MINUS" },
+                    { name: "W%", value: "W_PCT" },
                     { name: "GP", value: "GP" },
                     { name: "MIN", value: "MIN" }
                   ].map((stat) => (
