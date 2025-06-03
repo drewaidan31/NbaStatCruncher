@@ -6,6 +6,11 @@ interface FormulaExamplesProps {
 
 const EXAMPLE_FORMULAS = [
   {
+    name: "Effective FG% (eFG%)",
+    formula: "((FGA * FG_PCT) + (0.5 * 3PA * THREE_PCT)) / FGA",
+    description: "Shooting efficiency that weights 3-pointers as 1.5x more valuable than 2-pointers"
+  },
+  {
     name: "Player Efficiency Rating",
     formula: "PTS + REB + AST - TOV",
     description: "Basic efficiency combining production and protecting the ball"
