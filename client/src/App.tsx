@@ -236,19 +236,28 @@ function MainApp() {
   };
 
   const calculateStats = async () => {
-    if (!formula.trim()) return;
+    console.log("Calculate button clicked, formula:", formula, "season:", selectedSeason);
+    if (!formula.trim()) {
+      console.log("No formula provided, returning");
+      return;
+    }
     
     try {
+      console.log("Sending calculation request...");
       const response = await fetch("/api/nba/calculate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ formula, season: selectedSeason })
       });
       
+      console.log("Response status:", response.status);
       if (response.ok) {
         const data = await response.json();
+        console.log("Calculation results:", data.length, "players");
         setResults(data);
       } else {
+        const errorText = await response.text();
+        console.error("Calculation failed:", response.status, errorText);
         setError("Failed to calculate custom statistics");
       }
     } catch (err) {
