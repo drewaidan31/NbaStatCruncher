@@ -186,6 +186,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
       '3PA': seasonData.threePointAttempts || 0,
       'FT_PCT': seasonData.freeThrowPercentage,
       'FT%': seasonData.freeThrowPercentage, // Support both formats
+      'FTA': seasonData.freeThrowAttempts || 0,
       'GP': seasonData.gamesPlayed,
       'PLUS_MINUS': seasonData.plusMinus,
       '+/-': seasonData.plusMinus, // Support both formats
