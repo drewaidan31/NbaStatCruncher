@@ -182,29 +182,29 @@ function MainApp() {
   }, [refreshCounter]);
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white">
+    <div className="min-h-screen bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4 text-orange-400">
+          <h1 className="text-4xl font-bold mb-4 text-orange-500">
             NBA Custom Stats Calculator
           </h1>
-          <p className="text-lg text-slate-400">
+          <p className="text-lg text-gray-400">
             Create custom basketball statistics with authentic NBA player data
           </p>
         </div>
 
         {/* Navigation Bar */}
         <div className="flex justify-center mb-6">
-          <div className="bg-slate-800 rounded-lg p-1 border border-slate-700">
+          <div className="bg-gray-800 rounded-lg p-1">
             <div className="flex">
               <button
-                className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-orange-500 text-white"
+                className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-orange-600 text-white"
               >
                 <BarChart3 className="w-4 h-4" />
                 Leaderboards
               </button>
               <button
-                className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium text-slate-400 hover:text-slate-300"
+                className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium text-gray-400 hover:text-gray-300"
               >
                 <Search className="w-4 h-4" />
                 Player Search
@@ -215,14 +215,14 @@ function MainApp() {
 
         {/* Season Selector */}
         <div className="flex justify-center mb-6">
-          <div className="bg-slate-800 rounded-lg p-4 border border-slate-700">
-            <label className="block text-sm font-medium text-slate-400 mb-2">
+          <div className="bg-gray-800 rounded-lg p-4">
+            <label className="block text-sm font-medium text-gray-400 mb-2">
               Select NBA Season:
             </label>
             <select
               value={selectedSeason}
               onChange={(e) => setSelectedSeason(e.target.value)}
-              className="bg-slate-700 border border-slate-600 rounded-md px-3 py-2 text-white focus:outline-none focus:border-orange-500"
+              className="bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:border-orange-500 min-w-[200px]"
             >
               {seasonOptions.map((season) => (
                 <option key={season} value={season}>
