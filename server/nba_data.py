@@ -197,10 +197,14 @@ def get_all_players_with_seasons():
             return extended_players
         
         # Fallback to modern seasons only if extended data not available
-        print("Extended data not found, using modern seasons only...", file=sys.stderr)
+        print("Extended data not found, using all available seasons including historical...", file=sys.stderr)
+        # Include historical seasons from 1996-2025 to capture all NBA legends
         modern_seasons = ['2024-25', '2023-24', '2022-23', '2021-22', '2020-21', '2019-20', 
                          '2018-19', '2017-18', '2016-17', '2015-16', '2014-15',
-                         '2013-14', '2012-13', '2011-12', '2010-11']
+                         '2013-14', '2012-13', '2011-12', '2010-11', '2009-10', 
+                         '2008-09', '2007-08', '2006-07', '2005-06', '2004-05',
+                         '2003-04', '2002-03', '2001-02', '2000-01', '1999-00',
+                         '1998-99', '1997-98', '1996-97']
         
         all_players = {}  # Dictionary to store all seasons for each player
         

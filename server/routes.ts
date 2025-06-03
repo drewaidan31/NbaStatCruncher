@@ -592,6 +592,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get team stats for a specific season
+  app.get("/api/teams/:season", async (req, res) => {
+    try {
+      const { season } = req.params;
+      const teamData = await getTeamPossessionData(season);
+      
+      if (!teamData) {
+        return res.status(500).json({ message: "Failed to fetch team data from NBA API" });
+      }
+      
+      res.json(teamData);
+    } catch (error) {
+      console.error("Error fetching team stats:", error);
+      res.status(500).json({ message: "Failed to fetch team statistics" });
+    }
+  });
+
+  // Calculate custom stats for teams
+  app.post("/api/teams/calculate", async (req, res) => {
+    try {
+      const { formula, season = '2024-25' } = req.body;
+      
+      if (!formula) {
+        return res.status(400).json({ message: "Formula is required" });
+      }
+
+      const teamData = await getTeamPossessionData(season);
+      
+      if (!teamData) {
+        return res.status(500).json({ message: "Failed to fetch team data" });
+      }
+
+      const results = [];
+      
+      for (const team of teamData.teams) {
+        try {
+          let evaluationFormula = formula.toUpperCase();
+          
+          // Map team stats to formula variables
+          const teamStatMappings = {
+            'PPG': team.pointsPerGame,
+            'PTS': team.points,
+            'AST': team.assists,
+            'REB': team.rebounds,
+            'STL': team.steals,
+            'BLK': team.blocks,
+            'TOV': team.turnovers,
+            'FG_PCT': team.fieldGoalPercentage,
+            'FG%': team.fieldGoalPercentage,
+            '3P_PCT': team.threePointPercentage,
+            '3P%': team.threePointPercentage,
+            'FT_PCT': team.freeThrowPercentage,
+            'FT%': team.freeThrowPercentage,
+            'W_PCT': team.winPercentage,
+            'GP': team.gamesPlayed,
+            'W': team.wins,
+            'L': team.losses,
+            'PACE': team.pace,
+            'ORTG': team.offensiveRating,
+            'DRTG': team.defensiveRating,
+            'POSS': team.possessionsPerGame,
+            'PLUS_MINUS': team.plusMinus
+          };
+          
+          for (const [abbrev, value] of Object.entries(teamStatMappings)) {
+            evaluationFormula = evaluationFormula.replace(
+              new RegExp(`\\b${abbrev}\\b`, 'g'), 
+              value.toString()
+            );
+          }
+          
+          const customStat = evaluate(evaluationFormula);
+          
+          results.push({
+            team,
+            customStat: typeof customStat === 'number' ? 
+              Number(customStat.toFixed(2)) : 0,
+            formula
+          });
+        } catch (error) {
+          console.error(`Error calculating stat for ${team.teamName}:`, error);
+        }
+      }
+
+      // Sort by custom stat value (highest first)
+      results.sort((a, b) => b.customStat - a.customStat);
+      
+      // Add rank
+      const rankedResults = results.map((result, index) => ({
+        ...result,
+        rank: index + 1
+      }));
+
+      res.json(rankedResults);
+    } catch (error) {
+      console.error("Error calculating team stats:", error);
+      res.status(500).json({ message: "Failed to calculate custom team stats" });
+    }
+  });
+
   // Clean up duplicate custom stats (requires authentication)
   app.post("/api/custom-stats/cleanup-duplicates", isAuthenticated, async (req: any, res) => {
     try {
