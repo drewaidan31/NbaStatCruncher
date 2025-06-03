@@ -56,6 +56,11 @@ const EXAMPLE_FORMULAS = [
     name: "Winning Impact",
     formula: "PTS * W_PCT + AST * W_PCT",
     description: "Offensive production weighted by team success when player plays"
+  },
+  {
+    name: "3 Point Attempt Rate",
+    formula: "3PA / FGA",
+    description: "Percentage of field goal attempts that are three-pointers"
   }
 ];
 
