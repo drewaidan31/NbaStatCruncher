@@ -271,12 +271,12 @@ export default function LeaderboardTable({
           <div className="space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="flex items-center space-x-4">
-                <Skeleton className="h-10 w-10 rounded-full bg-slate-700" />
+                <Skeleton className="h-10 w-10 rounded-full bg-slate-200 dark:bg-slate-700" />
                 <div className="space-y-2 flex-1">
-                  <Skeleton className="h-4 w-32 bg-slate-700" />
-                  <Skeleton className="h-3 w-20 bg-slate-700" />
+                  <Skeleton className="h-4 w-32 bg-slate-200 dark:bg-slate-700" />
+                  <Skeleton className="h-3 w-20 bg-slate-200 dark:bg-slate-700" />
                 </div>
-                <Skeleton className="h-4 w-16 bg-slate-700" />
+                <Skeleton className="h-4 w-16 bg-slate-200 dark:bg-slate-700" />
               </div>
             ))}
           </div>

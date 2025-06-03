@@ -112,8 +112,8 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
     <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border border-slate-300 dark:border-slate-700">
       <div className="flex items-center gap-4 mb-6">
         <div className="flex items-center gap-2">
-          <Search className="w-5 h-5 text-slate-400" />
-          <h2 className="text-xl font-bold text-white">Player Search</h2>
+          <Search className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Player Search</h2>
         </div>
         
         <div className="flex gap-2">
@@ -125,7 +125,7 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               !compareMode
                 ? "bg-orange-600 text-white"
-                : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600"
             }`}
           >
             <User className="w-4 h-4 inline mr-1" />
@@ -136,7 +136,7 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               compareMode
                 ? "bg-orange-600 text-white"
-                : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600"
             }`}
           >
             <TrendingUp className="w-4 h-4 inline mr-1" />
@@ -146,12 +146,12 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
       </div>
 
       {compareMode && selectedPlayer1 && !showSeasonPicker && (
-        <div className="bg-slate-700 rounded-lg p-3 mb-4 border border-slate-600">
-          <div className="text-sm text-slate-300">Selected for comparison:</div>
-          <div className="text-white font-medium">
+        <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-3 mb-4 border border-slate-300 dark:border-slate-600">
+          <div className="text-sm text-slate-600 dark:text-slate-300">Selected for comparison:</div>
+          <div className="text-slate-900 dark:text-white font-medium">
             {selectedPlayer1.name} ({selectedSeason1}) - {selectedPlayer1.team}
           </div>
-          <div className="text-xs text-slate-400">Now select a second player to compare</div>
+          <div className="text-xs text-slate-500 dark:text-slate-400">Now select a second player to compare</div>
         </div>
       )}
 
@@ -184,14 +184,14 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
       )}
 
       <div className="mb-4">
-        <label className="block text-sm font-medium text-slate-300 mb-2">
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
           Search Players:
         </label>
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
           placeholder="Type player name... (searches all players from any season)"
         />
       </div>
@@ -267,9 +267,9 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
 
       {searchTerm.length === 0 && !isLoading && (
         <div className="text-center py-8">
-          <Search className="w-12 h-12 text-slate-500 mx-auto mb-3" />
-          <div className="text-slate-400 mb-2">Search for any NBA player</div>
-          <div className="text-slate-500 text-sm">
+          <Search className="w-12 h-12 text-slate-400 dark:text-slate-500 mx-auto mb-3" />
+          <div className="text-slate-600 dark:text-slate-400 mb-2">Search for any NBA player</div>
+          <div className="text-slate-500 dark:text-slate-500 text-sm">
             Type a player's name to see unified profiles with all their seasons
           </div>
         </div>
