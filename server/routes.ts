@@ -228,19 +228,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Calculate custom stat for each player
-      const results = players.map(player => {
+      // Calculate custom stat for each player (or each season for all-time)
+      const results: any[] = [];
+      
+      for (const player of players) {
         try {
-          let targetSeason = null;
-          let customStat = 0;
-          
           if (season && season !== "all-time") {
             // For specific season, use only that season's data
             if (player.seasons && Array.isArray(player.seasons)) {
-              targetSeason = player.seasons.find(s => s.season === season);
+              const targetSeason = player.seasons.find(s => s.season === season);
               if (!targetSeason) {
                 // Player didn't play in this season, skip them
-                return null;
+                continue;
               }
               
               // Calculate custom stat using the specific season's data
@@ -254,16 +253,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 );
               }
               
-              customStat = evaluate(evaluationFormula);
-            } else {
-              // No season data available, skip
-              return null;
+              const customStat = evaluate(evaluationFormula);
+              
+              results.push({
+                player: {
+                  ...player,
+                  team: targetSeason.team
+                },
+                customStat: typeof customStat === 'number' ? 
+                  Number(customStat.toFixed(2)) : 0,
+                bestSeason: targetSeason.season,
+                formula
+              });
             }
           } else {
-            // For all-time, find their best season
-            let bestSeason = null;
-            let bestCustomStat = -Infinity;
-            
+            // For all-time, include ALL seasons for each player
             if (player.seasons && Array.isArray(player.seasons)) {
               for (const seasonData of player.seasons) {
                 let evaluationFormula = formula.toUpperCase();
@@ -279,16 +283,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 
                 try {
                   const seasonCustomStat = evaluate(evaluationFormula);
-                  if (typeof seasonCustomStat === 'number' && seasonCustomStat > bestCustomStat) {
-                    bestCustomStat = seasonCustomStat;
-                    bestSeason = seasonData;
+                  if (typeof seasonCustomStat === 'number') {
+                    results.push({
+                      player: {
+                        ...player,
+                        team: seasonData.team
+                      },
+                      customStat: Number(seasonCustomStat.toFixed(2)),
+                      bestSeason: seasonData.season,
+                      formula
+                    });
                   }
                 } catch (seasonError) {
                   continue;
                 }
               }
-              targetSeason = bestSeason;
-              customStat = bestCustomStat;
             } else {
               // Fallback to career averages if no seasons data
               let evaluationFormula = formula.toUpperCase();
@@ -301,43 +310,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 );
               }
               
-              customStat = evaluate(evaluationFormula);
-              targetSeason = { season: player.currentSeason || '2024-25' };
+              const customStat = evaluate(evaluationFormula);
+              
+              results.push({
+                player: {
+                  ...player,
+                  team: player.team
+                },
+                customStat: typeof customStat === 'number' ? 
+                  Number(customStat.toFixed(2)) : 0,
+                bestSeason: player.currentSeason || '2024-25',
+                formula
+              });
             }
           }
-          
-          return {
-            player: {
-              ...player,
-              team: targetSeason?.team || player.team // Use team from specific season
-            },
-            customStat: typeof customStat === 'number' ? 
-              Number(customStat.toFixed(2)) : 0,
-            bestSeason: targetSeason?.season || player.currentSeason || '2024-25',
-            formula
-          };
         } catch (error) {
           console.error(`Error calculating stat for ${player.name}:`, error);
-          return {
-            player: {
-              ...player,
-              team: targetSeason?.team || player.team
-            },
-            customStat: 0,
-            bestSeason: targetSeason?.season || player.currentSeason || '2024-25',
-            formula
-          };
         }
-      });
-
-      // Filter out null results (players who didn't play in the selected season)
-      const validResults = results.filter((result): result is NonNullable<typeof result> => result !== null);
+      }
 
       // Sort by custom stat value (highest first)
-      validResults.sort((a, b) => b.customStat - a.customStat);
+      results.sort((a, b) => b.customStat - a.customStat);
       
       // Add rank
-      const rankedResults = validResults.map((result, index) => ({
+      const rankedResults = results.map((result, index) => ({
         ...result,
         rank: index + 1
       }));
