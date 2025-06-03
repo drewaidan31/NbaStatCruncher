@@ -157,8 +157,8 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
 
       {/* Season Selection Modal */}
       {showSeasonPicker && (
-        <div className="bg-slate-700 rounded-lg p-4 mb-4 border border-orange-500">
-          <div className="text-sm text-slate-300 mb-2">
+        <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-4 mb-4 border border-orange-500">
+          <div className="text-sm text-slate-700 dark:text-slate-300 mb-2">
             Select season for {showSeasonPicker.player.name}:
           </div>
           <div className="grid grid-cols-3 gap-2 mb-3">
@@ -175,7 +175,7 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
           <div className="flex gap-2">
             <button
               onClick={() => setShowSeasonPicker(null)}
-              className="bg-slate-600 hover:bg-slate-500 text-white text-sm py-1 px-3 rounded transition-colors"
+              className="bg-slate-400 hover:bg-slate-500 dark:bg-slate-600 dark:hover:bg-slate-500 text-white text-sm py-1 px-3 rounded transition-colors"
             >
               Cancel
             </button>
