@@ -138,29 +138,23 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
 
   const statMappings = {
     'PTS': currentPlayerData.points,
-    'PPG': currentPlayerData.points, // Support both formats
     'AST': currentPlayerData.assists,
-    'APG': currentPlayerData.assists, // Support both formats
     'REB': currentPlayerData.rebounds,
-    'RPG': currentPlayerData.rebounds, // Support both formats
     'STL': currentPlayerData.steals,
-    'SPG': currentPlayerData.steals, // Support both formats
     'BLK': currentPlayerData.blocks,
-    'BPG': currentPlayerData.blocks, // Support both formats
     'TOV': currentPlayerData.turnovers,
-    'TPG': currentPlayerData.turnovers, // Support both formats
     'FG_PCT': currentPlayerData.fieldGoalPercentage,
-    'FG%': currentPlayerData.fieldGoalPercentage, // Support both formats
+    'FG%': currentPlayerData.fieldGoalPercentage,
     'FGA': currentPlayerData.fieldGoalAttempts || 0,
     '3P_PCT': currentPlayerData.threePointPercentage,
-    '3P%': currentPlayerData.threePointPercentage, // Support both formats
+    '3P%': currentPlayerData.threePointPercentage,
     '3PA': currentPlayerData.threePointAttempts || 0,
     'FT_PCT': currentPlayerData.freeThrowPercentage,
-    'FT%': currentPlayerData.freeThrowPercentage, // Support both formats
+    'FT%': currentPlayerData.freeThrowPercentage,
     'FTA': currentPlayerData.freeThrowAttempts || 0,
     'GP': currentPlayerData.gamesPlayed,
     'PLUS_MINUS': currentPlayerData.plusMinus,
-    '+/-': currentPlayerData.plusMinus, // Support both formats
+    '+/-': currentPlayerData.plusMinus,
     'MIN': currentPlayerData.minutesPerGame || 32.5
   };
 
@@ -243,20 +237,31 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
         expression = expression.replace(/\+\/-/g, statMappings['+/-'].toString());
       }
       
+      // Create extended mappings for backward compatibility
+      const extendedMappings = {
+        ...statMappings,
+        'PPG': currentPlayerData.points,
+        'APG': currentPlayerData.assists,
+        'RPG': currentPlayerData.rebounds,
+        'SPG': currentPlayerData.steals,
+        'BPG': currentPlayerData.blocks,
+        'TPG': currentPlayerData.turnovers,
+      };
+      
       // Replace stat abbreviations with actual values
       // First handle percentage stats specifically
       if (expression.includes('FG%')) {
-        expression = expression.replace(/FG%/g, statMappings['FG%'].toString());
+        expression = expression.replace(/FG%/g, extendedMappings['FG%'].toString());
       }
       if (expression.includes('3P%')) {
-        expression = expression.replace(/3P%/g, statMappings['3P%'].toString());
+        expression = expression.replace(/3P%/g, extendedMappings['3P%'].toString());
       }
       if (expression.includes('FT%')) {
-        expression = expression.replace(/FT%/g, statMappings['FT%'].toString());
+        expression = expression.replace(/FT%/g, extendedMappings['FT%'].toString());
       }
       
       // Then handle other stats
-      Object.entries(statMappings).forEach(([key, value]) => {
+      Object.entries(extendedMappings).forEach(([key, value]) => {
         if (key === '+/-' || key.includes('%')) {
           // Skip these as we handled them above
           return;
