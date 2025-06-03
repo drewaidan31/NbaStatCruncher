@@ -6,6 +6,11 @@ interface FormulaExamplesProps {
 
 const EXAMPLE_FORMULAS = [
   {
+    name: "True Shooting % (TS%)",
+    formula: "PTS / (2 * (FGA + (0.44 * FTA)))",
+    description: "Combines all forms of scoring into one metric - field goals, 3-pointers, and free throws"
+  },
+  {
     name: "Effective FG% (eFG%)",
     formula: "((FGA * FG_PCT) + (0.5 * 3PA * THREE_PCT)) / FGA",
     description: "Shooting efficiency that weights 3-pointers as 1.5x more valuable than 2-pointers"

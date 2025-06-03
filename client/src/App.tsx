@@ -89,6 +89,7 @@ function MainApp() {
 
   // Preset custom stat equations for the showcase
   const presetStats = [
+    { name: "True Shooting % (TS%)", formula: "PTS / (2 * (FGA + (0.44 * FTA)))", description: "Combines all forms of scoring into one metric - field goals, 3-pointers, and free throws" },
     { name: "Offensive Impact", formula: "PTS + AST * 1.5", description: "Points + weighted assists to measure offensive contribution" },
     { name: "Complete Player", formula: "PTS + AST + REB + STL + BLK", description: "Total production across all major statistical categories" },
     { name: "Efficiency Rating", formula: "(PTS + REB + AST) / TOV", description: "Production per turnover - higher is better" },
@@ -161,8 +162,11 @@ function MainApp() {
       'BLK': seasonData.blocks,
       'TOV': seasonData.turnovers,
       'FG_PCT': seasonData.fieldGoalPercentage,
+      'FGA': seasonData.fieldGoalAttempts || 0,
       'THREE_PCT': seasonData.threePointPercentage,
+      '3PA': seasonData.threePointAttempts || 0,
       'FT_PCT': seasonData.freeThrowPercentage,
+      'FTA': seasonData.freeThrowAttempts || 0,
       'GP': seasonData.gamesPlayed,
       'PLUS_MINUS': seasonData.plusMinus,
       'MIN': seasonData.minutesPerGame || 32.5
