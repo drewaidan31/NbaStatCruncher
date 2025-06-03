@@ -146,7 +146,7 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect }: Player
             onChange={(e) => setSelectedSeason(e.target.value)}
             className="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
           >
-            <option value="all-time">All-Time Leaders (1996-2025)</option>
+            <option value="all-time">All-Time Leaders (2010-2025)</option>
             <option value="2024-25">2024-25 Season (Current)</option>
             <option value="2023-24">2023-24 Season</option>
             <option value="2022-23">2022-23 Season</option>
@@ -162,20 +162,6 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect }: Player
             <option value="2012-13">2012-13 Season</option>
             <option value="2011-12">2011-12 Season</option>
             <option value="2010-11">2010-11 Season</option>
-            <option value="2009-10">2009-10 Season</option>
-            <option value="2008-09">2008-09 Season</option>
-            <option value="2007-08">2007-08 Season</option>
-            <option value="2006-07">2006-07 Season</option>
-            <option value="2005-06">2005-06 Season</option>
-            <option value="2004-05">2004-05 Season</option>
-            <option value="2003-04">2003-04 Season</option>
-            <option value="2002-03">2002-03 Season</option>
-            <option value="2001-02">2001-02 Season</option>
-            <option value="2000-01">2000-01 Season</option>
-            <option value="1999-00">1999-00 Season</option>
-            <option value="1998-99">1998-99 Season (Lockout)</option>
-            <option value="1997-98">1997-98 Season (Jordan's Last)</option>
-            <option value="1996-97">1996-97 Season (Bulls 72-10)</option>
           </select>
         </div>
       </div>
