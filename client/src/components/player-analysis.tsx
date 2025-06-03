@@ -279,6 +279,12 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
       // Build chart data if seasons are available
       if (player.seasons && player.seasons.length > 0) {
         const chartPoints = player.seasons
+          .sort((a, b) => {
+            // Convert season format (e.g., "2019-20") to comparable numbers
+            const yearA = parseInt(a.season.split('-')[0]);
+            const yearB = parseInt(b.season.split('-')[0]);
+            return yearA - yearB; // Sort from oldest to newest
+          })
           .map(seasonData => {
             const seasonResult = calculateStatForSeason(formula, seasonData);
             return seasonResult !== null ? {
@@ -543,31 +549,31 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
 
               {/* Custom Stat Chart - Right after result */}
               {chartData.length > 0 && (
-                <div className="bg-slate-800 rounded-lg p-6 border border-slate-700 mb-6">
+                <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border border-slate-300 dark:border-slate-700 mb-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <TrendingUp className="w-5 h-5 text-orange-400" />
-                    <h3 className="text-lg font-medium text-white">{customStatName || "Custom Stat"} Over Time</h3>
-                    <span className="text-sm text-slate-400">({chartData.length} seasons)</span>
+                    <TrendingUp className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                    <h3 className="text-lg font-medium text-slate-900 dark:text-white">{customStatName || "Custom Stat"} Over Time</h3>
+                    <span className="text-sm text-slate-600 dark:text-slate-400">({chartData.length} seasons)</span>
                   </div>
                   <div className="h-64 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={chartData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
                         <XAxis 
                           dataKey="season" 
-                          stroke="#9CA3AF"
+                          stroke="var(--chart-text)"
                           fontSize={12}
                           angle={-45}
                           textAnchor="end"
                           height={60}
                         />
-                        <YAxis stroke="#9CA3AF" fontSize={12} />
+                        <YAxis stroke="var(--chart-text)" fontSize={12} />
                         <Tooltip 
                           contentStyle={{ 
-                            backgroundColor: '#1F2937', 
-                            border: '1px solid #374151',
+                            backgroundColor: 'var(--chart-tooltip-bg)', 
+                            border: '1px solid var(--chart-tooltip-border)',
                             borderRadius: '8px',
-                            color: '#F9FAFB'
+                            color: 'var(--chart-tooltip-text)'
                           }}
                           labelFormatter={(label) => {
                             const point = chartData.find(d => d.season === label);
@@ -577,10 +583,10 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
                         <Line 
                           type="monotone" 
                           dataKey="value" 
-                          stroke="#F97316" 
+                          stroke="var(--chart-line)" 
                           strokeWidth={3}
-                          dot={{ fill: '#F97316', strokeWidth: 2, r: 4 }}
-                          activeDot={{ r: 6, fill: '#EA580C' }}
+                          dot={{ fill: 'var(--chart-line)', strokeWidth: 2, r: 4 }}
+                          activeDot={{ r: 6, fill: 'var(--chart-line-active)' }}
                         />
                       </LineChart>
                     </ResponsiveContainer>
