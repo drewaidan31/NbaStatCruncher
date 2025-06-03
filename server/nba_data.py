@@ -177,7 +177,19 @@ def get_historical_legends():
 def get_all_players_with_seasons():
     """Get all unique players with all their seasons"""
     try:
-        # Modern seasons (2010-2025)
+        # Check if we have extended historical data available
+        import os
+        extended_data_path = 'server/extended_players.json'
+        
+        if os.path.exists(extended_data_path):
+            print("Using extended historical dataset...", file=sys.stderr)
+            with open(extended_data_path, 'r') as f:
+                extended_players = json.load(f)
+            print(f"Loaded {len(extended_players)} players with extended historical data", file=sys.stderr)
+            return extended_players
+        
+        # Fallback to modern seasons only if extended data not available
+        print("Extended data not found, using modern seasons only...", file=sys.stderr)
         modern_seasons = ['2024-25', '2023-24', '2022-23', '2021-22', '2020-21', '2019-20', 
                          '2018-19', '2017-18', '2016-17', '2015-16', '2014-15',
                          '2013-14', '2012-13', '2011-12', '2010-11']
