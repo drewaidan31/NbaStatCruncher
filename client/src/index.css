@@ -48,16 +48,64 @@ html:not(.dark) select {
 }
 
 /* Force input elements to respect light/dark mode styling */
-html:not(.dark) input {
+html:not(.dark) input,
+html:not(.dark) input[type="text"],
+html:not(.dark) input[type="search"] {
   background-color: white !important;
   color: #0f172a !important;
   border-color: #d1d5db !important;
 }
 
-.dark input {
+.dark input,
+.dark input[type="text"],
+.dark input[type="search"] {
   background-color: #374151 !important;
   color: white !important;
   border-color: #4b5563 !important;
+}
+
+/* Force textarea elements to respect light/dark mode styling */
+html:not(.dark) textarea {
+  background-color: white !important;
+  color: #0f172a !important;
+  border-color: #d1d5db !important;
+}
+
+.dark textarea {
+  background-color: #374151 !important;
+  color: white !important;
+  border-color: #4b5563 !important;
+}
+
+/* Override any component-specific dark styling */
+html:not(.dark) .bg-slate-700,
+html:not(.dark) .dark\:bg-slate-700 {
+  background-color: white !important;
+}
+
+html:not(.dark) .bg-slate-800,
+html:not(.dark) .dark\:bg-slate-800 {
+  background-color: #f8fafc !important;
+}
+
+html:not(.dark) .text-white,
+html:not(.dark) .dark\:text-white {
+  color: #0f172a !important;
+}
+
+html:not(.dark) .text-slate-300,
+html:not(.dark) .dark\:text-slate-300 {
+  color: #64748b !important;
+}
+
+html:not(.dark) .border-slate-600,
+html:not(.dark) .dark\:border-slate-600 {
+  border-color: #d1d5db !important;
+}
+
+html:not(.dark) .border-slate-700,
+html:not(.dark) .dark\:border-slate-700 {
+  border-color: #e2e8f0 !important;
 }
 
 /* Fix Recharts tooltip styling for light/dark mode */
