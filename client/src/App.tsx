@@ -55,7 +55,7 @@ interface Player {
   availableSeasons?: string[];
 }
 
-type ViewMode = 'leaderboard' | 'search' | 'analysis' | 'comparison';
+type ViewMode = 'leaderboard' | 'search' | 'analysis' | 'comparison' | 'usage-rate';
 
 function MainApp() {
   const [players, setPlayers] = useState([]);

@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
 interface FormulaExamplesProps {
-  onFormulaSelect: (formula: string) => void;
+  onFormulaSelect: (formula: string, name?: string) => void;
 }
 
 const EXAMPLE_FORMULAS = [
@@ -87,7 +87,7 @@ export default function FormulaExamples({ onFormulaSelect }: FormulaExamplesProp
               className="bg-slate-900 border-slate-600 cursor-pointer hover:bg-slate-700 transition-colors group"
               onClick={() => {
                 console.log("Formula selected:", example.formula);
-                onFormulaSelect(example.formula);
+                onFormulaSelect(example.formula, example.name);
               }}
             >
               <CardContent className="p-4">

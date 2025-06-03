@@ -737,8 +737,11 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
           </div>
 
           {showExamples && (
-            <FormulaExamples onFormulaSelect={(selectedFormula) => {
+            <FormulaExamples onFormulaSelect={(selectedFormula, selectedName) => {
               setFormula(selectedFormula);
+              if (selectedName) {
+                setCustomStatName(selectedName);
+              }
               handleFormulaChange(selectedFormula);
               setShowExamples(false);
             }} />
