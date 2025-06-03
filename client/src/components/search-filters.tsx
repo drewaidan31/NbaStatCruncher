@@ -9,6 +9,8 @@ interface SearchFiltersProps {
   onTeamChange: (value: string) => void;
   selectedPosition: string;
   onPositionChange: (value: string) => void;
+  showTeamLeaderboard?: boolean;
+  onTeamLeaderboardToggle?: (enabled: boolean) => void;
 }
 
 export default function SearchFilters({
@@ -18,6 +20,8 @@ export default function SearchFilters({
   onTeamChange,
   selectedPosition,
   onPositionChange,
+  showTeamLeaderboard = false,
+  onTeamLeaderboardToggle,
 }: SearchFiltersProps) {
   const teams = [
     "all", "ATL", "BOS", "BKN", "CHA", "CHI", "CLE", "DAL", "DEN", "DET", "GSW",
@@ -30,7 +34,23 @@ export default function SearchFilters({
   return (
     <div className="bg-slate-800 rounded-xl p-6 mb-8 border border-slate-700">
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <h2 className="text-xl font-bold text-slate-50">Player Leaderboard</h2>
+        <div className="flex items-center gap-4">
+          <h2 className="text-xl font-bold text-slate-50">Player Leaderboard</h2>
+          {onTeamLeaderboardToggle && (
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="team-leaderboard"
+                checked={showTeamLeaderboard}
+                onChange={(e) => onTeamLeaderboardToggle(e.target.checked)}
+                className="w-4 h-4 text-orange-600 bg-slate-700 border-slate-600 rounded focus:ring-orange-500"
+              />
+              <label htmlFor="team-leaderboard" className="text-sm text-slate-300">
+                Team View
+              </label>
+            </div>
+          )}
+        </div>
         
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           <div className="relative">
