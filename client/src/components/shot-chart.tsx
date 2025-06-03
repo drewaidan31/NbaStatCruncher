@@ -124,7 +124,7 @@ export default function ShotChart({ playerId, playerName, season = "2024-25" }: 
               width={COURT_WIDTH} 
               height={COURT_HEIGHT} 
               viewBox={`0 0 ${COURT_WIDTH} ${COURT_HEIGHT}`}
-              className="bg-green-800 rounded border border-white"
+              className="bg-white rounded border border-gray-300"
             >
               {/* Court Lines */}
               {/* Three-point line */}
