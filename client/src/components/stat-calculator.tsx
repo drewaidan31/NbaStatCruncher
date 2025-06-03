@@ -117,7 +117,7 @@ export default function StatCalculator({ onFormulaChange, onCalculate, formula =
               <button
                 key={num}
                 onClick={() => handleClick(num)}
-                className="bg-slate-600 hover:bg-slate-500 text-white text-lg py-2 px-3 rounded transition-colors"
+                className="bg-slate-400 dark:bg-slate-600 hover:bg-slate-500 dark:hover:bg-slate-500 text-white text-lg py-2 px-3 rounded transition-colors"
               >
                 {num}
               </button>
