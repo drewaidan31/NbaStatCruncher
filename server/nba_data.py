@@ -64,19 +64,129 @@ def get_nba_players_from_api(season='2024-25'):
         print(f"Error fetching from NBA API: {e}", file=sys.stderr)
         return None
 
+def get_historical_legends():
+    """Get top 100 historical players from 1996-2010"""
+    try:
+        # Sample key historical seasons to identify legends
+        historical_sample_seasons = ['2009-10', '2007-08', '2005-06', '2002-03', '1999-00', '1996-97']
+        
+        # Identify top players from these seasons
+        legend_candidates = {}
+        
+        for season in historical_sample_seasons:
+            try:
+                player_stats = leaguedashplayerstats.LeagueDashPlayerStats(
+                    season=season,
+                    season_type_all_star='Regular Season'
+                )
+                
+                df = player_stats.get_data_frames()[0]
+                df = df[(df['GP'] >= 20) & (df['PTS'] >= 10)]  # Meaningful players only
+                df = df.sort_values('PTS', ascending=False).head(25)  # Top 25 per season
+                
+                for _, row in df.iterrows():
+                    player_name = row['PLAYER_NAME']
+                    player_id = int(row['PLAYER_ID'])
+                    ppg = float(row['PTS']) / float(row['GP'])
+                    
+                    if player_name not in legend_candidates:
+                        legend_candidates[player_name] = {
+                            'playerId': player_id,
+                            'name': player_name,
+                            'peak_ppg': ppg
+                        }
+                    elif ppg > legend_candidates[player_name]['peak_ppg']:
+                        legend_candidates[player_name]['peak_ppg'] = ppg
+                        
+            except Exception as e:
+                print(f"Error sampling {season}: {e}", file=sys.stderr)
+                continue
+        
+        # Take top 100 legends by peak performance
+        top_legends = sorted(legend_candidates.values(), 
+                           key=lambda x: x['peak_ppg'], reverse=True)[:100]
+        
+        print(f"Identified {len(top_legends)} historical legends", file=sys.stderr)
+        
+        # Now fetch complete career data for these legends
+        historical_seasons = ['2009-10', '2008-09', '2007-08', '2006-07', '2005-06', '2004-05',
+                             '2003-04', '2002-03', '2001-02', '2000-01', '1999-00', '1998-99', '1997-98', '1996-97']
+        
+        legends_with_careers = {}
+        
+        for season in historical_seasons:
+            try:
+                player_stats = leaguedashplayerstats.LeagueDashPlayerStats(
+                    season=season,
+                    season_type_all_star='Regular Season'
+                )
+                
+                df = player_stats.get_data_frames()[0]
+                df = df[df['GP'] >= 5]
+                
+                for _, row in df.iterrows():
+                    player_id = int(row['PLAYER_ID'])
+                    player_name = row['PLAYER_NAME']
+                    
+                    # Only process if this player is in our top 100 legends
+                    if any(legend['playerId'] == player_id for legend in top_legends):
+                        games_played = int(row['GP']) if row['GP'] > 0 else 1
+                        
+                        season_stats = {
+                            'season': season,
+                            'team': row['TEAM_ABBREVIATION'],
+                            'position': 'G',
+                            'gamesPlayed': games_played,
+                            'minutesPerGame': float(row['MIN']) / games_played,
+                            'points': float(row['PTS']) / games_played,
+                            'assists': float(row['AST']) / games_played,
+                            'rebounds': float(row['REB']) / games_played,
+                            'steals': float(row['STL']) / games_played,
+                            'blocks': float(row['BLK']) / games_played,
+                            'turnovers': float(row['TOV']) / games_played,
+                            'fieldGoalPercentage': float(row['FG_PCT']) if row['FG_PCT'] else 0.0,
+                            'threePointPercentage': float(row['FG3_PCT']) if row['FG3_PCT'] else 0.0,
+                            'freeThrowPercentage': float(row['FT_PCT']) if row['FT_PCT'] else 0.0,
+                            'plusMinus': float(row['PLUS_MINUS']) / games_played if row['PLUS_MINUS'] else 0.0
+                        }
+                        
+                        if player_name not in legends_with_careers:
+                            legends_with_careers[player_name] = {
+                                'playerId': player_id,
+                                'name': player_name,
+                                'seasons': []
+                            }
+                        
+                        legends_with_careers[player_name]['seasons'].append(season_stats)
+                        
+            except Exception as e:
+                print(f"Error processing historical season {season}: {e}", file=sys.stderr)
+                continue
+        
+        # Filter legends who have multiple seasons and return as list
+        qualified_legends = [data for data in legends_with_careers.values() 
+                           if len(data['seasons']) >= 2]
+        
+        print(f"Historical legends with career data: {len(qualified_legends)}", file=sys.stderr)
+        return qualified_legends
+        
+    except Exception as e:
+        print(f"Error fetching historical legends: {e}", file=sys.stderr)
+        return []
+
 def get_all_players_with_seasons():
     """Get all unique players with all their seasons"""
     try:
-        # Key seasons to include
-        key_seasons = ['2024-25', '2023-24', '2022-23', '2021-22', '2020-21', '2019-20', 
-                      '2018-19', '2017-18', '2016-17', '2015-16', '2014-15',
-                      '2013-14', '2012-13', '2011-12', '2010-11']
+        # Modern seasons (2010-2025)
+        modern_seasons = ['2024-25', '2023-24', '2022-23', '2021-22', '2020-21', '2019-20', 
+                         '2018-19', '2017-18', '2016-17', '2015-16', '2014-15',
+                         '2013-14', '2012-13', '2011-12', '2010-11']
         
         all_players = {}  # Dictionary to store all seasons for each player
         
-        print(f"Fetching players from {len(key_seasons)} seasons...", file=sys.stderr)
+        print(f"Fetching players from {len(modern_seasons)} seasons...", file=sys.stderr)
         
-        for season in key_seasons:
+        for season in modern_seasons:
             try:
                 player_stats = leaguedashplayerstats.LeagueDashPlayerStats(
                     season=season,
