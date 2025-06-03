@@ -59,9 +59,10 @@ def create_optimized_historical_dataset():
             
             df = player_stats.get_data_frames()[0]
             
-            # Get only top 10 by total points (minimum 40 games)
+            # Get top 15 by points per game (minimum 40 games)
             df = df[df['GP'] >= 40]
-            df = df.sort_values('PTS', ascending=False).head(10)
+            df['PPG'] = df['PTS'] / df['GP']
+            df = df.sort_values('PPG', ascending=False).head(15)
             
             season_added = 0
             
