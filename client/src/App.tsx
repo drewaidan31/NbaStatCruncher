@@ -1,4 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
+
+// Force dark mode on app load
+if (typeof document !== 'undefined') {
+  document.documentElement.classList.add('dark');
+}
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import StatCalculator from "./components/stat-calculator";
 import SaveStatDialog from "./components/save-stat-dialog";
@@ -8,7 +13,7 @@ import PlayerComparison from "./components/player-comparison";
 import FormulaExamples from "./components/formula-examples";
 import UsageRateLeaderboard from "./components/usage-rate-leaderboard";
 import UserProfile from "./components/user-profile";
-import ThemeToggle from "./components/theme-toggle";
+
 
 import { BarChart3, Search, Calculator, TrendingUp, Sparkles, RefreshCw, ChevronDown } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -757,7 +762,6 @@ function MainApp() {
             </p>
           </div>
           <div className="ml-8 flex items-center gap-3">
-            <ThemeToggle />
             <UserProfile />
           </div>
         </div>

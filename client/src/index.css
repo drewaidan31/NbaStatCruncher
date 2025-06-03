@@ -30,193 +30,23 @@
   --chart-text: #64748b; /* Light mode text color */
 }
 
-/* Force select elements to respect light/dark mode styling */
-select {
-  color-scheme: light dark;
-}
-
-html:not(.dark) select {
-  background-color: white !important;
-  color: #0f172a !important;
-  border-color: #d1d5db !important;
-}
-
-.dark select {
-  background-color: #374151 !important;
-  color: white !important;
-  border-color: #4b5563 !important;
-}
-
-/* Force input elements to respect light/dark mode styling */
-html:not(.dark) input,
-html:not(.dark) input[type="text"],
-html:not(.dark) input[type="search"] {
-  background-color: white !important;
-  color: #0f172a !important;
-  border-color: #d1d5db !important;
-}
-
-.dark input,
-.dark input[type="text"],
-.dark input[type="search"] {
-  background-color: #374151 !important;
-  color: white !important;
-  border-color: #4b5563 !important;
-}
-
-/* Force textarea elements to respect light/dark mode styling */
-html:not(.dark) textarea {
-  background-color: white !important;
-  color: #0f172a !important;
-  border-color: #d1d5db !important;
-}
-
-.dark textarea {
-  background-color: #374151 !important;
-  color: white !important;
-  border-color: #4b5563 !important;
-}
-
-/* Override any component-specific dark styling */
-html:not(.dark) .bg-slate-700,
-html:not(.dark) .dark\:bg-slate-700 {
-  background-color: white !important;
-}
-
-html:not(.dark) .bg-slate-800,
-html:not(.dark) .dark\:bg-slate-800 {
-  background-color: #f8fafc !important;
-}
-
-html:not(.dark) .text-white,
-html:not(.dark) .dark\:text-white {
-  color: #0f172a !important;
-}
-
-html:not(.dark) .text-slate-300,
-html:not(.dark) .dark\:text-slate-300 {
-  color: #64748b !important;
-}
-
-html:not(.dark) .border-slate-600,
-html:not(.dark) .dark\:border-slate-600 {
-  border-color: #d1d5db !important;
-}
-
-html:not(.dark) .border-slate-700,
-html:not(.dark) .dark\:border-slate-700 {
-  border-color: #e2e8f0 !important;
-}
-
-/* Force all container backgrounds to be light in light mode */
-html:not(.dark) [class*="bg-slate-800"],
-html:not(.dark) [class*="dark:bg-slate-800"] {
-  background-color: white !important;
-}
-
-html:not(.dark) [class*="bg-slate-900"],
-html:not(.dark) [class*="dark:bg-slate-900"] {
-  background-color: #f8fafc !important;
-}
-
-html:not(.dark) [class*="bg-slate-700"],
-html:not(.dark) [class*="dark:bg-slate-700"] {
-  background-color: white !important;
-}
-
-/* Override specific component containers with highest specificity */
-html:not(.dark) div.bg-white.dark\:bg-slate-800 {
-  background-color: white !important;
-}
-
-html:not(.dark) .bg-slate-100.dark\:bg-slate-900 {
-  background-color: #f8fafc !important;
-}
-
-html:not(.dark) .bg-slate-100.dark\:bg-slate-700 {
-  background-color: #f8fafc !important;
-}
-
-/* Target specific light mode issues with higher specificity */
-html:not(.dark) .bg-white.dark\:bg-slate-800.rounded-xl {
-  background-color: white !important;
-  color: #0f172a !important;
-}
-
-html:not(.dark) .bg-slate-100.dark\:bg-slate-900.rounded-lg {
-  background-color: #f8fafc !important;
-}
-
-/* Ensure chart containers display correctly in light mode */
-html:not(.dark) div[class*="bg-slate-"] {
-  background-color: white !important;
-}
-
-html:not(.dark) div[class*="dark:bg-slate-"] {
-  background-color: white !important;
-}
-
-/* Force ALL elements with dark background classes to be light */
-html:not(.dark) [class*="bg-slate-"] {
-  background-color: white !important;
-}
-
-html:not(.dark) [class*="dark:bg-slate-"] {
-  background-color: white !important;
-}
-
-html:not(.dark) .bg-slate-600,
-html:not(.dark) .dark\:bg-slate-600 {
-  background-color: #f1f5f9 !important;
-}
-
-html:not(.dark) .bg-slate-500,
-html:not(.dark) .dark\:bg-slate-500 {
-  background-color: #e2e8f0 !important;
-}
-
-/* Ensure main page background stays correct */
-html:not(.dark) .bg-slate-900 {
-  background-color: white !important;
-}
-
-/* Force any remaining dark elements to light colors */
-html:not(.dark) [style*="background-color: rgb(51, 65, 85)"],
-html:not(.dark) [style*="background-color: rgb(71, 85, 105)"],
-html:not(.dark) [style*="background-color: rgb(100, 116, 139)"] {
-  background-color: white !important;
-}
-
-/* Fix Recharts tooltip styling for light/dark mode */
+/* Dark mode tooltip styling */
 .recharts-tooltip-wrapper .recharts-default-tooltip {
-  background-color: white !important;
-  border: 1px solid #d1d5db !important;
-  border-radius: 8px !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
-}
-
-.dark .recharts-tooltip-wrapper .recharts-default-tooltip {
   background-color: #374151 !important;
   border: 1px solid #4b5563 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
   color: white !important;
 }
 
 .recharts-tooltip-wrapper .recharts-default-tooltip .recharts-tooltip-label {
-  color: #0f172a !important;
+  color: white !important;
   font-weight: 600 !important;
 }
 
-.dark .recharts-tooltip-wrapper .recharts-default-tooltip .recharts-tooltip-label {
-  color: white !important;
-}
-
 .recharts-tooltip-wrapper .recharts-default-tooltip .recharts-tooltip-item {
-  color: #ea580c !important;
-  font-weight: 500 !important;
-}
-
-.dark .recharts-tooltip-wrapper .recharts-default-tooltip .recharts-tooltip-item {
   color: #fb923c !important;
+  font-weight: 500 !important;
 }
 
 .dark {
