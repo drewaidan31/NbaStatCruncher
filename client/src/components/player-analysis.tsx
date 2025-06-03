@@ -61,6 +61,13 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
   // Query to fetch specific season data for the player
   const { data: seasonPlayerData, isLoading: isLoadingSeason } = useQuery({
     queryKey: ['/api/nba/players', player.playerId, 'season', selectedSeason],
+    queryFn: async () => {
+      const response = await fetch(`/api/nba/players/${player.playerId}?season=${selectedSeason}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch season data');
+      }
+      return response.json();
+    },
     enabled: selectedSeason !== player.currentSeason && !!selectedSeason,
   });
 

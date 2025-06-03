@@ -116,12 +116,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get players filtered by season
+  app.get("/api/nba/players/season/:season", async (req, res) => {
+    try {
+      const { season } = req.params;
+      const allPlayers = await storage.getAllPlayers();
+      
+      if (season === "all-time") {
+        return res.json(allPlayers);
+      }
+      
+      // Filter players who played in the specified season
+      const filteredPlayers = allPlayers.filter(player => {
+        if (player.seasons && Array.isArray(player.seasons)) {
+          return player.seasons.some(s => s.season === season);
+        }
+        return player.currentSeason === season;
+      }).map(player => {
+        // Return player data for the specific season
+        if (player.seasons && Array.isArray(player.seasons)) {
+          const seasonData = player.seasons.find(s => s.season === season);
+          if (seasonData) {
+            return {
+              ...player,
+              // Override current season stats with specific season stats
+              points: seasonData.points,
+              assists: seasonData.assists,
+              rebounds: seasonData.rebounds,
+              steals: seasonData.steals,
+              blocks: seasonData.blocks,
+              turnovers: seasonData.turnovers,
+              fieldGoalPercentage: seasonData.fieldGoalPercentage,
+              threePointPercentage: seasonData.threePointPercentage,
+              freeThrowPercentage: seasonData.freeThrowPercentage,
+              gamesPlayed: seasonData.gamesPlayed,
+              minutesPerGame: seasonData.minutesPerGame,
+              plusMinus: seasonData.plusMinus,
+              team: seasonData.team,
+              currentSeason: season
+            };
+          }
+        }
+        return player;
+      });
+      
+      res.json(filteredPlayers);
+    } catch (error) {
+      console.error("Error filtering players by season:", error);
+      res.status(500).json({ message: "Failed to filter players by season" });
+    }
+  });
+
   // Calculate custom stats for formula
   app.post("/api/nba/calculate", async (req, res) => {
     try {
-      const { formula } = formulaCalculationSchema.parse(req.body);
+      const { formula, season } = req.body;
       
-      const players = await storage.getAllPlayers();
+      let players;
+      if (season && season !== "all-time") {
+        // Get players for specific season
+        const allPlayers = await storage.getAllPlayers();
+        players = allPlayers.filter(player => {
+          if (player.seasons && Array.isArray(player.seasons)) {
+            return player.seasons.some(s => s.season === season);
+          }
+          return player.currentSeason === season;
+        }).map(player => {
+          // Use season-specific stats
+          if (player.seasons && Array.isArray(player.seasons)) {
+            const seasonData = player.seasons.find(s => s.season === season);
+            if (seasonData) {
+              return {
+                ...player,
+                points: seasonData.points,
+                assists: seasonData.assists,
+                rebounds: seasonData.rebounds,
+                steals: seasonData.steals,
+                blocks: seasonData.blocks,
+                turnovers: seasonData.turnovers,
+                fieldGoalPercentage: seasonData.fieldGoalPercentage,
+                threePointPercentage: seasonData.threePointPercentage,
+                freeThrowPercentage: seasonData.freeThrowPercentage,
+                gamesPlayed: seasonData.gamesPlayed,
+                minutesPerGame: seasonData.minutesPerGame,
+                plusMinus: seasonData.plusMinus,
+                team: seasonData.team,
+                currentSeason: season
+              };
+            }
+          }
+          return player;
+        });
+      } else {
+        players = await storage.getAllPlayers();
+      }
       
       if (players.length === 0) {
         return res.status(400).json({ 
