@@ -26,6 +26,8 @@
   --radius: 0.75rem;
   --nba-orange: 21 90% 48%; /* #ea580c */
   --nba-blue: 213 94% 68%; /* #3b82f6 */
+  --chart-grid: #cbd5e1; /* Light mode grid color */
+  --chart-text: #64748b; /* Light mode text color */
 }
 
 .dark {
@@ -52,6 +54,8 @@
   --radius: 0.75rem;
   --nba-orange: 21 90% 48%; /* #ea580c */
   --nba-blue: 213 94% 68%; /* #3b82f6 */
+  --chart-grid: #374151; /* Dark mode grid color */
+  --chart-text: #9CA3AF; /* Dark mode text color */
 }
 
 .dark {

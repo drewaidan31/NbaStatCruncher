@@ -109,7 +109,7 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
   };
 
   return (
-    <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
+    <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border border-slate-300 dark:border-slate-700">
       <div className="flex items-center gap-4 mb-6">
         <div className="flex items-center gap-2">
           <Search className="w-5 h-5 text-slate-400" />
