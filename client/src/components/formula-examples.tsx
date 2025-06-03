@@ -43,6 +43,8 @@ const EXAMPLE_FORMULAS = [
 ];
 
 export default function FormulaExamples({ onFormulaSelect }: FormulaExamplesProps) {
+  console.log("FormulaExamples component rendering, examples count:", EXAMPLE_FORMULAS.length);
+  
   return (
     <div className="bg-slate-800 rounded-xl p-6 mt-8 border border-slate-700">
       <h3 className="text-lg font-semibold text-slate-50 mb-4">Popular Formula Examples</h3>
