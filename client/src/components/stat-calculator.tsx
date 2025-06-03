@@ -69,13 +69,13 @@ export default function StatCalculator({ onFormulaChange, onCalculate, formula =
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-300 p-6" style={{ backgroundColor: 'white' }}>
-      <h3 className="text-lg font-semibold text-slate-900 mb-4">Custom Stats Calculator</h3>
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 p-6">
+      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50 mb-4">Custom Stats Calculator</h3>
       
       {/* Display */}
-      <div className="bg-slate-100 rounded-lg p-4 mb-4 border border-slate-300" style={{ backgroundColor: '#f8fafc' }}>
-        <div className="text-slate-600 text-sm mb-1">Formula:</div>
-        <div className="text-slate-900 text-lg font-mono min-h-[2rem] break-all">
+      <div className="bg-slate-100 dark:bg-slate-900 rounded-lg p-4 mb-4 border border-slate-300 dark:border-slate-600">
+        <div className="text-slate-600 dark:text-slate-300 text-sm mb-1">Formula:</div>
+        <div className="text-slate-900 dark:text-white text-lg font-mono min-h-[2rem] break-all">
           {display || "Select stats and operations to build your formula"}
         </div>
       </div>

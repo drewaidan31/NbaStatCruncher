@@ -745,14 +745,14 @@ function MainApp() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 transition-colors">
+    <div className="min-h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition-colors">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-start mb-8">
           <div className="text-center flex-1">
             <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
               NBA Custom Stats Calculator
             </h1>
-            <p className="text-xl text-slate-600">
+            <p className="text-xl text-slate-600 dark:text-slate-300">
               Create custom basketball statistics with authentic NBA player data
             </p>
           </div>

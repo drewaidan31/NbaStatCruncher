@@ -137,36 +137,23 @@ html:not(.dark) .bg-slate-100.dark\:bg-slate-700 {
   background-color: #f8fafc !important;
 }
 
-/* FORCE LIGHT MODE - Override everything */
-html * {
-  /* Override ALL dark backgrounds regardless of theme */
-}
-
-*[class*="bg-slate-8"],
-*[class*="dark:bg-slate-8"],
-*.bg-white.dark\:bg-slate-800 {
+/* Target specific light mode issues with higher specificity */
+html:not(.dark) .bg-white.dark\:bg-slate-800.rounded-xl {
   background-color: white !important;
+  color: #0f172a !important;
 }
 
-*[class*="bg-slate-9"],
-*[class*="dark:bg-slate-9"] {
+html:not(.dark) .bg-slate-100.dark\:bg-slate-900.rounded-lg {
   background-color: #f8fafc !important;
 }
 
-*[class*="bg-slate-7"],
-*[class*="dark:bg-slate-7"] {
+/* Ensure chart containers display correctly in light mode */
+html:not(.dark) div[class*="bg-slate-"] {
   background-color: white !important;
 }
 
-/* Force text colors to be dark in all cases */
-*[class*="text-white"],
-*[class*="dark:text-white"] {
-  color: #0f172a !important;
-}
-
-*[class*="text-slate-50"],
-*[class*="dark:text-slate-50"] {
-  color: #0f172a !important;
+html:not(.dark) div[class*="dark:bg-slate-"] {
+  background-color: white !important;
 }
 
 /* Force ALL elements with dark background classes to be light */
