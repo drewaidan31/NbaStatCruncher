@@ -55,7 +55,7 @@ const EXAMPLE_FORMULAS = [
 ];
 
 export default function FormulaExamples({ onFormulaSelect }: FormulaExamplesProps) {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   console.log("FormulaExamples component rendering, examples count:", EXAMPLE_FORMULAS.length);
   
   return (
