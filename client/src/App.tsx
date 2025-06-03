@@ -6,6 +6,7 @@ import PlayerSearch from "./components/player-search";
 import PlayerAnalysis from "./components/player-analysis";
 import PlayerComparison from "./components/player-comparison";
 import FormulaExamples from "./components/formula-examples";
+import UsageRateLeaderboard from "./components/usage-rate-leaderboard";
 
 import { BarChart3, Search, Calculator, TrendingUp, Sparkles, RefreshCw } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -367,6 +368,10 @@ function MainApp() {
           customStatResults={results}
         />
       );
+    }
+
+    if (viewMode === 'usage-rate') {
+      return <UsageRateLeaderboard season={selectedSeason === 'all-time' ? '2024-25' : selectedSeason} />;
     }
 
     // Default leaderboard view
@@ -778,6 +783,17 @@ function MainApp() {
               >
                 <Search className="w-4 h-4" />
                 Player Search
+              </button>
+              <button
+                onClick={() => setViewMode('usage-rate')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  viewMode === 'usage-rate'
+                    ? "bg-orange-600 text-white"
+                    : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                }`}
+              >
+                <TrendingUp className="w-4 h-4" />
+                Usage Rate
               </button>
             </div>
           </div>
