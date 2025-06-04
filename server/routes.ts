@@ -1,10 +1,12 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { formulaCalculationSchema, saveCustomStatSchema, NBA_STAT_MAPPINGS, type Player } from "@shared/schema";
+import { formulaCalculationSchema, saveCustomStatSchema, NBA_STAT_MAPPINGS, type Player, playerAwards, allStarSelections, endOfSeasonTeams } from "@shared/schema";
 import { evaluate } from "mathjs";
 import { spawn } from "child_process";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { db } from "./db";
+import { eq, and } from "drizzle-orm";
 
 import { getPlayerShotChart } from "./shot-chart-service";
 import { getTeamPossessionData } from "./team-stats-service";
@@ -536,6 +538,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error saving custom stat:", error);
       res.status(400).json({ message: "Failed to save custom stat" });
+    }
+  });
+
+  // Get player awards by name and season
+  app.get("/api/awards/:playerName/:season", async (req, res) => {
+    try {
+      const { playerName, season } = req.params;
+      
+      // Get all awards for this player and season
+      const awards = await db.select().from(playerAwards)
+        .where(and(eq(playerAwards.playerName, playerName), eq(playerAwards.season, season)));
+      
+      // Get All-Star selection for this player and season
+      const allStar = await db.select().from(allStarSelections)
+        .where(and(eq(allStarSelections.playerName, playerName), eq(allStarSelections.season, season)));
+      
+      // Get All-NBA/All-Defense teams for this player and season
+      const teams = await db.select().from(endOfSeasonTeams)
+        .where(and(eq(endOfSeasonTeams.playerName, playerName), eq(endOfSeasonTeams.season, season)));
+      
+      res.json({
+        awards,
+        allStar: allStar[0] || null,
+        teams
+      });
+    } catch (error) {
+      console.error("Error fetching player awards:", error);
+      res.status(500).json({ message: "Failed to fetch player awards" });
     }
   });
 

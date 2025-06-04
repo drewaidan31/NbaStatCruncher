@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, Calculator, TrendingUp, Sparkles, BarChart3, Calendar, Target } from "lucide-react";
 import FormulaExamples from "./formula-examples";
 import ShotChart from "./shot-chart";
+import { PlayerAwards } from "./player-awards";
 import { evaluate } from "mathjs";
 import { useQuery } from "@tanstack/react-query";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -417,6 +418,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
               <p className="opacity-90" style={{ color: teamTextColor }}>
                 {getTeamColors(currentPlayerData.team).name} • {currentPlayerData.position} • {selectedSeason}
               </p>
+              <PlayerAwards playerName={player.name} season={selectedSeason} />
             </div>
           </div>
           <div className="flex items-center gap-4">
