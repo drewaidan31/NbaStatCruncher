@@ -724,7 +724,16 @@ function MainApp() {
           )}
         </div>
 
-        <FormulaExamples onFormulaSelect={setFormula} />
+        <FormulaExamples onFormulaSelect={(selectedFormula) => {
+          console.log('Inserting preset formula:', selectedFormula);
+          console.log('Current formula before insert:', formula);
+          const insertion = `(${selectedFormula})`;
+          setFormula(prev => {
+            const newFormula = prev + insertion;
+            console.log('New formula after insert:', newFormula);
+            return newFormula;
+          });
+        }} />
 
         {results.length > 0 && (
           <div id="leaderboard-results" className="bg-slate-800 rounded-xl border border-slate-700 p-6">
