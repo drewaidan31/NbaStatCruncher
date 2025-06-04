@@ -166,7 +166,8 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
     'GP': currentPlayerData.gamesPlayed,
     'PLUS_MINUS': currentPlayerData.plusMinus,
     '+/-': currentPlayerData.plusMinus,
-    'MIN': currentPlayerData.minutesPerGame || 0
+    'MIN': currentPlayerData.minutesPerGame || 0,
+    'W_PCT': (currentPlayerData as any).winPercentage || 0
   };
 
   const calculateStatForSeason = (formula: string, seasonData: any) => {
@@ -195,7 +196,8 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
       'GP': seasonData.gamesPlayed,
       'PLUS_MINUS': seasonData.plusMinus,
       '+/-': seasonData.plusMinus, // Support both formats
-      'MIN': seasonData.minutesPerGame || 0
+      'MIN': seasonData.minutesPerGame || 0,
+      'W_PCT': seasonData.winPercentage || 0
     };
 
     try {
