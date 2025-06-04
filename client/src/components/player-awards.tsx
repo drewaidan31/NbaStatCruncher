@@ -7,14 +7,24 @@ interface PlayerAwardsProps {
 }
 
 export function PlayerAwards({ playerName, season }: PlayerAwardsProps) {
+  // Convert NBA season format (e.g., "2001-02") to award year format (e.g., "2001")
+  const getAwardYear = (season: string) => {
+    if (season === 'all-time' || !season) return '';
+    // For NBA seasons like "2001-02", use the first year
+    return season.split('-')[0];
+  };
+
+  const awardYear = getAwardYear(season);
+
   const { data: awardsData, isLoading } = useQuery({
-    queryKey: ['/api/awards', playerName, season],
+    queryKey: ['/api/awards', playerName, awardYear],
     queryFn: async () => {
-      const response = await fetch(`/api/awards/${encodeURIComponent(playerName)}/${season}`);
+      if (!awardYear) return null;
+      const response = await fetch(`/api/awards/${encodeURIComponent(playerName)}/${awardYear}`);
       if (!response.ok) throw new Error('Failed to fetch awards');
       return response.json();
     },
-    enabled: !!playerName && !!season && season !== 'all-time'
+    enabled: !!playerName && !!awardYear
   });
 
   if (isLoading) {
