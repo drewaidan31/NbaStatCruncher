@@ -47,7 +47,7 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
 
   const { player1, season1, player2, season2 } = comparison;
 
-  const getStatMappings = (player: Player) => ({
+  const getStatMappings = (player: any) => ({
     'PTS': player.points,
     'AST': player.assists,
     'REB': player.rebounds,
@@ -56,21 +56,21 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
     'TOV': player.turnovers,
     'FG_PCT': player.fieldGoalPercentage,
     'FG%': player.fieldGoalPercentage,
-    'FGA': 15.0, // Estimated field goal attempts based on average
+    'FGA': player.fieldGoalAttempts || 0,
     'THREE_PCT': player.threePointPercentage,
     '3P%': player.threePointPercentage,
-    '3PA': 5.0, // Estimated 3-point attempts
+    '3PA': player.threePointAttempts || 0,
     'FT_PCT': player.freeThrowPercentage,
     'FT%': player.freeThrowPercentage,
-    'FTA': 4.0, // Estimated free throw attempts
+    'FTA': player.freeThrowAttempts || 0,
     'GP': player.gamesPlayed,
     'PLUS_MINUS': player.plusMinus,
     '+/-': player.plusMinus,
-    'MIN': 32.5, // Default minutes per game
-    'W_PCT': 0.5 // Default win percentage
+    'MIN': player.minutesPerGame || 0,
+    'W_PCT': player.winPercentage || 0
   });
 
-  const calculateCustomStat = (player: Player) => {
+  const calculateCustomStat = (player: any) => {
     // Only calculate if formula is not empty
     if (!formula || formula.trim().length === 0) {
       console.log('No formula provided');

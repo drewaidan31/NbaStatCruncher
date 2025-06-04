@@ -195,7 +195,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
       'GP': seasonData.gamesPlayed,
       'PLUS_MINUS': seasonData.plusMinus,
       '+/-': seasonData.plusMinus, // Support both formats
-      'MIN': seasonData.minutesPerGame || 32.5
+      'MIN': seasonData.minutesPerGame || 0
     };
 
     try {
