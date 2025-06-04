@@ -220,8 +220,8 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
                   >
                     <div className="flex justify-between items-start">
                       <div>
-                        <div className="font-medium text-slate-900 dark:text-white">{player.name}</div>
-                        <div className="text-sm text-slate-600 dark:text-slate-300">
+                        <div className="font-medium text-slate-900 dark:text-white transition-all duration-300 ease-in-out group-hover:text-orange-400 group-hover:font-bold group-hover:transform group-hover:translate-x-1">{player.name}</div>
+                        <div className="text-sm text-slate-600 dark:text-slate-300 transition-all duration-300 ease-in-out group-hover:text-slate-700 dark:group-hover:text-slate-200">
                           {player.team} • {player.position} • {player.currentSeason || "2024-25"}
                         </div>
                         {player.availableSeasons && player.availableSeasons.length > 1 && (

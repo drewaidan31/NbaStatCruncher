@@ -760,15 +760,16 @@ function MainApp() {
                     
                     return false;
                   }).map((result: any, index) => (
-                    <tr key={`${result.player.id}-${result.bestSeason}-${index}`} className="border-b border-slate-700 hover:bg-slate-700/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] hover:shadow-lg hover:shadow-orange-500/20 group cursor-pointer">
+                    <tr 
+                      key={`${result.player.id}-${result.bestSeason}-${index}`} 
+                      onClick={() => handlePlayerSelect(result.player, result.bestSeason)}
+                      className="border-b border-slate-700 hover:bg-slate-700/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] hover:shadow-lg hover:shadow-orange-500/20 group cursor-pointer"
+                    >
                       <td className="py-2">{index + 1}</td>
                       <td className="py-2 font-medium">
-                        <button
-                          onClick={() => handlePlayerSelect(result.player, result.bestSeason)}
-                          className="text-white hover:text-orange-400 transition-all duration-300 ease-in-out cursor-pointer text-left underline decoration-slate-500 hover:decoration-orange-400 group-hover:transform group-hover:translate-x-2 font-medium hover:font-bold"
-                        >
+                        <span className="text-white group-hover:text-orange-400 transition-all duration-300 ease-in-out underline decoration-slate-500 group-hover:decoration-orange-400 group-hover:transform group-hover:translate-x-2 font-medium group-hover:font-bold">
                           {result.player.name}
-                        </button>
+                        </span>
                       </td>
                       <td className="py-2">
                         <span className="bg-slate-700 text-orange-400 px-2 py-1 rounded text-xs font-medium transition-all duration-300 ease-in-out group-hover:bg-orange-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">
