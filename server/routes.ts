@@ -423,16 +423,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               const customStat = evaluate(evaluationFormula);
               
-              results.push({
-                player: {
-                  ...player,
-                  team: targetSeason.team
-                },
-                customStat: typeof customStat === 'number' ? 
-                  Number(customStat.toFixed(2)) : 0,
-                bestSeason: targetSeason.season,
-                formula: resolvedFormula
-              });
+              // Only include results with valid, finite numbers
+              if (typeof customStat === 'number' && isFinite(customStat) && customStat !== 0) {
+                results.push({
+                  player: {
+                    ...player,
+                    team: targetSeason.team
+                  },
+                  customStat: Number(customStat.toFixed(2)),
+                  bestSeason: targetSeason.season,
+                  formula: resolvedFormula
+                });
+              }
             }
           } else {
             // For all-time, include ALL seasons for each player
@@ -461,7 +463,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 
                 try {
                   const seasonCustomStat = evaluate(evaluationFormula);
-                  if (typeof seasonCustomStat === 'number') {
+                  // Only include results with valid, finite numbers
+                  if (typeof seasonCustomStat === 'number' && isFinite(seasonCustomStat) && seasonCustomStat !== 0) {
                     results.push({
                       player: {
                         ...player,
@@ -500,16 +503,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               const customStat = evaluate(evaluationFormula);
               
-              results.push({
-                player: {
-                  ...player,
-                  team: player.team
-                },
-                customStat: typeof customStat === 'number' ? 
-                  Number(customStat.toFixed(2)) : 0,
-                bestSeason: player.currentSeason || '2024-25',
-                formula: resolvedFormula
-              });
+              // Only include results with valid, finite numbers
+              if (typeof customStat === 'number' && isFinite(customStat) && customStat !== 0) {
+                results.push({
+                  player: {
+                    ...player,
+                    team: player.team
+                  },
+                  customStat: Number(customStat.toFixed(2)),
+                  bestSeason: player.currentSeason || '2024-25',
+                  formula: resolvedFormula
+                });
+              }
             }
           }
         } catch (error) {
