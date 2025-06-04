@@ -47,30 +47,45 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
 
   const { player1, season1, player2, season2 } = comparison;
 
-  const getStatMappings = (player: any) => ({
-    'PTS': player.points,
-    'AST': player.assists,
-    'REB': player.rebounds,
-    'STL': player.steals,
-    'BLK': player.blocks,
-    'TOV': player.turnovers,
-    'FG_PCT': player.fieldGoalPercentage,
-    'FG%': player.fieldGoalPercentage,
-    'FGA': player.fieldGoalAttempts || 0,
-    'THREE_PCT': player.threePointPercentage,
-    '3P%': player.threePointPercentage,
-    '3PA': player.threePointAttempts || 0,
-    'FT_PCT': player.freeThrowPercentage,
-    'FT%': player.freeThrowPercentage,
-    'FTA': player.freeThrowAttempts || 0,
-    'GP': player.gamesPlayed,
-    'PLUS_MINUS': player.plusMinus,
-    '+/-': player.plusMinus,
-    'MIN': player.minutesPerGame || 0,
-    'W_PCT': player.winPercentage || 0
-  });
+  // Extract season-specific data for accurate comparisons
+  const getPlayerSeasonData = (player: any, season: string) => {
+    if (player.seasons && Array.isArray(player.seasons)) {
+      const seasonData = player.seasons.find((s: any) => s.season === season);
+      if (seasonData) {
+        return seasonData;
+      }
+    }
+    // Fallback to player top-level data if season not found
+    return player;
+  };
 
-  const calculateCustomStat = (player: any) => {
+  const getStatMappings = (player: any, season: string) => {
+    const seasonData = getPlayerSeasonData(player, season);
+    return {
+      'PTS': seasonData.points || 0,
+      'AST': seasonData.assists || 0,
+      'REB': seasonData.rebounds || 0,
+      'STL': seasonData.steals || 0,
+      'BLK': seasonData.blocks || 0,
+      'TOV': seasonData.turnovers || 0,
+      'FG_PCT': seasonData.fieldGoalPercentage || 0,
+      'FG%': seasonData.fieldGoalPercentage || 0,
+      'FGA': seasonData.fieldGoalAttempts || 0,
+      'THREE_PCT': seasonData.threePointPercentage || 0,
+      '3P%': seasonData.threePointPercentage || 0,
+      '3PA': seasonData.threePointAttempts || 0,
+      'FT_PCT': seasonData.freeThrowPercentage || 0,
+      'FT%': seasonData.freeThrowPercentage || 0,
+      'FTA': seasonData.freeThrowAttempts || 0,
+      'GP': seasonData.gamesPlayed || 0,
+      'PLUS_MINUS': seasonData.plusMinus || 0,
+      '+/-': seasonData.plusMinus || 0,
+      'MIN': seasonData.minutesPerGame || 0,
+      'W_PCT': seasonData.winPercentage || 0
+    };
+  };
+
+  const calculateCustomStat = (player: any, season: string) => {
     // Only calculate if formula is not empty
     if (!formula || formula.trim().length === 0) {
       console.log('No formula provided');
@@ -79,7 +94,7 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
     
     try {
       let expression = formula;
-      const statMappings = getStatMappings(player);
+      const statMappings = getStatMappings(player, season);
       console.log('Original formula:', formula);
       console.log('Player stats:', statMappings);
       
@@ -127,8 +142,8 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
   };
 
   const handleCalculate = () => {
-    const value1 = calculateCustomStat(player1);
-    const value2 = calculateCustomStat(player2);
+    const value1 = calculateCustomStat(player1, season1);
+    const value2 = calculateCustomStat(player2, season2);
     setPlayer1Value(value1);
     setPlayer2Value(value2);
   };
@@ -569,7 +584,7 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
               <div>
                 <div className="font-medium text-blue-600 dark:text-blue-300 mb-1">{player1.name} ({season1})</div>
-                {Object.entries(getStatMappings(player1)).map(([key, value]) => (
+                {Object.entries(getStatMappings(player1, season1)).map(([key, value]) => (
                   <div key={key} className="text-slate-700 dark:text-slate-300">
                     <span className="font-medium text-orange-600 dark:text-orange-300">{key}</span>: {
                       key.includes('%') ? (value * 100).toFixed(1) + '%' : value.toFixed(1)
@@ -579,7 +594,7 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
               </div>
               <div>
                 <div className="font-medium text-blue-600 dark:text-blue-300 mb-1">{player2.name} ({season2})</div>
-                {Object.entries(getStatMappings(player2)).map(([key, value]) => (
+                {Object.entries(getStatMappings(player2, season2)).map(([key, value]) => (
                   <div key={key} className="text-slate-700 dark:text-slate-300">
                     <span className="font-medium text-orange-600 dark:text-orange-300">{key}</span>: {
                       key.includes('%') ? (value * 100).toFixed(1) + '%' : value.toFixed(1)
