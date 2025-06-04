@@ -853,33 +853,7 @@ function MainApp() {
           </div>
         )}
 
-        {savedStats.length > 0 && (
-          <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-            <h3 className="text-lg font-semibold mb-4">Your Saved Custom Stats</h3>
-            <div className="space-y-4">
-              {savedStats.map((stat) => (
-                <div key={stat.id} className="bg-slate-700 p-4 rounded-lg">
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-medium text-slate-50">{stat.name}</h4>
-                    <button
-                      onClick={() => {
-                        setFormula(stat.formula);
-                        calculateStats();
-                      }}
-                      className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition-colors"
-                    >
-                      Use Formula
-                    </button>
-                  </div>
-                  {stat.description && (
-                    <p className="text-sm text-slate-400 mb-2">{stat.description}</p>
-                  )}
-                  <div className="text-xs text-slate-500 font-mono">{stat.formula}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+
       </div>
     );
   };
