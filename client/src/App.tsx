@@ -295,8 +295,11 @@ function MainApp() {
       if (response.ok) {
         alert('Stat saved successfully!');
         fetchSavedStats();
+      } else if (response.status === 409) {
+        alert('A stat with this name and formula already exists. Please use a different name or modify the formula.');
       } else {
-        console.error('Failed to save stat:', response.statusText);
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        alert(`Failed to save stat: ${errorData.message || response.statusText}`);
       }
     } catch (error) {
       console.error('Error saving stat:', error);
@@ -318,6 +321,34 @@ function MainApp() {
   };
 
   const loadSavedStat = (stat: any) => {
+    setFormula(stat.formula);
+    setCustomStatName(stat.name);
+    setShowSavedStats(false);
+  };
+
+  const handleDeleteStat = async (statId: number) => {
+    if (!confirm('Are you sure you want to delete this custom stat?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/custom-stats/${statId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        fetchSavedStats(); // Refresh the list
+      } else {
+        alert('Failed to delete stat');
+      }
+    } catch (error) {
+      console.error('Error deleting stat:', error);
+      alert('Failed to delete stat');
+    }
+  };
+
+  const handleEditStat = (stat: any) => {
     setFormula(stat.formula);
     setCustomStatName(stat.name);
     setShowSavedStats(false);
@@ -617,7 +648,12 @@ function MainApp() {
                 Save Stat
               </button>
               <button
-                onClick={() => setShowSavedStats(!showSavedStats)}
+                onClick={() => {
+                  setShowSavedStats(!showSavedStats);
+                  if (!showSavedStats) {
+                    fetchSavedStats();
+                  }
+                }}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
               >
                 Saved Stats
@@ -638,19 +674,37 @@ function MainApp() {
           {showSavedStats && (
             <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-4 mt-4">
               <h4 className="text-lg font-medium text-slate-900 dark:text-slate-50 mb-3">Your Saved Stats</h4>
-              <div className="space-y-2">
+              <div className="space-y-2 max-h-60 overflow-y-auto">
                 {savedStats.length === 0 ? (
-                  <p className="text-slate-600 dark:text-slate-400">No saved stats yet</p>
+                  <p className="text-slate-600 dark:text-slate-400">No saved stats yet. Save your first custom stat above!</p>
                 ) : (
                   savedStats.map((stat) => (
-                    <button
+                    <div
                       key={stat.id}
-                      onClick={() => loadSavedStat(stat)}
-                      className="w-full text-left bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 p-3 rounded-lg transition-colors"
+                      className="p-3 bg-white dark:bg-slate-600 rounded border border-slate-200 dark:border-slate-500"
                     >
-                      <div className="font-medium text-slate-900 dark:text-slate-50">{stat.name}</div>
-                      <div className="text-sm text-slate-600 dark:text-slate-300">{stat.formula}</div>
-                    </button>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 cursor-pointer" onClick={() => loadSavedStat(stat)}>
+                          <div className="font-medium text-slate-900 dark:text-slate-50">{stat.name}</div>
+                          <div className="text-sm text-slate-600 dark:text-slate-300">{stat.formula}</div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">Click to load</div>
+                        </div>
+                        <div className="flex gap-2 ml-3">
+                          <button
+                            onClick={() => handleEditStat(stat)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs transition-colors"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteStat(stat.id)}
+                            className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   ))
                 )}
               </div>
