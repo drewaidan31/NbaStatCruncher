@@ -63,7 +63,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
   const [calculatedValue, setCalculatedValue] = useState<number | null>(null);
   const [showExamples, setShowExamples] = useState(false);
   const [showSavedStats, setShowSavedStats] = useState(false);
-  const [selectedSeason, setSelectedSeason] = useState(player.currentSeason || season);
+  const [selectedSeason, setSelectedSeason] = useState(season || player.currentSeason);
   const [currentPlayerData, setCurrentPlayerData] = useState(player);
   const [chartData, setChartData] = useState<Array<{season: string, value: number, team: string}>>([]);
   const [activeTab, setActiveTab] = useState<'overview' | 'shooting' | 'calculator'>('overview');
@@ -102,6 +102,13 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
       return response.json();
     },
   });
+
+  // Update selected season when season prop changes from navigation
+  useEffect(() => {
+    if (season && season !== selectedSeason) {
+      setSelectedSeason(season);
+    }
+  }, [season]);
 
   // Update current player data when season changes
   useEffect(() => {
