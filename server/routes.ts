@@ -293,10 +293,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Helper function to recursively resolve saved stat names in formulas
+  const resolveSavedStatsInFormula = async (formula: string): Promise<string> => {
+    let resolvedFormula = formula;
+    const savedStats = await storage.getCustomStats();
+    
+    // Keep resolving until no more saved stat names are found
+    let hasChanges = true;
+    while (hasChanges) {
+      hasChanges = false;
+      
+      for (const stat of savedStats) {
+        // Check if the stat name appears in the formula (case-insensitive)
+        const regex = new RegExp(`\\b${stat.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+        if (regex.test(resolvedFormula)) {
+          // Replace the stat name with its formula wrapped in parentheses
+          resolvedFormula = resolvedFormula.replace(regex, `(${stat.formula})`);
+          hasChanges = true;
+        }
+      }
+    }
+    
+    return resolvedFormula;
+  };
+
   // Calculate custom stats for formula
   app.post("/api/nba/calculate", async (req, res) => {
     try {
       const { formula, season } = req.body;
+      
+      // First, resolve any saved stat names in the formula
+      const resolvedFormula = await resolveSavedStatsInFormula(formula);
+      console.log('Original formula:', formula);
+      console.log('Resolved formula:', resolvedFormula);
       
       let players;
       if (season && season !== "all-time") {
@@ -346,8 +375,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Validate formula contains valid NBA stats
-      const formulaUpper = formula.toUpperCase();
+      // Validate resolved formula contains valid NBA stats
+      const formulaUpper = resolvedFormula.toUpperCase();
       const availableStats = Object.keys(NBA_STAT_MAPPINGS);
       const usedStats = availableStats.filter(stat => formulaUpper.includes(stat));
       
@@ -372,7 +401,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
               
               // Check if formula uses percentage stats and apply minimum games filter
-              const formulaUpper = formula.toUpperCase();
+              const formulaUpper = resolvedFormula.toUpperCase();
               const percentageStats = ['W_PCT', 'FG_PCT', 'FG%', '3P_PCT', '3P%', 'FT_PCT', 'FT%'];
               const usesPercentageStats = percentageStats.some(stat => formulaUpper.includes(stat));
               
@@ -382,7 +411,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
               
               // Calculate custom stat using the specific season's data
-              let evaluationFormula = formula.toUpperCase();
+              let evaluationFormula = resolvedFormula.toUpperCase();
               
               for (const [abbrev, field] of Object.entries(NBA_STAT_MAPPINGS)) {
                 const value = targetSeason[field] as number || 0;
@@ -402,7 +431,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 customStat: typeof customStat === 'number' ? 
                   Number(customStat.toFixed(2)) : 0,
                 bestSeason: targetSeason.season,
-                formula
+                formula: resolvedFormula
               });
             }
           } else {
