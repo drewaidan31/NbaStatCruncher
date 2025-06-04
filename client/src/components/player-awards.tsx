@@ -57,7 +57,7 @@ export function PlayerAwards({ playerName, season }: PlayerAwardsProps) {
   const { awards, allStar, teams } = awardsData;
 
   // Filter for major awards that were won
-  const majorAwards = awards?.filter((award: any) => award.winner === 'TRUE') || [];
+  const majorAwards = awards?.filter((award: any) => award.winner === 'TRUE' || award.winner === true || award.winner === 'true') || [];
   
   // Get award display info
   const getAwardInfo = (awardType: string) => {
