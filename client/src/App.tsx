@@ -17,7 +17,7 @@ import TeamStats from "./components/team-stats";
 import AboutSection from "./components/about-section";
 
 
-import { BarChart3, Search, Calculator, TrendingUp, Sparkles, RefreshCw, ChevronDown } from "lucide-react";
+import { BarChart3, Search, Calculator, TrendingUp, Sparkles, RefreshCw, ChevronDown, Filter } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { evaluate } from "mathjs";
 
@@ -96,6 +96,7 @@ function MainApp() {
   const [featuredStat, setFeaturedStat] = useState<{name: string, formula: string, description: string} | null>(null);
   const [featuredChartData, setFeaturedChartData] = useState<Array<{season: string, value: number, team: string}>>([]);
   const [refreshCounter, setRefreshCounter] = useState(0);
+  const [selectedPosition, setSelectedPosition] = useState<string>("all");
 
   // Preset custom stat equations for the showcase
   const presetStats = [
@@ -682,22 +683,60 @@ function MainApp() {
 
         {results.length > 0 && (
           <div id="leaderboard-results" className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-            <h3 className="text-lg font-semibold mb-4">
-              {customStatName ? `${customStatName} Leaderboard` : "Custom Statistics Leaderboard"}
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">
+                {customStatName ? `${customStatName} Leaderboard` : "Custom Statistics Leaderboard"}
+              </h3>
+              
+              {/* Position Filter */}
+              <div className="flex items-center gap-2">
+                <Filter className="w-4 h-4 text-slate-400" />
+                <div className="relative">
+                  <select
+                    value={selectedPosition}
+                    onChange={(e) => setSelectedPosition(e.target.value)}
+                    className="bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 pr-8 text-sm appearance-none cursor-pointer hover:bg-slate-600 transition-colors"
+                  >
+                    <option value="all">All Positions</option>
+                    <option value="PG">Point Guards</option>
+                    <option value="SG">Shooting Guards</option>
+                    <option value="SF">Small Forwards</option>
+                    <option value="PF">Power Forwards</option>
+                    <option value="C">Centers</option>
+                    <option value="G">Guards</option>
+                    <option value="F">Forwards</option>
+                  </select>
+                  <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" />
+                </div>
+              </div>
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-slate-600">
                     <th className="text-left py-2">Rank</th>
                     <th className="text-left py-2">Player</th>
+                    <th className="text-left py-2">Position</th>
                     <th className="text-left py-2">Team</th>
                     <th className="text-left py-2">{customStatName || "Custom Stat"}</th>
                     <th className="text-left py-2">Season</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {results.map((result: any, index) => (
+                  {results.filter((result: any) => {
+                    if (selectedPosition === "all") return true;
+                    
+                    const playerPosition = result.player.position;
+                    
+                    // Handle specific position matches
+                    if (selectedPosition === playerPosition) return true;
+                    
+                    // Handle grouped positions
+                    if (selectedPosition === "G" && (playerPosition === "PG" || playerPosition === "SG")) return true;
+                    if (selectedPosition === "F" && (playerPosition === "SF" || playerPosition === "PF")) return true;
+                    
+                    return false;
+                  }).map((result: any, index) => (
                     <tr key={`${result.player.id}-${result.bestSeason}-${index}`} className="border-b border-slate-700">
                       <td className="py-2">{index + 1}</td>
                       <td className="py-2 font-medium">
@@ -707,6 +746,11 @@ function MainApp() {
                         >
                           {result.player.name}
                         </button>
+                      </td>
+                      <td className="py-2">
+                        <span className="bg-slate-700 text-orange-400 px-2 py-1 rounded text-xs font-medium">
+                          {result.player.position}
+                        </span>
                       </td>
                       <td className="py-2">{result.player.team}</td>
                       <td className="py-2">
