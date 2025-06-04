@@ -42,6 +42,8 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
   const [customStatName, setCustomStatName] = useState("Total Impact");
   const [player1Value, setPlayer1Value] = useState<number | null>(null);
   const [player2Value, setPlayer2Value] = useState<number | null>(null);
+  const [savedStats, setSavedStats] = useState<any[]>([]);
+  const [showSavedStats, setShowSavedStats] = useState(false);
 
   const { player1, season1, player2, season2 } = comparison;
 
@@ -129,6 +131,57 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
     const value2 = calculateCustomStat(player2);
     setPlayer1Value(value1);
     setPlayer2Value(value2);
+  };
+
+  const fetchSavedStats = async () => {
+    try {
+      const response = await fetch('/api/custom-stats');
+      if (response.ok) {
+        const stats = await response.json();
+        setSavedStats(stats);
+      }
+    } catch (error) {
+      console.error('Error fetching saved stats:', error);
+    }
+  };
+
+  const insertSavedStat = (stat: any) => {
+    const insertion = `(${stat.formula})`;
+    console.log('Inserting saved stat:', stat.name, 'formula:', stat.formula);
+    console.log('Current formula before insert:', formula);
+    setFormula(prev => {
+      const newFormula = prev + insertion;
+      console.log('New formula after insert:', newFormula);
+      return newFormula;
+    });
+    setShowSavedStats(false);
+  };
+
+  const handleDeleteStat = async (statId: number) => {
+    if (!confirm('Are you sure you want to delete this custom stat?')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/custom-stats/${statId}`, {
+        method: 'DELETE',
+      });
+      
+      if (response.ok) {
+        fetchSavedStats(); // Refresh the list
+      } else {
+        alert('Failed to delete stat');
+      }
+    } catch (error) {
+      console.error('Error deleting stat:', error);
+      alert('Failed to delete stat');
+    }
+  };
+
+  const handleEditStat = (stat: any) => {
+    setFormula(stat.formula);
+    setCustomStatName(stat.name);
+    setShowSavedStats(false);
   };
 
   const handleSaveStat = async () => {
@@ -313,6 +366,17 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
                 </button>
                 <button
                   onClick={() => {
+                    setShowSavedStats(!showSavedStats);
+                    if (!showSavedStats) {
+                      fetchSavedStats();
+                    }
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                >
+                  Saved Stats
+                </button>
+                <button
+                  onClick={() => {
                     setFormula("");
                     handleFormulaChange("");
                   }}
@@ -323,11 +387,69 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
               </div>
             </div>
 
+            {/* Saved Stats Modal */}
+            {showSavedStats && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white dark:bg-slate-800 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
+                  <div className="flex justify-between items-center mb-4">
+                    <h4 className="text-lg font-medium text-slate-900 dark:text-slate-50">Your Saved Stats</h4>
+                    <button 
+                      onClick={() => setShowSavedStats(false)}
+                      className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {savedStats.length === 0 ? (
+                      <p className="text-slate-600 dark:text-slate-400">No saved stats yet. Save your first custom stat above!</p>
+                    ) : (
+                      savedStats.map((stat) => (
+                        <div
+                          key={stat.id}
+                          className="p-3 bg-slate-100 dark:bg-slate-700 rounded border"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1 cursor-pointer" onClick={() => insertSavedStat(stat)}>
+                              <div className="font-medium text-slate-900 dark:text-slate-50">{stat.name}</div>
+                              <div className="text-sm text-slate-600 dark:text-slate-300">{stat.formula}</div>
+                              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">Click to insert into formula</div>
+                            </div>
+                            <div className="flex gap-2 ml-3">
+                              <button
+                                onClick={() => handleEditStat(stat)}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs transition-colors"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDeleteStat(stat.id)}
+                                className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs transition-colors"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Formula Examples */}
             <FormulaExamples 
               onFormulaSelect={(selectedFormula) => {
-                setFormula(selectedFormula);
-                handleFormulaChange(selectedFormula);
+                console.log('Inserting preset formula:', selectedFormula);
+                console.log('Current formula before insert:', formula);
+                const insertion = `(${selectedFormula})`;
+                setFormula(prev => {
+                  const newFormula = prev + insertion;
+                  console.log('New formula after insert:', newFormula);
+                  return newFormula;
+                });
+                handleFormulaChange(formula + insertion);
               }}
             />
 
