@@ -389,6 +389,19 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
     handleFormulaChange(stat.formula);
   };
 
+  const insertSavedStat = (stat: any) => {
+    const insertion = `(${stat.formula})`;
+    console.log('Inserting saved stat:', stat.name, 'formula:', stat.formula);
+    console.log('Current formula before insert:', formula);
+    setFormula(prev => {
+      const newFormula = prev + insertion;
+      console.log('New formula after insert:', newFormula);
+      handleFormulaChange(newFormula);
+      return newFormula;
+    });
+    setShowSavedStats(false);
+  };
+
   // Get team colors for current player's team
   const teamColors = getTeamColors(currentPlayerData.team);
   const teamGradient = getTeamGradient(currentPlayerData.team);
@@ -677,6 +690,14 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
             </button>
             <button
               onClick={() => {
+                setShowSavedStats(!showSavedStats);
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+            >
+              Saved Stats
+            </button>
+            <button
+              onClick={() => {
                 setFormula("");
                 setCustomStatName("");
                 setCalculatedValue(null);
@@ -827,12 +848,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
                     <div
                       key={stat.id}
                       className="bg-slate-700 rounded-lg p-4 cursor-pointer hover:bg-slate-600 transition-colors"
-                      onClick={() => {
-                        setFormula(stat.formula);
-                        setCustomStatName(stat.name);
-                        handleFormulaChange(stat.formula);
-                        setShowSavedStats(false);
-                      }}
+                      onClick={() => insertSavedStat(stat)}
                     >
                       <div className="flex justify-between items-start mb-2">
                         <h4 className="font-medium text-white">{stat.name}</h4>
@@ -860,7 +876,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
                       <div className="text-sm text-slate-300 mb-1">Formula: {stat.formula}</div>
                       <div className="text-lg font-bold text-orange-400">{stat.value?.toFixed(2)}</div>
                       <div className="text-xs text-slate-500 mt-2">
-                        Click to load
+                        Click to insert into formula
                       </div>
                     </div>
                   ))}
