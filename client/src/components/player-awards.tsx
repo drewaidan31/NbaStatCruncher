@@ -7,11 +7,25 @@ interface PlayerAwardsProps {
 }
 
 export function PlayerAwards({ playerName, season }: PlayerAwardsProps) {
-  // Convert NBA season format (e.g., "2001-02") to award year format (e.g., "2001")
+  // Convert NBA season format to award year format
+  // NBA seasons like "2022-23" correspond to awards given in 2023
   const getAwardYear = (season: string) => {
     if (season === 'all-time' || !season) return '';
-    // For NBA seasons like "2001-02", use the first year
-    return season.split('-')[0];
+    // For NBA seasons like "2022-23", awards are given in the second year (2023)
+    const parts = season.split('-');
+    if (parts.length === 2) {
+      // Convert "22" to "2022" format for proper year calculation
+      const firstYear = parseInt(parts[0]);
+      const secondYearShort = parseInt(parts[1]);
+      
+      // If second part is 2-digit, it's the year the award was given
+      if (secondYearShort < 100) {
+        const century = Math.floor(firstYear / 100) * 100;
+        return (century + secondYearShort).toString();
+      }
+    }
+    // Fallback: use the first year
+    return parts[0];
   };
 
   const awardYear = getAwardYear(season);
