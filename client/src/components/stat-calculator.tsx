@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { Delete } from "lucide-react";
 
 interface StatCalculatorProps {
   onFormulaChange: (formula: string) => void;
@@ -19,19 +18,10 @@ export default function StatCalculator({ onFormulaChange, onCalculate, formula =
     }
   }, [formula]);
 
-  const insertAtCursor = (insertion: string) => {
-    const newDisplay = display.slice(0, cursorPosition) + insertion + display.slice(cursorPosition);
-    setDisplay(newDisplay);
-    setCursorPosition(cursorPosition + insertion.length);
-    onFormulaChange(newDisplay);
-  };
-
-  const moveCursor = (direction: 'left' | 'right') => {
-    if (direction === 'left' && cursorPosition > 0) {
-      setCursorPosition(cursorPosition - 1);
-    } else if (direction === 'right' && cursorPosition < display.length) {
-      setCursorPosition(cursorPosition + 1);
-    }
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value;
+    setDisplay(newValue);
+    onFormulaChange(newValue);
   };
 
   const stats = [
@@ -65,29 +55,32 @@ export default function StatCalculator({ onFormulaChange, onCalculate, formula =
   const numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "."];
 
   const handleClick = (value: string) => {
-    insertAtCursor(value);
+    const textarea = document.querySelector('textarea[data-formula-input]') as HTMLTextAreaElement;
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const newValue = display.slice(0, start) + value + display.slice(end);
+      setDisplay(newValue);
+      onFormulaChange(newValue);
+      
+      // Set cursor position after the inserted text
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start + value.length, start + value.length);
+      }, 0);
+    } else {
+      // Fallback if textarea not found
+      setDisplay(display + value);
+      onFormulaChange(display + value);
+    }
   };
 
   const handleClear = () => {
     setDisplay("");
-    setCursorPosition(0);
     onFormulaChange("");
-  };
-
-  const handleBackspace = () => {
-    if (cursorPosition > 0) {
-      const newDisplay = display.slice(0, cursorPosition - 1) + display.slice(cursorPosition);
-      setDisplay(newDisplay);
-      setCursorPosition(cursorPosition - 1);
-      onFormulaChange(newDisplay);
-    }
-  };
-
-  const handleDelete = () => {
-    if (cursorPosition < display.length) {
-      const newDisplay = display.slice(0, cursorPosition) + display.slice(cursorPosition + 1);
-      setDisplay(newDisplay);
-      onFormulaChange(newDisplay);
+    const textarea = document.querySelector('textarea[data-formula-input]') as HTMLTextAreaElement;
+    if (textarea) {
+      textarea.focus();
     }
   };
 
@@ -99,23 +92,19 @@ export default function StatCalculator({ onFormulaChange, onCalculate, formula =
     <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 p-6">
       <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50 mb-4">Custom Stats Calculator</h3>
       
-      {/* Display */}
+      {/* Formula Input */}
       <div className="bg-slate-100 dark:bg-slate-900 rounded-lg p-4 mb-4 border border-slate-300 dark:border-slate-600">
-        <div className="text-slate-600 dark:text-slate-300 text-sm mb-1">Formula:</div>
-        <div className="text-slate-900 dark:text-white text-lg font-mono min-h-[2rem] break-all">
-          {display ? (
-            <span>
-              {display.slice(0, cursorPosition)}
-              <span className="bg-blue-500 text-white px-0.5 animate-pulse">|</span>
-              {display.slice(cursorPosition)}
-            </span>
-          ) : (
-            <span>
-              <span className="bg-blue-500 text-white px-0.5 animate-pulse">|</span>
-              Select stats and operations to build your formula
-            </span>
-          )}
-        </div>
+        <label htmlFor="formula-input" className="text-slate-600 dark:text-slate-300 text-sm mb-1 block">
+          Formula:
+        </label>
+        <textarea
+          id="formula-input"
+          data-formula-input
+          value={display}
+          onChange={handleInputChange}
+          placeholder="Type your formula or use the buttons below to build it"
+          className="w-full bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-lg font-mono min-h-[4rem] p-3 rounded border border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-vertical"
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -160,44 +149,10 @@ export default function StatCalculator({ onFormulaChange, onCalculate, formula =
                 {num}
               </button>
             ))}
-            <button
-              onClick={handleDelete}
-              disabled={!display.trim()}
-              className="bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2 px-3 rounded transition-colors flex items-center justify-center"
-            >
-              <Delete className="w-4 h-4" />
-            </button>
           </div>
         </div>
 
-        {/* Navigation Controls */}
-        <div>
-          <h4 className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">Navigation</h4>
-          <div className="flex gap-2">
-            <button
-              onClick={() => moveCursor('left')}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded transition-colors"
-              title="Move cursor left"
-            >
-              ←
-            </button>
-            <button
-              onClick={() => moveCursor('right')}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded transition-colors"
-              title="Move cursor right"
-            >
-              →
-            </button>
-            <button
-              onClick={handleDelete}
-              disabled={cursorPosition >= display.length}
-              className="flex-1 bg-orange-600 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2 px-3 rounded transition-colors"
-              title="Delete character at cursor"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
+
 
         {/* Actions */}
         <div>
