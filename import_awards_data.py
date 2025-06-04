@@ -4,6 +4,24 @@ import os
 import psycopg2
 from psycopg2.extras import execute_values
 
+def safe_float(value):
+    """Safely convert value to float, handling 'NA' and empty values"""
+    if not value or value == 'NA':
+        return None
+    try:
+        return float(value)
+    except ValueError:
+        return None
+
+def safe_int(value):
+    """Safely convert value to int, handling 'NA' and empty values"""
+    if not value or value == 'NA':
+        return None
+    try:
+        return int(value)
+    except ValueError:
+        return None
+
 def get_db_connection():
     """Get database connection using environment variable"""
     return psycopg2.connect(os.environ['DATABASE_URL'])
@@ -22,17 +40,17 @@ def import_player_awards():
                 reader = csv.DictReader(f)
                 for row in reader:
                     awards_data.append((
-                        int(row['player_id']) if row['player_id'] else None,
+                        safe_int(row['player_id']),
                         row['player'],
                         row['season'],
                         row['award'],
                         row['winner'],
-                        float(row['share']) if row['share'] else None,
-                        float(row['pts_won']) if row['pts_won'] else None,
-                        float(row['pts_max']) if row['pts_max'] else None,
-                        float(row['first']) if row['first'] else None,
-                        row['tm'],
-                        int(row['age']) if row['age'] else None
+                        safe_float(row['share']),
+                        safe_float(row['pts_won']),
+                        safe_float(row['pts_max']),
+                        safe_float(row['first']),
+                        row['tm'] if row['tm'] != 'NA' else None,
+                        safe_int(row['age'])
                     ))
             
             # Insert awards data
@@ -98,11 +116,11 @@ def import_end_of_season_teams():
                         row['number_tm'],  # This is the team (1st, 2nd, 3rd, etc.)
                         row['position'] if row['position'] != 'NA' else None,
                         row['player'],
-                        int(row['age']) if row['age'] else None,
-                        row['tm'],
-                        int(row['pts_won']) if row['pts_won'] else None,
-                        int(row['pts_max']) if row['pts_max'] else None,
-                        float(row['share']) if row['share'] else None
+                        safe_int(row['age']),
+                        row['tm'] if row['tm'] != 'NA' else None,
+                        safe_float(row['pts_won']),
+                        safe_float(row['pts_max']),
+                        safe_float(row['share'])
                     ))
             
             # Insert teams data
