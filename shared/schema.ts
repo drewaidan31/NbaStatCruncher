@@ -60,6 +60,47 @@ export const customStats = pgTable("custom_stats", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Player awards table
+export const playerAwards = pgTable("player_awards", {
+  id: serial("id").primaryKey(),
+  playerId: integer("player_id").notNull(),
+  playerName: text("player_name").notNull(),
+  season: text("season").notNull(),
+  award: text("award").notNull(),
+  winner: text("winner").notNull(), // TRUE/FALSE
+  share: real("share"), // Voting share
+  ptsWon: real("pts_won"), // Points won in voting
+  ptsMax: real("pts_max"), // Maximum possible points
+  first: real("first"), // First place votes
+  team: text("team"),
+  age: integer("age"),
+});
+
+// All-Star selections table
+export const allStarSelections = pgTable("all_star_selections", {
+  id: serial("id").primaryKey(),
+  playerName: text("player_name").notNull(),
+  team: text("team").notNull(),
+  conference: text("conference").notNull(), // East/West or team captain name
+  season: text("season").notNull(),
+  replaced: text("replaced").notNull(), // TRUE/FALSE
+});
+
+// End of season teams (All-NBA, All-Defense, All-Rookie)
+export const endOfSeasonTeams = pgTable("end_of_season_teams", {
+  id: serial("id").primaryKey(),
+  season: text("season").notNull(),
+  type: text("type").notNull(), // All-NBA, All-Defense, All-Rookie
+  team: text("team").notNull(), // 1st, 2nd, 3rd, ORV (other receiving votes)
+  position: text("position"),
+  playerName: text("player_name").notNull(),
+  age: integer("age"),
+  team_abbr: text("team_abbr"),
+  ptsWon: integer("pts_won"),
+  ptsMax: integer("pts_max"),
+  share: real("share"),
+});
+
 export const insertPlayerSchema = createInsertSchema(nbaPlayers).omit({
   id: true,
 });
@@ -87,6 +128,9 @@ export type FormulaCalculation = z.infer<typeof formulaCalculationSchema>;
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type SaveCustomStat = z.infer<typeof saveCustomStatSchema>;
+export type PlayerAward = typeof playerAwards.$inferSelect;
+export type AllStarSelection = typeof allStarSelections.$inferSelect;
+export type EndOfSeasonTeam = typeof endOfSeasonTeams.$inferSelect;
 
 // NBA Stat mappings for formula parsing
 export const NBA_STAT_MAPPINGS = {
