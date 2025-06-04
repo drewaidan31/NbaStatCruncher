@@ -3,6 +3,7 @@ import { ArrowLeft, Calculator, TrendingUp, GitCompare } from "lucide-react";
 
 import { evaluate } from "mathjs";
 import FormulaExamples from "./formula-examples";
+import { getTeamColors, getTeamGradient, getTeamTextColor } from "../utils/team-colors";
 
 interface Player {
   playerId: number;
@@ -188,32 +189,61 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
     );
   };
 
+  // Get team colors for both players
+  const team1Colors = getTeamColors(player1.team);
+  const team2Colors = getTeamColors(player2.team);
+  const team1Gradient = getTeamGradient(player1.team);
+  const team2Gradient = getTeamGradient(player2.team);
+  const team1TextColor = getTeamTextColor(player1.team);
+  const team2TextColor = getTeamTextColor(player2.team);
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border border-slate-300 dark:border-slate-700">
-        <div className="flex items-center gap-4 mb-4">
+      {/* Header with Split Team Colors */}
+      <div className="rounded-lg border border-slate-300 dark:border-slate-700 overflow-hidden">
+        <div className="flex items-center gap-4 p-6">
           <button
             onClick={onBack}
-            className="p-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg transition-colors"
+            className="p-2 bg-black/20 hover:bg-black/30 rounded-lg transition-colors backdrop-blur-sm text-white"
           >
-            <ArrowLeft className="w-5 h-5 text-slate-900 dark:text-white" />
+            <ArrowLeft className="w-5 h-5" />
           </button>
-          <div className="flex items-center gap-4">
-            <div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">{player1.name}</h2>
-              <p className="text-slate-600 dark:text-slate-300">{player1.team} • {season1}</p>
+          <div className="flex items-center gap-4 flex-1">
+            {/* Player 1 Section */}
+            <div 
+              className="flex-1 p-4 rounded-lg relative overflow-hidden"
+              style={{ background: team1Gradient }}
+            >
+              <div className="relative z-10">
+                <h2 className="text-xl font-bold" style={{ color: team1TextColor }}>{player1.name}</h2>
+                <p className="opacity-90" style={{ color: team1TextColor }}>
+                  {team1Colors.name} • {season1}
+                </p>
+              </div>
             </div>
-            <GitCompare className="w-8 h-8 text-orange-400" />
-            <div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">{player2.name}</h2>
-              <p className="text-slate-600 dark:text-slate-300">{player2.team} • {season2}</p>
+            
+            {/* VS Separator */}
+            <div className="bg-slate-800 p-3 rounded-full">
+              <GitCompare className="w-6 h-6 text-orange-400" />
+            </div>
+            
+            {/* Player 2 Section */}
+            <div 
+              className="flex-1 p-4 rounded-lg relative overflow-hidden"
+              style={{ background: team2Gradient }}
+            >
+              <div className="relative z-10">
+                <h2 className="text-xl font-bold" style={{ color: team2TextColor }}>{player2.name}</h2>
+                <p className="opacity-90" style={{ color: team2TextColor }}>
+                  {team2Colors.name} • {season2}
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Stats Comparison Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6 bg-white dark:bg-slate-800">
           <StatComparison label="Points per Game" value1={player1.points} value2={player2.points} />
           <StatComparison label="Assists per Game" value1={player1.assists} value2={player2.assists} />
           <StatComparison label="Rebounds per Game" value1={player1.rebounds} value2={player2.rebounds} />

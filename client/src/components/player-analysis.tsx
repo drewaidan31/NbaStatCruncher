@@ -379,36 +379,54 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
     handleFormulaChange(stat.formula);
   };
 
+  // Get team colors for current player's team
+  const teamColors = getTeamColors(currentPlayerData.team);
+  const teamGradient = getTeamGradient(currentPlayerData.team);
+  const teamTextColor = getTeamTextColor(currentPlayerData.team);
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border border-slate-300 dark:border-slate-700">
-        <div className="flex items-center justify-between mb-4">
+      {/* Header with Team Colors */}
+      <div 
+        className="rounded-lg p-6 border border-slate-300 dark:border-slate-700 relative overflow-hidden"
+        style={{
+          background: teamGradient,
+          color: teamTextColor
+        }}
+      >
+        <div className="flex items-center justify-between mb-4 relative z-10">
           <div className="flex items-center gap-4">
             <button
               onClick={onBack}
-              className="p-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg transition-colors"
+              className="p-2 bg-black/20 hover:bg-black/30 rounded-lg transition-colors backdrop-blur-sm"
+              style={{ color: teamTextColor }}
             >
-              <ArrowLeft className="w-5 h-5 text-slate-900 dark:text-white" />
+              <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{player.name}</h1>
-              <p className="text-slate-600 dark:text-slate-300">{currentPlayerData.team} • {currentPlayerData.position} • {selectedSeason}</p>
+              <h1 className="text-2xl font-bold" style={{ color: teamTextColor }}>{player.name}</h1>
+              <p className="opacity-90" style={{ color: teamTextColor }}>
+                {getTeamColors(currentPlayerData.team).name} • {currentPlayerData.position} • {selectedSeason}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-4">
             {/* Season Selector */}
             {player.availableSeasons && player.availableSeasons.length > 1 && (
               <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                <Calendar className="w-4 h-4" style={{ color: teamTextColor }} />
                 <select
                   value={selectedSeason}
                   onChange={(e) => setSelectedSeason(e.target.value)}
-                  className="bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="bg-black/20 backdrop-blur-sm border border-white/30 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2"
+                  style={{ 
+                    color: teamTextColor,
+                    borderColor: teamTextColor + '50'
+                  }}
                   disabled={isLoadingSeason}
                 >
                   {player.availableSeasons.map((season) => (
-                    <option key={season} value={season}>
+                    <option key={season} value={season} className="bg-slate-800 text-white">
                       {season}
                     </option>
                   ))}
@@ -418,15 +436,16 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
           </div>
         </div>
 
-        {/* Tab Navigation */}
+        {/* Tab Navigation with Team Colors */}
         <div className="flex space-x-1 mb-4">
           <button
             onClick={() => setActiveTab('overview')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               activeTab === 'overview'
-                ? 'bg-orange-500 text-white'
-                : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
+                ? 'bg-white/20 backdrop-blur-sm'
+                : 'bg-black/10 hover:bg-black/20 backdrop-blur-sm'
             }`}
+            style={{ color: teamTextColor }}
           >
             <div className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
@@ -437,9 +456,10 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
             onClick={() => setActiveTab('shooting')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               activeTab === 'shooting'
-                ? 'bg-orange-500 text-white'
-                : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
+                ? 'bg-white/20 backdrop-blur-sm'
+                : 'bg-black/10 hover:bg-black/20 backdrop-blur-sm'
             }`}
+            style={{ color: teamTextColor }}
           >
             <div className="flex items-center gap-2">
               <Target className="w-4 h-4" />
@@ -450,9 +470,10 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
             onClick={() => setActiveTab('calculator')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               activeTab === 'calculator'
-                ? 'bg-orange-500 text-white'
-                : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
+                ? 'bg-white/20 backdrop-blur-sm'
+                : 'bg-black/10 hover:bg-black/20 backdrop-blur-sm'
             }`}
+            style={{ color: teamTextColor }}
           >
             <div className="flex items-center gap-2">
               <Calculator className="w-4 h-4" />
