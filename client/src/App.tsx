@@ -320,12 +320,6 @@ function MainApp() {
     }
   };
 
-  const loadSavedStat = (stat: any) => {
-    setFormula(stat.formula);
-    setCustomStatName(stat.name);
-    setShowSavedStats(false);
-  };
-
   const insertSavedStat = (stat: any) => {
     // Insert the saved stat formula into the current formula
     const insertion = `(${stat.formula})`;
@@ -691,39 +685,24 @@ function MainApp() {
                       className="p-3 bg-white dark:bg-slate-600 rounded border border-slate-200 dark:border-slate-500"
                     >
                       <div className="flex items-start justify-between">
-                        <div className="flex-1">
+                        <div className="flex-1 cursor-pointer" onClick={() => insertSavedStat(stat)}>
                           <div className="font-medium text-slate-900 dark:text-slate-50">{stat.name}</div>
                           <div className="text-sm text-slate-600 dark:text-slate-300">{stat.formula}</div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">Click to insert into formula</div>
                         </div>
-                        <div className="flex flex-col gap-1 ml-3">
-                          <div className="flex gap-1">
-                            <button
-                              onClick={() => loadSavedStat(stat)}
-                              className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs transition-colors"
-                            >
-                              Load
-                            </button>
-                            <button
-                              onClick={() => insertSavedStat(stat)}
-                              className="bg-orange-600 hover:bg-orange-700 text-white px-2 py-1 rounded text-xs transition-colors"
-                            >
-                              Insert
-                            </button>
-                          </div>
-                          <div className="flex gap-1">
-                            <button
-                              onClick={() => handleEditStat(stat)}
-                              className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs transition-colors"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleDeleteStat(stat.id)}
-                              className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs transition-colors"
-                            >
-                              Delete
-                            </button>
-                          </div>
+                        <div className="flex gap-2 ml-3">
+                          <button
+                            onClick={() => handleEditStat(stat)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs transition-colors"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteStat(stat.id)}
+                            className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs transition-colors"
+                          >
+                            Delete
+                          </button>
                         </div>
                       </div>
                     </div>
