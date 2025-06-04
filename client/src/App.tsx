@@ -389,7 +389,7 @@ function MainApp() {
       <div className="space-y-6">
         {/* Featured Player Showcase */}
         {featuredPlayer && featuredStat && featuredChartData.length > 0 && (
-          <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-xl border border-slate-300 dark:border-slate-700 p-6">
+          <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-xl border border-slate-300 dark:border-slate-700 p-6 transition-all duration-500 ease-in-out hover:shadow-2xl hover:shadow-orange-500/20 hover:scale-[1.02] hover:border-orange-400 group">
             <div className="flex items-center gap-3 mb-4">
               <Sparkles className="w-6 h-6 text-orange-400" />
               <h2 className="text-xl font-bold text-slate-900 dark:text-white">Featured Analysis</h2>
@@ -399,19 +399,19 @@ function MainApp() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Player Info and Stats */}
               <div className="space-y-4">
-                <div className="bg-slate-200 dark:bg-slate-700 rounded-lg p-5">
+                <div className="bg-slate-200 dark:bg-slate-700 rounded-lg p-5 transition-all duration-300 ease-in-out group-hover:bg-slate-300 dark:group-hover:bg-slate-600 group-hover:shadow-lg">
                   <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    <div className="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center text-white font-bold text-lg transition-all duration-300 ease-in-out group-hover:scale-125 group-hover:bg-orange-500 group-hover:shadow-lg group-hover:rotate-12">
                       {featuredPlayer.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2)}
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <button
                         onClick={() => handlePlayerSelect(featuredPlayer, featuredPlayer.currentSeason || '2024-25')}
-                        className="text-xl font-bold text-slate-900 dark:text-white hover:text-orange-400 transition-colors cursor-pointer text-left"
+                        className="text-xl font-bold text-slate-900 dark:text-white hover:text-orange-400 transition-all duration-300 ease-in-out cursor-pointer text-left group-hover:transform group-hover:translate-x-2 group-hover:scale-105"
                       >
                         {featuredPlayer.name} →
                       </button>
-                      <p className="text-slate-600 dark:text-slate-300">{featuredPlayer.position} • Career Spanning {featuredChartData.length} Seasons</p>
+                      <p className="text-slate-600 dark:text-slate-300 transition-all duration-300 ease-in-out group-hover:text-slate-700 dark:group-hover:text-slate-200">{featuredPlayer.position} • Career Spanning {featuredChartData.length} Seasons</p>
                     </div>
                   </div>
                   
@@ -760,18 +760,18 @@ function MainApp() {
                     
                     return false;
                   }).map((result: any, index) => (
-                    <tr key={`${result.player.id}-${result.bestSeason}-${index}`} className="border-b border-slate-700">
+                    <tr key={`${result.player.id}-${result.bestSeason}-${index}`} className="border-b border-slate-700 hover:bg-slate-700/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] hover:shadow-lg hover:shadow-orange-500/20 group cursor-pointer">
                       <td className="py-2">{index + 1}</td>
                       <td className="py-2 font-medium">
                         <button
                           onClick={() => handlePlayerSelect(result.player, result.bestSeason)}
-                          className="text-white hover:text-orange-400 transition-colors cursor-pointer text-left underline decoration-slate-500 hover:decoration-orange-400"
+                          className="text-white hover:text-orange-400 transition-all duration-300 ease-in-out cursor-pointer text-left underline decoration-slate-500 hover:decoration-orange-400 group-hover:transform group-hover:translate-x-2 font-medium hover:font-bold"
                         >
                           {result.player.name}
                         </button>
                       </td>
                       <td className="py-2">
-                        <span className="bg-slate-700 text-orange-400 px-2 py-1 rounded text-xs font-medium">
+                        <span className="bg-slate-700 text-orange-400 px-2 py-1 rounded text-xs font-medium transition-all duration-300 ease-in-out group-hover:bg-orange-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">
                           {(() => {
                             const playerName = result.player.name.toLowerCase();
                             const pointGuards = ["chris paul", "stephen curry", "russell westbrook", "damian lillard", 
@@ -791,14 +791,14 @@ function MainApp() {
                           })()}
                         </span>
                       </td>
-                      <td className="py-2">{result.player.team}</td>
-                      <td className="py-2">
+                      <td className="py-2 transition-all duration-300 ease-in-out group-hover:text-blue-400 group-hover:font-semibold">{result.player.team}</td>
+                      <td className="py-2 transition-all duration-300 ease-in-out group-hover:text-green-400 group-hover:font-bold group-hover:scale-110">
                         {customStatName.includes("eFG%") || customStatName.includes("TS%") ? 
                           `${(result.customStat * 100).toFixed(1)}%` : 
                           result.customStat.toFixed(2)
                         }
                       </td>
-                      <td className="py-2 text-orange-400 font-medium">{result.bestSeason}</td>
+                      <td className="py-2 text-orange-400 font-medium transition-all duration-300 ease-in-out group-hover:text-yellow-400 group-hover:font-bold">{result.bestSeason}</td>
                     </tr>
                   ))}
                 </tbody>
