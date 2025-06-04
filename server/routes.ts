@@ -5,7 +5,7 @@ import { formulaCalculationSchema, saveCustomStatSchema, NBA_STAT_MAPPINGS, type
 import { evaluate } from "mathjs";
 import { spawn } from "child_process";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { generateStatName } from "./openai-service";
+
 import { getPlayerShotChart } from "./shot-chart-service";
 import { getTeamPossessionData } from "./team-stats-service";
 
@@ -110,21 +110,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Generate stat name
-  app.post("/api/nba/generate-name", async (req, res) => {
-    try {
-      const { formula } = req.body;
-      if (!formula || typeof formula !== 'string') {
-        return res.status(400).json({ message: "Formula is required" });
-      }
-      
-      const result = generateStatName(formula);
-      res.json(result);
-    } catch (error) {
-      console.error("Error generating stat name:", error);
-      res.status(500).json({ message: "Failed to generate stat name" });
-    }
-  });
+
 
   // Clear players cache
   app.post("/api/nba/players/clear", async (req, res) => {
@@ -714,22 +700,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Generate AI name for custom stat formula (public endpoint)
-  app.post("/api/custom-stats/generate-name", async (req, res) => {
-    try {
-      const { formula } = req.body;
-      
-      if (!formula || typeof formula !== 'string') {
-        return res.status(400).json({ message: "Formula is required" });
-      }
 
-      const result = await generateStatName(formula);
-      res.json(result);
-    } catch (error) {
-      console.error("Error generating stat name:", error);
-      res.status(500).json({ message: "Failed to generate stat name" });
-    }
-  });
 
   // Get specific season stats for a player
   app.get("/api/nba/players/:playerId/season/:season", async (req, res) => {
