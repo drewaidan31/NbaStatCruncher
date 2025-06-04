@@ -253,6 +253,9 @@ function MainApp() {
       return;
     }
     
+    // Clear any previous errors when starting a new calculation
+    setError("");
+    
     try {
       console.log("Sending calculation request...");
       const response = await fetch("/api/nba/calculate", {
@@ -266,6 +269,8 @@ function MainApp() {
         const data = await response.json();
         console.log("Calculation results:", data.length, "players");
         setResults(data);
+        // Clear error on successful calculation
+        setError("");
       } else {
         const errorText = await response.text();
         console.error("Calculation failed:", response.status, errorText);
