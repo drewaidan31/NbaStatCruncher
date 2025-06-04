@@ -5,6 +5,7 @@ import ShotChart from "./shot-chart";
 import { evaluate } from "mathjs";
 import { useQuery } from "@tanstack/react-query";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { getTeamColors, getTeamGradient, getTeamTextColor } from "../utils/team-colors";
 
 interface Player {
   playerId: number;
