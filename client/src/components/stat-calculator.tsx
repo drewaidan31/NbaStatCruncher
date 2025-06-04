@@ -9,13 +9,30 @@ interface StatCalculatorProps {
 
 export default function StatCalculator({ onFormulaChange, onCalculate, formula = "" }: StatCalculatorProps) {
   const [display, setDisplay] = useState("");
+  const [cursorPosition, setCursorPosition] = useState(0);
 
   // Update display when formula prop changes
   useEffect(() => {
     if (formula !== display) {
       setDisplay(formula);
+      setCursorPosition(formula.length);
     }
   }, [formula]);
+
+  const insertAtCursor = (insertion: string) => {
+    const newDisplay = display.slice(0, cursorPosition) + insertion + display.slice(cursorPosition);
+    setDisplay(newDisplay);
+    setCursorPosition(cursorPosition + insertion.length);
+    onFormulaChange(newDisplay);
+  };
+
+  const moveCursor = (direction: 'left' | 'right') => {
+    if (direction === 'left' && cursorPosition > 0) {
+      setCursorPosition(cursorPosition - 1);
+    } else if (direction === 'right' && cursorPosition < display.length) {
+      setCursorPosition(cursorPosition + 1);
+    }
+  };
 
   const stats = [
     { name: "PPG", value: "PTS" },
@@ -48,20 +65,30 @@ export default function StatCalculator({ onFormulaChange, onCalculate, formula =
   const numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "."];
 
   const handleClick = (value: string) => {
-    const newDisplay = display + value;
-    setDisplay(newDisplay);
-    onFormulaChange(newDisplay);
+    insertAtCursor(value);
   };
 
   const handleClear = () => {
     setDisplay("");
+    setCursorPosition(0);
     onFormulaChange("");
   };
 
+  const handleBackspace = () => {
+    if (cursorPosition > 0) {
+      const newDisplay = display.slice(0, cursorPosition - 1) + display.slice(cursorPosition);
+      setDisplay(newDisplay);
+      setCursorPosition(cursorPosition - 1);
+      onFormulaChange(newDisplay);
+    }
+  };
+
   const handleDelete = () => {
-    const newDisplay = display.slice(0, -1);
-    setDisplay(newDisplay);
-    onFormulaChange(newDisplay);
+    if (cursorPosition < display.length) {
+      const newDisplay = display.slice(0, cursorPosition) + display.slice(cursorPosition + 1);
+      setDisplay(newDisplay);
+      onFormulaChange(newDisplay);
+    }
   };
 
   const handleCalculate = () => {
@@ -132,6 +159,50 @@ export default function StatCalculator({ onFormulaChange, onCalculate, formula =
           </div>
         </div>
 
+        {/* Navigation Controls */}
+        <div>
+          <h4 className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">Navigation</h4>
+          <div className="space-y-3">
+            <div className="flex gap-2">
+              <button
+                onClick={() => moveCursor('left')}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded transition-colors"
+                title="Move cursor left"
+              >
+                ←
+              </button>
+              <button
+                onClick={() => moveCursor('right')}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded transition-colors"
+                title="Move cursor right"
+              >
+                →
+              </button>
+            </div>
+            <div className="bg-slate-100 dark:bg-slate-700 rounded px-3 py-2 text-slate-600 dark:text-slate-300 text-sm text-center">
+              Cursor: {cursorPosition} / {display.length}
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={handleBackspace}
+                disabled={cursorPosition === 0}
+                className="flex-1 bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2 px-3 rounded transition-colors"
+                title="Delete character before cursor"
+              >
+                Backspace
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={cursorPosition >= display.length}
+                className="flex-1 bg-orange-600 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2 px-3 rounded transition-colors"
+                title="Delete character at cursor"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Actions */}
         <div>
           <h4 className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">Actions</h4>
@@ -150,8 +221,6 @@ export default function StatCalculator({ onFormulaChange, onCalculate, formula =
               Calculate Rankings
             </button>
           </div>
-
-
         </div>
       </div>
     </div>
