@@ -839,10 +839,11 @@ function MainApp() {
                       </td>
                       <td className="py-2 transition-all duration-300 ease-in-out group-hover:text-blue-400 group-hover:font-semibold">{result.player.team}</td>
                       <td className="py-2 transition-all duration-300 ease-in-out group-hover:text-green-400 group-hover:font-bold group-hover:scale-110">
-                        {customStatName.includes("eFG%") || customStatName.includes("TS%") ? 
-                          `${(result.customStat * 100).toFixed(1)}%` : 
-                          result.customStat.toFixed(2)
-                        }
+                        {result.customStat !== null && result.customStat !== undefined ? (
+                          customStatName.includes("eFG%") || customStatName.includes("TS%") ? 
+                            `${(result.customStat * 100).toFixed(1)}%` : 
+                            result.customStat.toFixed(2)
+                        ) : 'N/A'}
                       </td>
                       <td className="py-2 text-orange-400 font-medium transition-all duration-300 ease-in-out group-hover:text-yellow-400 group-hover:font-bold">{result.bestSeason}</td>
                     </tr>
