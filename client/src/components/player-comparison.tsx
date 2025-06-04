@@ -220,6 +220,7 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
                 <p className="opacity-90" style={{ color: team1TextColor }}>
                   {team1Colors.name} • {season1}
                 </p>
+                <PlayerAwards playerName={player1.name} season={season1} />
               </div>
             </div>
             
@@ -238,6 +239,7 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
                 <p className="opacity-90" style={{ color: team2TextColor }}>
                   {team2Colors.name} • {season2}
                 </p>
+                <PlayerAwards playerName={player2.name} season={season2} />
               </div>
             </div>
           </div>
