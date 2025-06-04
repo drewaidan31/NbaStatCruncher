@@ -14,6 +14,7 @@ import FormulaExamples from "./components/formula-examples";
 import UsageRateLeaderboard from "./components/usage-rate-leaderboard";
 import UserProfile from "./components/user-profile";
 import TeamStats from "./components/team-stats";
+import AboutSection from "./components/about-section";
 
 
 import { BarChart3, Search, Calculator, TrendingUp, Sparkles, RefreshCw, ChevronDown } from "lucide-react";
@@ -64,7 +65,7 @@ interface Player {
   availableSeasons?: string[];
 }
 
-type ViewMode = 'leaderboard' | 'search' | 'analysis' | 'comparison' | 'usage-rate';
+type ViewMode = 'leaderboard' | 'search' | 'analysis' | 'comparison' | 'usage-rate' | 'about';
 
 function MainApp() {
   const [players, setPlayers] = useState([]);
@@ -376,6 +377,10 @@ function MainApp() {
           customStatResults={results}
         />
       );
+    }
+
+    if (viewMode === 'about') {
+      return <AboutSection />;
     }
 
     // Default leaderboard view
@@ -792,6 +797,17 @@ function MainApp() {
               >
                 <Search className="w-4 h-4" />
                 Player Search
+              </button>
+              <button
+                onClick={() => setViewMode('about')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  viewMode === 'about'
+                    ? "bg-orange-600 text-white"
+                    : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600"
+                }`}
+              >
+                <Calculator className="w-4 h-4" />
+                Custom Stats Guide
               </button>
             </div>
           </div>
