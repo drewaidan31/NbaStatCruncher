@@ -727,6 +727,7 @@ function MainApp() {
                     if (selectedPosition === "all") return true;
                     
                     const playerPosition = result.player.position;
+                    console.log("Filtering:", selectedPosition, "Player:", result.player.name, "Position:", playerPosition);
                     
                     // Handle specific position matches
                     if (selectedPosition === playerPosition) return true;
