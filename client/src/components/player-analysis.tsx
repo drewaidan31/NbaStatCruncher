@@ -68,6 +68,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
   const [currentPlayerData, setCurrentPlayerData] = useState(player);
   const [chartData, setChartData] = useState<Array<{season: string, value: number, team: string}>>([]);
   const [activeTab, setActiveTab] = useState<'overview' | 'shooting' | 'calculator'>('overview');
+  const [cursorPosition, setCursorPosition] = useState(0);
 
   // Query to fetch specific season data for the player
   const { data: seasonPlayerData, isLoading: isLoadingSeason } = useQuery({
@@ -324,6 +325,22 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
     if (!newFormula.trim()) {
       setCalculatedValue(null);
       setChartData([]);
+    }
+    setCursorPosition(newFormula.length);
+  };
+
+  const insertAtCursor = (insertion: string) => {
+    const newFormula = formula.slice(0, cursorPosition) + insertion + formula.slice(cursorPosition);
+    setFormula(newFormula);
+    setCursorPosition(cursorPosition + insertion.length);
+    handleFormulaChange(newFormula);
+  };
+
+  const moveCursor = (direction: 'left' | 'right') => {
+    if (direction === 'left' && cursorPosition > 0) {
+      setCursorPosition(cursorPosition - 1);
+    } else if (direction === 'right' && cursorPosition < formula.length) {
+      setCursorPosition(cursorPosition + 1);
     }
   };
 
@@ -763,11 +780,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
                   ].map((op) => (
                     <button
                       key={op.symbol}
-                      onClick={() => {
-                        const newFormula = formula + op.value;
-                        setFormula(newFormula);
-                        handleFormulaChange(newFormula);
-                      }}
+                      onClick={() => insertAtCursor(op.value)}
                       className="bg-green-600 hover:bg-green-700 text-white text-sm py-2 px-3 rounded transition-colors"
                     >
                       {op.symbol}
@@ -783,11 +796,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
                   {["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "."].map((num) => (
                     <button
                       key={num}
-                      onClick={() => {
-                        const newFormula = formula + num;
-                        setFormula(newFormula);
-                        handleFormulaChange(newFormula);
-                      }}
+                      onClick={() => insertAtCursor(num)}
                       className="bg-slate-600 hover:bg-slate-500 text-white text-sm py-2 px-3 rounded transition-colors"
                     >
                       {num}
@@ -798,26 +807,68 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
             </div>
 
             {/* Calculator Controls */}
-            <div className="flex gap-2 mt-4">
-              <button
-                onClick={() => {
-                  setFormula("");
-                  setCalculatedValue(null);
-                }}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition-colors"
-              >
-                Clear
-              </button>
-              <button
-                onClick={() => {
-                  const newFormula = formula.slice(0, -1);
-                  setFormula(newFormula);
-                  handleFormulaChange(newFormula);
-                }}
-                className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded transition-colors"
-              >
-                Delete
-              </button>
+            <div className="space-y-3 mt-4">
+              {/* Navigation Controls */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => moveCursor('left')}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded transition-colors flex items-center gap-1"
+                  title="Move cursor left"
+                >
+                  ←
+                </button>
+                <button
+                  onClick={() => moveCursor('right')}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded transition-colors flex items-center gap-1"
+                  title="Move cursor right"
+                >
+                  →
+                </button>
+                <div className="flex-1 bg-slate-700 rounded px-3 py-2 text-white text-sm">
+                  Cursor: {cursorPosition} / {formula.length}
+                </div>
+              </div>
+              
+              {/* Action Controls */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setFormula("");
+                    setCalculatedValue(null);
+                    setCursorPosition(0);
+                  }}
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition-colors"
+                >
+                  Clear
+                </button>
+                <button
+                  onClick={() => {
+                    if (cursorPosition > 0) {
+                      const newFormula = formula.slice(0, cursorPosition - 1) + formula.slice(cursorPosition);
+                      setFormula(newFormula);
+                      setCursorPosition(cursorPosition - 1);
+                      handleFormulaChange(newFormula);
+                    }
+                  }}
+                  className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded transition-colors"
+                  title="Delete character before cursor"
+                >
+                  Backspace
+                </button>
+                <button
+                  onClick={() => {
+                    if (cursorPosition < formula.length) {
+                      const newFormula = formula.slice(0, cursorPosition) + formula.slice(cursorPosition + 1);
+                      setFormula(newFormula);
+                      handleFormulaChange(newFormula);
+                    }
+                  }}
+                  className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded transition-colors"
+                  title="Delete character at cursor"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
 
