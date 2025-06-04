@@ -78,7 +78,9 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
       }
       return response.json();
     },
-    enabled: selectedSeason !== player.currentSeason && !!selectedSeason,
+    enabled: !!selectedSeason && selectedSeason !== player.currentSeason,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
   });
 
   // Query to fetch saved custom stats
@@ -430,7 +432,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
                     color: teamTextColor,
                     borderColor: teamTextColor + '50'
                   }}
-                  disabled={isLoadingSeason}
+                  disabled={false}
                 >
                   {player.availableSeasons.map((season) => (
                     <option key={season} value={season} className="bg-slate-800 text-white">
