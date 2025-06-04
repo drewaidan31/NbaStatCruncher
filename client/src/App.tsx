@@ -328,7 +328,13 @@ function MainApp() {
   const insertSavedStat = (stat: any) => {
     // Insert the saved stat formula into the current formula
     const insertion = `(${stat.formula})`;
-    setFormula(prev => prev + insertion);
+    console.log('Inserting saved stat:', stat.name, 'formula:', stat.formula);
+    console.log('Current formula before insert:', formula);
+    setFormula(prev => {
+      const newFormula = prev + insertion;
+      console.log('New formula after insert:', newFormula);
+      return newFormula;
+    });
     setShowSavedStats(false);
   };
 
