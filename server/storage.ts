@@ -114,10 +114,13 @@ export class DatabaseStorage implements IStorage {
 
   // Saved custom stats operations
   async saveCustomStat(stat: SaveCustomStat): Promise<CustomStat> {
-    const insertData: any = { ...stat };
-    if (stat.isPublic !== undefined) {
-      insertData.isPublic = stat.isPublic ? 1 : 0;
-    }
+    const insertData = {
+      name: stat.name,
+      formula: stat.formula,
+      description: stat.description,
+      userId: stat.userId,
+      isPublic: stat.isPublic ? 1 : 0
+    };
     
     const [savedStat] = await db
       .insert(customStats)

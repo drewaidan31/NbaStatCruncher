@@ -32,7 +32,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/custom-stats', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { name, formula, description } = req.body;
+      const { name, formula, description, isPublic } = req.body;
       
       if (!name || !formula) {
         return res.status(400).json({ message: "Name and formula are required" });
@@ -42,7 +42,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         name,
         formula,
         description,
-        userId
+        userId,
+        isPublic: isPublic || false
       });
 
       res.json(customStat);
@@ -98,7 +99,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updatedStat = await storage.updateCustomStat(statId, userId, {
         name,
         formula,
-        description
+        description,
+        isPublic: req.body.isPublic
       });
 
       if (!updatedStat) {
@@ -112,7 +114,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Community stats routes
+  app.get('/api/community-stats', async (req, res) => {
+    try {
+      const publicStats = await storage.getPublicCustomStats();
+      res.json(publicStats);
+    } catch (error) {
+      console.error("Error fetching community stats:", error);
+      res.status(500).json({ message: "Failed to fetch community stats" });
+    }
+  });
 
+  app.post('/api/custom-stats/:id/toggle-visibility', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const statId = parseInt(req.params.id);
+      const { isPublic } = req.body;
+
+      if (isNaN(statId)) {
+        return res.status(400).json({ message: "Invalid stat ID" });
+      }
+
+      const updatedStat = await storage.toggleStatVisibility(statId, userId, isPublic);
+
+      if (!updatedStat) {
+        return res.status(404).json({ message: "Custom stat not found" });
+      }
+
+      res.json(updatedStat);
+    } catch (error) {
+      console.error("Error toggling stat visibility:", error);
+      res.status(500).json({ message: "Failed to toggle stat visibility" });
+    }
+  });
 
   // Clear players cache
   app.post("/api/nba/players/clear", async (req, res) => {
