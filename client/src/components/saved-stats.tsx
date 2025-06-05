@@ -59,7 +59,7 @@ function EditDialog({ stat, onClose }: EditDialogProps) {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/custom-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/custom-stats/my"] });
       queryClient.invalidateQueries({ queryKey: ["/api/community-stats"] });
       toast({
         title: "Success",
@@ -154,7 +154,7 @@ export default function SavedStats() {
   const [editingStat, setEditingStat] = useState<CustomStat | null>(null);
 
   const { data: savedStats = [], isLoading } = useQuery<CustomStat[]>({
-    queryKey: ["/api/custom-stats"],
+    queryKey: ["/api/custom-stats/my"],
     retry: false,
     enabled: isAuthenticated,
   });
@@ -173,7 +173,7 @@ export default function SavedStats() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/custom-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/custom-stats/my"] });
       queryClient.invalidateQueries({ queryKey: ["/api/community-stats"] });
       toast({
         title: "Success",
