@@ -16,7 +16,7 @@ import { Save } from "lucide-react";
 
 interface SaveStatDialogProps {
   formula: string;
-  onSave: (name: string, description: string) => void;
+  onSave: (name: string, description: string, isPublic?: boolean) => void;
   disabled?: boolean;
 }
 
@@ -24,12 +24,14 @@ export default function SaveStatDialog({ formula, onSave, disabled }: SaveStatDi
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [isPublic, setIsPublic] = useState(false);
 
   const handleSave = () => {
     if (name.trim()) {
-      onSave(name.trim(), description.trim());
+      onSave(name.trim(), description.trim(), isPublic);
       setName("");
       setDescription("");
+      setIsPublic(false);
       setOpen(false);
     }
   };
@@ -84,6 +86,20 @@ export default function SaveStatDialog({ formula, onSave, disabled }: SaveStatDi
               placeholder="e.g., Measures overall impact by combining points, assists, and rebounds"
               maxLength={200}
               rows={3}
+            />
+          </div>
+
+          <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+            <div className="space-y-0.5">
+              <Label htmlFor="public-toggle">Share with community</Label>
+              <div className="text-sm text-slate-600 dark:text-slate-400">
+                Make this formula visible to other users
+              </div>
+            </div>
+            <Switch
+              id="public-toggle"
+              checked={isPublic}
+              onCheckedChange={setIsPublic}
             />
           </div>
         </div>

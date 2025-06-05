@@ -38,8 +38,11 @@ function EditDialog({ stat, onClose }: EditDialogProps) {
 
   const updateMutation = useMutation({
     mutationFn: async (data: { name: string; description: string; isPublic: boolean }) => {
-      return await apiRequest(`/api/custom-stats/${stat.id}`, {
+      const response = await fetch(`/api/custom-stats/${stat.id}`, {
         method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           name: data.name,
           formula: stat.formula,
@@ -47,6 +50,13 @@ function EditDialog({ stat, onClose }: EditDialogProps) {
           isPublic: data.isPublic
         }),
       });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `${response.status}: ${response.statusText}`);
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/custom-stats"] });
@@ -151,9 +161,16 @@ export default function SavedStats() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      return await apiRequest(`/api/custom-stats/${id}`, {
+      const response = await fetch(`/api/custom-stats/${id}`, {
         method: "DELETE",
       });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `${response.status}: ${response.statusText}`);
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/custom-stats"] });
@@ -185,10 +202,20 @@ export default function SavedStats() {
 
   const toggleVisibilityMutation = useMutation({
     mutationFn: async ({ id, isPublic }: { id: number; isPublic: boolean }) => {
-      return await apiRequest(`/api/custom-stats/${id}/toggle-visibility`, {
+      const response = await fetch(`/api/custom-stats/${id}/toggle-visibility`, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ isPublic }),
       });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `${response.status}: ${response.statusText}`);
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/custom-stats"] });
