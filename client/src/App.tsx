@@ -15,6 +15,7 @@ import UsageRateLeaderboard from "./components/usage-rate-leaderboard";
 import UserProfile from "./components/user-profile";
 import TeamStats from "./components/team-stats";
 import AboutSection from "./components/about-section";
+import StatsLibrary from "./pages/StatsLibrary";
 
 
 import { BarChart3, Search, Calculator, TrendingUp, Sparkles, RefreshCw, ChevronDown, Filter } from "lucide-react";
@@ -65,7 +66,7 @@ interface Player {
   availableSeasons?: string[];
 }
 
-type ViewMode = 'leaderboard' | 'search' | 'analysis' | 'comparison' | 'usage-rate' | 'about';
+type ViewMode = 'leaderboard' | 'search' | 'analysis' | 'comparison' | 'usage-rate' | 'about' | 'stats-library';
 
 function MainApp() {
   const [players, setPlayers] = useState([]);
