@@ -11,7 +11,7 @@ import {
   type SaveCustomStat
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 
 export interface IStorage {
   // Player operations
@@ -34,8 +34,12 @@ export interface IStorage {
   saveCustomStat(stat: SaveCustomStat): Promise<CustomStat>;
   getUserCustomStats(userId: string): Promise<CustomStat[]>;
   deleteCustomStat(statId: number, userId: string): Promise<boolean>;
-  updateCustomStat(statId: number, userId: string, updates: { name?: string; formula?: string; description?: string }): Promise<CustomStat | null>;
+  updateCustomStat(statId: number, userId: string, updates: { name?: string; formula?: string; description?: string; isPublic?: boolean }): Promise<CustomStat | null>;
   removeDuplicateCustomStats(userId: string): Promise<number>;
+  
+  // Community stats operations
+  getPublicCustomStats(): Promise<(CustomStat & { user: User })[]>;
+  toggleStatVisibility(statId: number, userId: string, isPublic: boolean): Promise<CustomStat | null>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -110,9 +114,14 @@ export class DatabaseStorage implements IStorage {
 
   // Saved custom stats operations
   async saveCustomStat(stat: SaveCustomStat): Promise<CustomStat> {
+    const insertData: any = { ...stat };
+    if (stat.isPublic !== undefined) {
+      insertData.isPublic = stat.isPublic ? 1 : 0;
+    }
+    
     const [savedStat] = await db
       .insert(customStats)
-      .values(stat)
+      .values(insertData)
       .returning();
     return savedStat;
   }
@@ -131,10 +140,15 @@ export class DatabaseStorage implements IStorage {
     return result.rowCount !== null && result.rowCount > 0;
   }
 
-  async updateCustomStat(statId: number, userId: string, updates: { name?: string; formula?: string; description?: string }): Promise<CustomStat | null> {
+  async updateCustomStat(statId: number, userId: string, updates: { name?: string; formula?: string; description?: string; isPublic?: boolean }): Promise<CustomStat | null> {
+    const updateData: any = { ...updates };
+    if (updates.isPublic !== undefined) {
+      updateData.isPublic = updates.isPublic ? 1 : 0;
+    }
+    
     const [updatedStat] = await db
       .update(customStats)
-      .set(updates)
+      .set(updateData)
       .where(and(eq(customStats.id, statId), eq(customStats.userId, userId)))
       .returning();
     return updatedStat || null;
@@ -156,10 +170,14 @@ export class DatabaseStorage implements IStorage {
     
     // Remove duplicates (keep the first one, delete the rest)
     let duplicatesRemoved = 0;
-    for (const [key, stats] of statGroups) {
+    for (const [key, stats] of Array.from(statGroups.entries())) {
       if (stats.length > 1) {
         // Sort by creation date and keep the first one
-        stats.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        stats.sort((a: CustomStat, b: CustomStat) => {
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateA - dateB;
+        });
         const toDelete = stats.slice(1); // Remove all except the first
         
         for (const stat of toDelete) {
@@ -172,6 +190,45 @@ export class DatabaseStorage implements IStorage {
     }
     
     return duplicatesRemoved;
+  }
+
+  // Community stats operations
+  async getPublicCustomStats(): Promise<(CustomStat & { user: User })[]> {
+    const result = await db
+      .select({
+        id: customStats.id,
+        name: customStats.name,
+        formula: customStats.formula,
+        description: customStats.description,
+        userId: customStats.userId,
+        isPublic: customStats.isPublic,
+        createdAt: customStats.createdAt,
+        user: users
+      })
+      .from(customStats)
+      .innerJoin(users, eq(customStats.userId, users.id))
+      .where(eq(customStats.isPublic, 1))
+      .orderBy(desc(customStats.createdAt));
+
+    return result.map(row => ({
+      id: row.id,
+      name: row.name,
+      formula: row.formula,
+      description: row.description,
+      userId: row.userId,
+      isPublic: row.isPublic,
+      createdAt: row.createdAt,
+      user: row.user
+    }));
+  }
+
+  async toggleStatVisibility(statId: number, userId: string, isPublic: boolean): Promise<CustomStat | null> {
+    const [updatedStat] = await db
+      .update(customStats)
+      .set({ isPublic: isPublic ? 1 : 0 })
+      .where(and(eq(customStats.id, statId), eq(customStats.userId, userId)))
+      .returning();
+    return updatedStat || null;
   }
 }
 

@@ -57,6 +57,7 @@ export const customStats = pgTable("custom_stats", {
   name: text("name").notNull(),
   description: text("description"),
   userId: varchar("user_id").references(() => users.id),
+  isPublic: integer("is_public").default(0), // 0 = private, 1 = public
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -114,6 +115,8 @@ export const upsertUserSchema = createInsertSchema(users);
 export const saveCustomStatSchema = createInsertSchema(customStats).omit({
   id: true,
   createdAt: true,
+}).extend({
+  isPublic: z.boolean().optional(),
 });
 
 export const formulaCalculationSchema = z.object({
