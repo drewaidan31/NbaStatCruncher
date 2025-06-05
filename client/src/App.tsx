@@ -428,6 +428,10 @@ function MainApp() {
       return <AboutSection />;
     }
 
+    if (viewMode === 'stats-library') {
+      return <StatsLibrary />;
+    }
+
     // Default leaderboard view
     return (
       <div className="space-y-6">
@@ -911,6 +915,17 @@ function MainApp() {
               >
                 <Search className="w-4 h-4" />
                 Player Search
+              </button>
+              <button
+                onClick={() => setViewMode('stats-library')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  viewMode === 'stats-library'
+                    ? "bg-orange-600 text-white"
+                    : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600"
+                }`}
+              >
+                <Calculator className="w-4 h-4" />
+                Stats Library
               </button>
               <button
                 onClick={() => setViewMode('about')}
