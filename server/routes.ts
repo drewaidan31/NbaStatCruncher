@@ -994,6 +994,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Player ID and name are required" });
       }
 
+      // Check if already favorited
+      const existingFavorites = await storage.getUserFavoritePlayers(userId);
+      const alreadyFavorited = existingFavorites.find(fav => fav.playerId === playerId);
+      
+      if (alreadyFavorited) {
+        return res.status(409).json({ message: "Player already in favorites", favorite: alreadyFavorited });
+      }
+
       const favoritePlayer = await storage.addFavoritePlayer({
         userId,
         playerId,

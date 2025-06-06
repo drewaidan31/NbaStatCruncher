@@ -76,6 +76,11 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
       if (!response.ok) {
         const errorText = await response.text();
         console.log("Add favorite error:", errorText);
+        if (response.status === 409) {
+          // Already favorited, just refresh the cache
+          queryClient.invalidateQueries({ queryKey: ["/api/favorite-players"] });
+          return null;
+        }
         throw new Error(`Failed to add favorite: ${response.status} ${errorText}`);
       }
       const result = await response.json();
