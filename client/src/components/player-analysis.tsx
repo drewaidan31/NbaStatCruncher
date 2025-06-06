@@ -678,7 +678,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
         <ShotChart
           playerId={player.playerId}
           playerName={player.name}
-          season={selectedSeason}
+          season={selectedSeason ?? undefined}
         />
       )}
 

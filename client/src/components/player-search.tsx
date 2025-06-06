@@ -60,6 +60,15 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
   const { data: favorites = [], isLoading: favoritesLoading, error: favoritesError } = useQuery<FavoritePlayer[]>({
     queryKey: ["/api/favorite-players"],
     enabled: isAuthenticated,
+    queryFn: async () => {
+      const response = await fetch("/api/favorite-players", {
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch favorites: ${response.status}`);
+      }
+      return response.json();
+    },
   });
 
   // Debug favorites state
