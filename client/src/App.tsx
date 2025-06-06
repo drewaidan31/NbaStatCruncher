@@ -694,6 +694,8 @@ function MainApp() {
 
         {/* My Custom Stats Component */}
         <MyCustomStats />
+
+
       </div>
     );
   };
