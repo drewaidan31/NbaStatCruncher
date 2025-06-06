@@ -18,7 +18,18 @@ export function MyCustomStats({ onStatSelect }: MyCustomStatsProps) {
     enabled: isAuthenticated,
   });
 
-  if (!isAuthenticated || userCustomStats.length === 0) {
+  console.log("MyCustomStats - isAuthenticated:", isAuthenticated);
+  console.log("MyCustomStats - userCustomStats:", userCustomStats);
+  console.log("MyCustomStats - isLoading:", isLoading);
+  console.log("MyCustomStats - error:", error);
+
+  if (!isAuthenticated) {
+    console.log("MyCustomStats - Not authenticated, hiding component");
+    return null;
+  }
+
+  if (userCustomStats.length === 0) {
+    console.log("MyCustomStats - No custom stats found, hiding component");
     return null;
   }
 
