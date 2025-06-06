@@ -191,7 +191,7 @@ function MainApp() {
       
       console.log('Generated chart data points:', chartDataPoints.length);
       
-      setFeaturedPlayer(selectedPlayer);
+      setFeaturedPlayer(selectedPlayer as Player);
       setFeaturedStat(selectedStat);
       setFeaturedChartData(chartDataPoints);
     } else {
@@ -283,8 +283,8 @@ function MainApp() {
     setShowSavedStats(false);
   };
 
-  const handlePlayerSelect = (player: Player, season: string) => {
-    setSelectedPlayer(player);
+  const handlePlayerSelect = (player: any, season: string) => {
+    setSelectedPlayer(player as Player);
     setSelectedPlayerSeason(season);
     setViewMode('analysis');
   };
@@ -316,8 +316,10 @@ function MainApp() {
     if (viewMode === 'comparison' && comparisonData) {
       return (
         <PlayerComparison
-          player1Data={comparisonData.player1}
-          player2Data={comparisonData.player2}
+          player1={comparisonData.player1}
+          season1={comparisonData.season1}
+          player2={comparisonData.player2}
+          season2={comparisonData.season2}
         />
       );
     }
@@ -334,6 +336,10 @@ function MainApp() {
       return (
         <PlayerSearch
           onPlayerSelect={handlePlayerSelect}
+          onCompareSelect={(player1, season1, player2, season2) => {
+            setComparisonData({ player1, season1, player2, season2 });
+            setViewMode('comparison');
+          }}
         />
       );
     }
@@ -341,6 +347,7 @@ function MainApp() {
     if (viewMode === 'usage-rate') {
       return (
         <UsageRateLeaderboard
+          players={players}
           onPlayerSelect={handlePlayerSelect}
         />
       );
