@@ -112,10 +112,10 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
     if (preferences.playstyles.includes("outside-shooter")) {
       // Three-point shooting emphasis
       if (weights.threePointPct >= 3) {
-        archetypeComponents.push(`3PA * ${weights.threePointPct * 0.5}`);
-        archetypeComponents.push(`3P_PCT * ${weights.threePointPct * 2}`);
+        archetypeComponents.push(`3PA * ${weights.threePointPct * 0.3}`);
+        archetypeComponents.push(`3P_PCT * ${weights.threePointPct}`);
       }
-      archetypeComponents.push("(3PA / FGA) * 5"); // Reward 3P attempt rate
+      archetypeComponents.push("(3PA / FGA) * 3"); // Reward 3P attempt rate
     }
     
     if (preferences.playstyles.includes("slasher")) {
@@ -167,24 +167,13 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
 
     let formula = allComponents.join(" + ");
 
-    // Apply efficiency multipliers
-    if (efficiencyMultipliers.length > 0) {
-      formula = `(${formula}) * ${efficiencyMultipliers.join(" * ")}`;
-    } else if (preferences.efficiency) {
-      formula = `(${formula}) * (0.5 + FG_PCT)`;
-    }
-
-    // Add percentage stats as multipliers when highly weighted
-    if (weights.fieldGoalPct >= 4 && !efficiencyMultipliers.length) {
-      formula = `(${formula}) * (0.5 + FG_PCT * ${weights.fieldGoalPct * 0.5})`;
-    }
-
-    if (weights.threePointPct >= 4 && preferences.playstyles.includes("outside-shooter")) {
-      formula = `(${formula}) * (0.7 + 3P_PCT)`;
-    }
-
-    if (weights.freeThrowPct >= 4) {
-      formula = `(${formula}) * (0.8 + FT_PCT * 0.5)`;
+    // Apply only one efficiency multiplier to prevent overflow
+    if (preferences.efficiency && weights.fieldGoalPct >= 3) {
+      formula = `(${formula}) * (0.8 + FG_PCT * 0.2)`;
+    } else if (weights.threePointPct >= 4 && preferences.playstyles.includes("outside-shooter")) {
+      formula = `(${formula}) * (0.9 + 3P_PCT * 0.2)`;
+    } else if (weights.freeThrowPct >= 4) {
+      formula = `(${formula}) * (0.9 + FT_PCT * 0.1)`;
     }
 
     // Penalties
@@ -255,10 +244,11 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
 
     setIsCalculating(true);
     try {
-      const response = await fetch("/api/nba/calculate", {
+      const response = await fetch("/api/custom-stats/calculate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ formula: generatedFormula })
+        credentials: "include",
+        body: JSON.stringify({ formula: generatedFormula, season: "all-time" })
       });
 
       if (!response.ok) {

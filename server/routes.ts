@@ -616,6 +616,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Calculate custom stat for all players
+  app.post("/api/custom-stats/calculate", async (req, res) => {
+    try {
+      const { formula, season } = req.body;
+      
+      if (!formula) {
+        return res.status(400).json({ message: "Formula is required" });
+      }
+
+      console.log("Original formula:", formula);
+      
+      // Resolve any saved stat names in the formula
+      const resolvedFormula = await resolveSavedStatsInFormula(formula);
+      console.log("Resolved formula:", resolvedFormula);
+      
+      // Get all players
+      const allPlayers = await storage.getAllPlayers();
+      const results: any[] = [];
+
+      for (const player of allPlayers) {
+        try {
+          // Create a context with player stats using NBA_STAT_MAPPINGS
+          const context: any = {};
+          
+          // Map player stats to formula variables
+          Object.entries(NBA_STAT_MAPPINGS).forEach(([key, value]) => {
+            if (typeof value === 'string') {
+              context[key] = player[value as keyof Player] || 0;
+            } else if (typeof value === 'function') {
+              context[key] = value(player);
+            }
+          });
+
+          // Calculate the custom stat value
+          const customStat = evaluate(resolvedFormula, context);
+          
+          if (typeof customStat === 'number' && !isNaN(customStat) && isFinite(customStat)) {
+            results.push({
+              playerId: player.playerId,
+              name: player.name,
+              team: player.team,
+              customStat: Number(customStat.toFixed(2)),
+              points: player.points,
+              assists: player.assists,
+              rebounds: player.rebounds
+            });
+          }
+        } catch (evalError) {
+          // Skip players that cause evaluation errors
+          continue;
+        }
+      }
+
+      // Sort by custom stat value (highest first)
+      results.sort((a, b) => b.customStat - a.customStat);
+      
+      // Add rank and limit to top 100
+      const rankedResults = results.slice(0, 100).map((result, index) => ({
+        ...result,
+        rank: index + 1
+      }));
+
+      res.json(rankedResults);
+    } catch (error) {
+      console.error("Error calculating custom stats:", error);
+      
+      if (error instanceof Error && error.message.includes("Unexpected")) {
+        return res.status(400).json({ 
+          message: "Invalid formula syntax. Please check your mathematical expression." 
+        });
+      }
+      
+      res.status(500).json({ 
+        message: "Failed to calculate custom statistics. Please verify your formula and try again." 
+      });
+    }
+  });
+
   // Get user's saved custom stats (requires authentication)
   app.get("/api/custom-stats/my", isAuthenticated, async (req: any, res) => {
     try {
