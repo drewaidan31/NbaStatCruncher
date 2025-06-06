@@ -326,24 +326,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .replace(/3PA/g, 'THREE_PA')
             .replace(/3P/g, 'THREE_P');
           
+          // Calculate realistic values to prevent extreme clustering
+          const pts = Number(player.points) || 0;
+          const fgPct = Number(player.fieldGoalPercentage) || 0.45;
+          const plusMinus = Number(player.plusMinus) || 0;
+          
+          // Estimate FGA from points and shooting percentage
+          const estimatedFGA = fgPct > 0 ? Math.max(Math.round(pts / (fgPct * 2)), 1) : Math.max(Math.round(pts / 0.9), 1);
+          
+          // Calculate realistic win percentage from plus/minus
+          const estimatedWinPct = Math.max(0.2, Math.min(0.8, 0.5 + (plusMinus / 20)));
+          
           const context: any = {
-            PTS: Number(player.points) || 0,
+            PTS: pts,
             AST: Number(player.assists) || 0,
             REB: Number(player.rebounds) || 0,
-            TOV: Number(player.turnovers) || 0,
-            PLUS_MINUS: Number(player.plusMinus) || 0,
-            FG_PCT: Number(player.fieldGoalPercentage) || 0,
-            FGA: Math.max(Number(player.fieldGoalAttempts) || 0, 0.1),
-            FT_PCT: Number(player.freeThrowPercentage) || 0,
-            FTA: Number(player.freeThrowAttempts) || 0,
-            THREE_PCT: Number(player.threePointPercentage) || 0,
-            THREE_PA: Number(player.threePointAttempts) || 0,
-            THREE_P: Number(player.threePointAttempts) || 0,
-            MIN: Math.max(Number(player.minutesPerGame) || 0, 0.1),
+            TOV: Math.max(Number(player.turnovers) || 0, 0.1),
+            PLUS_MINUS: plusMinus,
+            FG_PCT: fgPct,
+            FGA: estimatedFGA,
+            FT_PCT: Number(player.freeThrowPercentage) || 0.75,
+            FTA: Math.max(Number(player.freeThrowAttempts) || 0, 1),
+            THREE_PCT: Number(player.threePointPercentage) || 0.35,
+            THREE_PA: Math.max(Number(player.threePointAttempts) || 0, 1),
+            THREE_P: Math.max(Number(player.threePointAttempts) || 0, 1),
+            MIN: Math.max(Number(player.minutesPerGame) || 0, 1),
             STL: Number(player.steals) || 0,
             BLK: Number(player.blocks) || 0,
             GP: Math.max(Number(player.gamesPlayed) || 0, 1),
-            W_PCT: Number(player.winPercentage) || 0
+            W_PCT: estimatedWinPct
           };
 
           const customStat = evaluate(cleanFormula, context);
