@@ -147,11 +147,11 @@ export function generatePersonalizedGraph(config: PersonalizedGraphConfig): {
     }
   }
   
-  // Determine player selection strategy
+  // Determine player selection strategy - use ONLY favorites if available
   let playerPool = allPlayers;
   let useFavorites = false;
   
-  // 40% chance to use favorites if user has any
+  // Always use favorites if user has any
   if (favorites.length > 0) {
     const favoritePlayerIds = favorites.map(fav => fav.playerId);
     const favoritePlayers = allPlayers.filter(player => 
@@ -159,11 +159,8 @@ export function generatePersonalizedGraph(config: PersonalizedGraphConfig): {
     );
     
     if (favoritePlayers.length > 0) {
-      const random = (refreshCounter * 7 + Date.now() / 1000000) % 100;
-      if (random < 40) {
-        playerPool = favoritePlayers;
-        useFavorites = true;
-      }
+      playerPool = favoritePlayers;
+      useFavorites = true;
     }
   }
   
