@@ -14,7 +14,7 @@ export function MyCustomStats({ onStatSelect }: MyCustomStatsProps) {
 
   // Fetch user's custom stats
   const { data: userCustomStats = [], isLoading, error } = useQuery<CustomStat[]>({
-    queryKey: ["/api/custom-stats"],
+    queryKey: ["/api/custom-stats/my"],
     enabled: isAuthenticated,
   });
 
