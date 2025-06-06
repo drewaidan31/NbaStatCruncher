@@ -16,8 +16,9 @@ import UserProfile from "./components/user-profile";
 import TeamStats from "./components/team-stats";
 import AboutSection from "./components/about-section";
 import StatsLibrary from "./pages/StatsLibrary";
-import { FavoritePlayers } from "./components/favorite-players";
-
+import { FavoritePlayers } from "./components/favorite-players-simple";
+import { generatePersonalizedGraph, generateCareerProgressionData } from "./utils/personalized-graphs";
+import type { CustomStat, FavoritePlayer } from "@shared/schema";
 
 import { BarChart3, Search, Calculator, TrendingUp, Sparkles, RefreshCw, ChevronDown, Filter } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -1010,7 +1011,23 @@ function MainApp() {
             <div className="text-lg text-slate-300">No NBA player data available</div>
           </div>
         ) : (
-          renderCurrentView()
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Main Content */}
+            <div className="lg:col-span-3">
+              {renderCurrentView()}
+            </div>
+            
+            {/* Sidebar */}
+            <div className="space-y-6">
+              <FavoritePlayers 
+                players={players}
+                onFavoriteChange={(hasFavorites) => {
+                  // Could trigger enhanced random graphs here
+                  console.log('Favorites changed:', hasFavorites);
+                }}
+              />
+            </div>
+          </div>
         )}
       </div>
 
