@@ -116,6 +116,8 @@ function MainApp() {
   }, []);
 
   const setupFeaturedShowcase = useCallback(async (playerData: any[]) => {
+    console.log('setupFeaturedShowcase called with', playerData.length, 'players');
+    
     // Filter players with multiple seasons
     const playersWithMultipleSeasons = playerData.filter(p => p.seasons && p.seasons.length >= 3);
     
