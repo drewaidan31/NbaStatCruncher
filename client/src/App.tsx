@@ -64,17 +64,24 @@ function MainApp() {
     
     try {
       console.log('Calculating formula:', formula);
-      const response = await apiRequest('/api/calculate-custom-stat', {
+      const response = await fetch('/api/calculate-custom-stat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ formula })
       });
       
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
       console.log('Calculation response:', response);
       
-      if (response && response.length > 0) {
+      if (data && data.length > 0) {
         // Transform the response to match expected format
-        const transformedResults = response.map((item: any) => ({
+        const transformedResults = data.map((item: any) => ({
           player: item.player || item.name,
           value: item.customStat || item.value || 0
         }));
