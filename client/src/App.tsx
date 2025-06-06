@@ -24,7 +24,7 @@ import { MyCustomStats } from "./components/my-custom-stats";
 import { generatePersonalizedGraph, generateCareerProgressionData } from "./utils/personalized-graphs";
 import type { CustomStat, FavoritePlayer } from "@shared/schema";
 
-import { BarChart3, Search, Calculator, TrendingUp, Sparkles, RefreshCw, ChevronDown, Filter, User, Home, Info, BookOpen, Scatter3D, Wand2 } from "lucide-react";
+import { BarChart3, Search, Calculator, TrendingUp, Sparkles, RefreshCw, ChevronDown, Filter, User, Home, Info, BookOpen, Activity, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { evaluate } from "mathjs";
@@ -699,7 +699,7 @@ function MainApp() {
                   onClick={() => handleNavigation('scatter-plot')}
                   className="flex items-center gap-2"
                 >
-                  <Scatter3D className="w-4 h-4" />
+                  <Activity className="w-4 h-4" />
                   Analysis
                 </Button>
                 <Button
