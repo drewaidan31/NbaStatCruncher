@@ -51,6 +51,15 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Favorite players table
+export const favoritePlayers = pgTable("favorite_players", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  playerId: integer("player_id").notNull(),
+  playerName: varchar("player_name").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const customStats = pgTable("custom_stats", {
   id: serial("id").primaryKey(),
   formula: text("formula").notNull(),
@@ -131,6 +140,8 @@ export type FormulaCalculation = z.infer<typeof formulaCalculationSchema>;
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type SaveCustomStat = z.infer<typeof saveCustomStatSchema>;
+export type FavoritePlayer = typeof favoritePlayers.$inferSelect;
+export type InsertFavoritePlayer = typeof favoritePlayers.$inferInsert;
 export type PlayerAward = typeof playerAwards.$inferSelect;
 export type AllStarSelection = typeof allStarSelections.$inferSelect;
 export type EndOfSeasonTeam = typeof endOfSeasonTeams.$inferSelect;

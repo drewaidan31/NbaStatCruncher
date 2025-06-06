@@ -2,13 +2,16 @@ import {
   nbaPlayers, 
   customStats, 
   users,
+  favoritePlayers,
   type Player, 
   type InsertPlayer, 
   type CustomStat, 
   type InsertCustomStat,
   type User,
   type UpsertUser,
-  type SaveCustomStat
+  type SaveCustomStat,
+  type FavoritePlayer,
+  type InsertFavoritePlayer
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
@@ -40,6 +43,11 @@ export interface IStorage {
   // Community stats operations
   getPublicCustomStats(): Promise<(CustomStat & { user: User })[]>;
   toggleStatVisibility(statId: number, userId: string, isPublic: boolean): Promise<CustomStat | null>;
+  
+  // Favorite players operations
+  getUserFavoritePlayers(userId: string): Promise<FavoritePlayer[]>;
+  addFavoritePlayer(favoritePlayer: InsertFavoritePlayer): Promise<FavoritePlayer>;
+  removeFavoritePlayer(userId: string, playerId: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -235,6 +243,32 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(customStats.id, statId), eq(customStats.userId, userId)))
       .returning();
     return updatedStat || null;
+  }
+
+  // Favorite players operations
+  async getUserFavoritePlayers(userId: string): Promise<FavoritePlayer[]> {
+    return await db
+      .select()
+      .from(favoritePlayers)
+      .where(eq(favoritePlayers.userId, userId));
+  }
+
+  async addFavoritePlayer(favoritePlayer: InsertFavoritePlayer): Promise<FavoritePlayer> {
+    const [newFavorite] = await db
+      .insert(favoritePlayers)
+      .values(favoritePlayer)
+      .returning();
+    return newFavorite;
+  }
+
+  async removeFavoritePlayer(userId: string, playerId: number): Promise<boolean> {
+    const result = await db
+      .delete(favoritePlayers)
+      .where(and(
+        eq(favoritePlayers.userId, userId),
+        eq(favoritePlayers.playerId, playerId)
+      ));
+    return result.rowCount > 0;
   }
 }
 
