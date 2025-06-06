@@ -460,7 +460,7 @@ function MainApp() {
                 <p className="text-sm text-slate-400">Create custom basketball statistics with authentic NBA player data</p>
               </div>
               
-              <nav className="hidden md:flex items-center gap-1">
+              <nav className="flex items-center gap-1">
                 <Button
                   variant={viewMode === 'home' ? 'default' : 'ghost'}
                   onClick={() => handleNavigation('home')}
