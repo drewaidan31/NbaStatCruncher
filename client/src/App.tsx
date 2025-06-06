@@ -47,7 +47,7 @@ interface Player {
   freeThrowPercentage: number;
   plusMinus: number;
   currentSeason?: string | null;
-  seasons?: any;
+  seasons?: unknown;
   availableSeasons?: string[] | null;
 }
 
@@ -396,7 +396,7 @@ function MainApp() {
     if (viewMode === 'analysis' && selectedPlayer) {
       return (
         <PlayerAnalysis
-          player={selectedPlayer}
+          player={selectedPlayer as any}
           season={selectedPlayerSeason}
           onBack={handleBackToSearch}
         />

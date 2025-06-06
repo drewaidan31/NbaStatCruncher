@@ -31,7 +31,7 @@ interface Player {
   freeThrowPercentage: number;
   freeThrowAttempts?: number;
   plusMinus: number;
-  currentSeason?: string;
+  currentSeason?: string | null;
   seasons?: Array<{
     season: string;
     team: string;
@@ -566,7 +566,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" style={{ color: teamTextColor }} />
                 <select
-                  value={selectedSeason}
+                  value={selectedSeason || ''}
                   onChange={(e) => setSelectedSeason(e.target.value)}
                   className="bg-black/20 backdrop-blur-sm border border-white/30 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2"
                   style={{ 
