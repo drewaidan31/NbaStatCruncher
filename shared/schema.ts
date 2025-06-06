@@ -1,4 +1,4 @@
-import { pgTable, text, serial, real, integer, varchar, timestamp, jsonb, index } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, real, integer, varchar, timestamp, jsonb, index, unique } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -58,7 +58,9 @@ export const favoritePlayers = pgTable("favorite_players", {
   playerId: integer("player_id").notNull(),
   playerName: varchar("player_name").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => [
+  unique("unique_user_player").on(table.userId, table.playerId),
+]);
 
 export const customStats = pgTable("custom_stats", {
   id: serial("id").primaryKey(),
