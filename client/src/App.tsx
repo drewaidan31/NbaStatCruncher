@@ -16,6 +16,7 @@ import TeamStats from "./components/team-stats";
 import AboutSection from "./components/about-section";
 import StatsLibrary from "./pages/StatsLibrary";
 import UserProfilePage from "./pages/UserProfile";
+import ScatterPlotAnalyzer from "./components/scatter-plot-analyzer";
 import { ColorfulFavoriteButton } from "./components/colorful-favorites";
 import { UserProfileDropdown } from "./components/user-profile-dropdown";
 import { MyCustomStats } from "./components/my-custom-stats";
@@ -53,7 +54,7 @@ interface Player {
   availableSeasons?: string[] | null;
 }
 
-type ViewMode = 'leaderboard' | 'search' | 'analysis' | 'comparison' | 'usage-rate' | 'about' | 'stats-library' | 'profile';
+type ViewMode = 'leaderboard' | 'search' | 'analysis' | 'comparison' | 'usage-rate' | 'about' | 'stats-library' | 'profile' | 'scatter-plot';
 
 function MainApp() {
   const [players, setPlayers] = useState([]);
@@ -439,6 +440,15 @@ function MainApp() {
     if (viewMode === 'profile') {
       return (
         <UserProfilePage 
+          players={players}
+          onBack={() => setViewMode('leaderboard')}
+        />
+      );
+    }
+
+    if (viewMode === 'scatter-plot') {
+      return (
+        <ScatterPlotAnalyzer 
           players={players}
           onBack={() => setViewMode('leaderboard')}
         />
@@ -957,6 +967,18 @@ function MainApp() {
               >
                 <Calculator className="w-4 h-4" />
                 Stats Library
+              </button>
+
+              <button
+                onClick={() => setViewMode('scatter-plot')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  viewMode === 'scatter-plot'
+                    ? "bg-orange-600 text-white"
+                    : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600"
+                }`}
+              >
+                <TrendingUp className="w-4 h-4" />
+                Scatter Plot
               </button>
 
               <button
