@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, X, Star, TrendingUp } from "lucide-react";
@@ -15,7 +14,7 @@ interface FavoritePlayersProps {
 }
 
 export function FavoritePlayers({ onFavoriteChange, players }: FavoritePlayersProps) {
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showAll, setShowAll] = useState(false);
@@ -69,7 +68,7 @@ export function FavoritePlayers({ onFavoriteChange, players }: FavoritePlayersPr
         title: "Player Removed",
         description: "Player removed from your favorites",
       });
-      onFavoriteChange?.((favorites as FavoritePlayer[]).length <= 1);
+      onFavoriteChange?.(favorites.length <= 1);
     },
     onError: () => {
       toast({
@@ -90,7 +89,7 @@ export function FavoritePlayers({ onFavoriteChange, players }: FavoritePlayersPr
       return;
     }
 
-    const isFavorite = (favorites as FavoritePlayer[]).some((fav: FavoritePlayer) => fav.playerId === player.playerId);
+    const isFavorite = favorites.some((fav: FavoritePlayer) => fav.playerId === player.playerId);
     
     if (isFavorite) {
       removeFavoriteMutation.mutate(player.playerId);
@@ -103,7 +102,7 @@ export function FavoritePlayers({ onFavoriteChange, players }: FavoritePlayersPr
   };
 
   const isFavorite = (playerId: number) => {
-    return (favorites as FavoritePlayer[]).some((fav: FavoritePlayer) => fav.playerId === playerId);
+    return favorites.some((fav: FavoritePlayer) => fav.playerId === playerId);
   };
 
   if (!isAuthenticated) {
@@ -264,7 +263,7 @@ export function FavoriteButton({ player, className = "" }: FavoriteButtonProps) 
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: favorites = [] } = useQuery({
+  const { data: favorites = [] } = useQuery<FavoritePlayer[]>({
     queryKey: ["/api/favorite-players"],
     enabled: isAuthenticated,
   });
@@ -273,10 +272,13 @@ export function FavoriteButton({ player, className = "" }: FavoriteButtonProps) 
 
   const addFavoriteMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest(`/api/favorite-players`, {
+      const response = await fetch(`/api/favorite-players`, {
         method: "POST",
-        body: { playerId: player.playerId, playerName: player.name },
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ playerId: player.playerId, playerName: player.name }),
       });
+      if (!response.ok) throw new Error("Failed to add favorite");
+      return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/favorite-players"] });
@@ -289,9 +291,11 @@ export function FavoriteButton({ player, className = "" }: FavoriteButtonProps) 
 
   const removeFavoriteMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest(`/api/favorite-players/${player.playerId}`, {
+      const response = await fetch(`/api/favorite-players/${player.playerId}`, {
         method: "DELETE",
       });
+      if (!response.ok) throw new Error("Failed to remove favorite");
+      return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/favorite-players"] });
