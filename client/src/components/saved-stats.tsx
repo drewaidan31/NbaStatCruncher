@@ -157,7 +157,11 @@ export default function SavedStats() {
     queryKey: ["/api/custom-stats/my"],
     retry: false,
     enabled: isAuthenticated,
+    staleTime: 0, // Always refetch
+    cacheTime: 0, // Don't cache
   });
+
+  console.log("SavedStats component - isAuthenticated:", isAuthenticated, "isLoading:", isLoading, "savedStats:", savedStats);
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
