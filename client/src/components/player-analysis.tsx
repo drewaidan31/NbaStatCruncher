@@ -827,35 +827,36 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
             </button>
           </div>
 
-          {/* Quick Calculator */}
-          <div className="bg-slate-800 rounded-lg p-6 border border-slate-700 mb-6">
-            <h3 className="text-lg font-medium text-white mb-4">Quick Calculator</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Player Stats */}
+          {/* Standardized Calculator Interface */}
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 p-6 mb-6">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50 mb-4">Quick Calculator</h3>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Statistics */}
               <div>
-                <h4 className="text-sm font-medium text-slate-400 mb-3">Player Stats</h4>
+                <h4 className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">Player Statistics</h4>
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    { name: "PTS", value: "PTS" },
-                    { name: "AST", value: "AST" },
-                    { name: "REB", value: "REB" },
-                    { name: "STL", value: "STL" },
-                    { name: "BLK", value: "BLK" },
-                    { name: "TOV", value: "TOV" },
-                    { name: "FG%", value: "FG%" },
-                    { name: "3P%", value: "3P%" },
-                    { name: "FT%", value: "FT%" },
-                    { name: "+/-", value: "+/-" },
-                    { name: "GP", value: "GP" },
-                    { name: "MIN", value: "MIN" }
+                    { name: "PPG", value: "PTS" },
+                    { name: "APG", value: "AST" },
+                    { name: "RPG", value: "REB" },
+                    { name: "SPG", value: "STL" },
+                    { name: "BPG", value: "BLK" },
+                    { name: "TPG", value: "TOV" },
+                    { name: "FG%", value: "FG_PCT" },
+                    { name: "FGA", value: "FGA" },
+                    { name: "3P%", value: "THREE_PCT" },
+                    { name: "3PA", value: "3PA" },
+                    { name: "FT%", value: "FT_PCT" },
+                    { name: "FTA", value: "FTA" },
+                    { name: "+/-", value: "PLUS_MINUS" },
+                    { name: "W%", value: "W_PCT" },
+                    { name: "MPG", value: "MIN" },
+                    { name: "GP", value: "GP" }
                   ].map((stat) => (
                     <button
                       key={stat.value}
-                      onClick={() => {
-                        const newFormula = formula + stat.value;
-                        setFormula(newFormula);
-                        handleFormulaChange(newFormula);
-                      }}
+                      onClick={() => insertAtCursor(stat.value)}
                       className="bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 px-3 rounded transition-colors"
                     >
                       {stat.name}
@@ -866,7 +867,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
 
               {/* Operations */}
               <div>
-                <h4 className="text-sm font-medium text-slate-400 mb-3">Operations</h4>
+                <h4 className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">Operations</h4>
                 <div className="grid grid-cols-3 gap-2">
                   {[
                     { symbol: "+", value: " + " },
@@ -879,93 +880,49 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
                     <button
                       key={op.symbol}
                       onClick={() => insertAtCursor(op.value)}
-                      className="bg-green-600 hover:bg-green-700 text-white text-sm py-2 px-3 rounded transition-colors"
+                      className="bg-orange-600 hover:bg-orange-700 text-white text-lg py-2 px-3 rounded transition-colors"
                     >
                       {op.symbol}
                     </button>
                   ))}
                 </div>
-              </div>
-
-              {/* Numbers */}
-              <div>
-                <h4 className="text-sm font-medium text-slate-400 mb-3">Numbers</h4>
-                <div className="grid grid-cols-3 gap-2">
+                
+                <div className="grid grid-cols-4 gap-2 mt-4">
                   {["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "."].map((num) => (
                     <button
                       key={num}
                       onClick={() => insertAtCursor(num)}
-                      className="bg-slate-600 hover:bg-slate-500 text-white text-sm py-2 px-3 rounded transition-colors"
+                      className="bg-slate-400 dark:bg-slate-600 hover:bg-slate-500 dark:hover:bg-slate-500 text-white text-lg py-2 px-3 rounded transition-colors"
                     >
                       {num}
                     </button>
                   ))}
                 </div>
               </div>
-            </div>
 
-            {/* Calculator Controls */}
-            <div className="space-y-3 mt-4">
-              {/* Navigation Controls */}
-              <div className="flex gap-2">
-                <button
-                  onClick={() => moveCursor('left')}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded transition-colors flex items-center gap-1"
-                  title="Move cursor left"
-                >
-                  ←
-                </button>
-                <button
-                  onClick={() => moveCursor('right')}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded transition-colors flex items-center gap-1"
-                  title="Move cursor right"
-                >
-                  →
-                </button>
-                <div className="flex-1 bg-slate-700 rounded px-3 py-2 text-white text-sm">
-                  Cursor: {cursorPosition} / {formula.length}
+              {/* Actions */}
+              <div>
+                <h4 className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">Actions</h4>
+                <div className="space-y-3">
+                  <button
+                    onClick={() => {
+                      setFormula("");
+                      setCalculatedValue(null);
+                      setChartData([]);
+                      setCursorPosition(0);
+                    }}
+                    className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded transition-colors"
+                  >
+                    Clear
+                  </button>
+                  <button
+                    onClick={calculateCustomStat}
+                    disabled={!formula.trim()}
+                    className="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-4 rounded font-medium transition-colors"
+                  >
+                    Calculate
+                  </button>
                 </div>
-              </div>
-              
-              {/* Action Controls */}
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    setFormula("");
-                    setCalculatedValue(null);
-                    setCursorPosition(0);
-                  }}
-                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition-colors"
-                >
-                  Clear
-                </button>
-                <button
-                  onClick={() => {
-                    if (cursorPosition > 0) {
-                      const newFormula = formula.slice(0, cursorPosition - 1) + formula.slice(cursorPosition);
-                      setFormula(newFormula);
-                      setCursorPosition(cursorPosition - 1);
-                      handleFormulaChange(newFormula);
-                    }
-                  }}
-                  className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded transition-colors"
-                  title="Delete character before cursor"
-                >
-                  Backspace
-                </button>
-                <button
-                  onClick={() => {
-                    if (cursorPosition < formula.length) {
-                      const newFormula = formula.slice(0, cursorPosition) + formula.slice(cursorPosition + 1);
-                      setFormula(newFormula);
-                      handleFormulaChange(newFormula);
-                    }
-                  }}
-                  className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded transition-colors"
-                  title="Delete character at cursor"
-                >
-                  Delete
-                </button>
               </div>
             </div>
           </div>
