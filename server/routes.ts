@@ -643,9 +643,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Map player stats to formula variables
           Object.entries(NBA_STAT_MAPPINGS).forEach(([key, value]) => {
             if (typeof value === 'string') {
-              context[key] = player[value as keyof Player] || 0;
+              const playerValue = (player as any)[value];
+              context[key] = typeof playerValue === 'number' ? playerValue : 0;
             } else if (typeof value === 'function') {
-              context[key] = value(player);
+              try {
+                context[key] = value(player);
+              } catch {
+                context[key] = 0;
+              }
             }
           });
 
