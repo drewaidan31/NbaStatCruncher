@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Calculator, TrendingUp, Sparkles, BarChart3, Calendar, Target } from "lucide-react";
+import { ArrowLeft, Calculator, TrendingUp, Sparkles, BarChart3, Calendar, Target, Heart } from "lucide-react";
 import FormulaExamples from "./formula-examples";
 import ShotChart from "./shot-chart";
 import { PlayerAwards } from "./player-awards";
 import { evaluate } from "mathjs";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { getTeamColors, getTeamGradient, getTeamTextColor } from "../utils/team-colors";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import type { FavoritePlayer } from "@shared/schema";
 
 interface Player {
   playerId: number;
@@ -69,6 +72,94 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
   const [chartData, setChartData] = useState<Array<{season: string, value: number, team: string}>>([]);
   const [activeTab, setActiveTab] = useState<'overview' | 'shooting' | 'calculator'>('overview');
   const [cursorPosition, setCursorPosition] = useState(0);
+
+  const { isAuthenticated } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Fetch user's favorite players
+  const { data: favorites = [] } = useQuery<FavoritePlayer[]>({
+    queryKey: ["/api/favorite-players"],
+    enabled: isAuthenticated,
+  });
+
+  // Add favorite player mutation
+  const addFavoriteMutation = useMutation({
+    mutationFn: async ({ playerId, playerName }: { playerId: number; playerName: string }) => {
+      const response = await fetch(`/api/favorite-players`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ playerId, playerName }),
+      });
+      if (!response.ok) throw new Error("Failed to add favorite");
+      return await response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/favorite-players"] });
+      toast({
+        title: "Added to Favorites!",
+        description: "Player added with personalized insights",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to add player to favorites",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Remove favorite player mutation
+  const removeFavoriteMutation = useMutation({
+    mutationFn: async (playerId: number) => {
+      const response = await fetch(`/api/favorite-players/${playerId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to remove favorite");
+      return await response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/favorite-players"] });
+      toast({
+        title: "Removed from Favorites",
+        description: "Player removed from your favorites",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to remove player from favorites",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const isFavorite = (playerId: number) => {
+    return favorites.some((fav: FavoritePlayer) => fav.playerId === playerId);
+  };
+
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!isAuthenticated) {
+      toast({
+        title: "Please Log In",
+        description: "Log in to save favorite players and get personalized insights",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (isFavorite(player.playerId)) {
+      removeFavoriteMutation.mutate(player.playerId);
+    } else {
+      addFavoriteMutation.mutate({
+        playerId: player.playerId,
+        playerName: player.name,
+      });
+    }
+  };
 
   // Query to fetch specific season data for the player
   const { data: seasonPlayerData, isLoading: isLoadingSeason } = useQuery({
@@ -447,7 +538,23 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <h1 className="text-2xl font-bold" style={{ color: teamTextColor }}>{player.name}</h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold" style={{ color: teamTextColor }}>{player.name}</h1>
+                <button
+                  onClick={handleToggleFavorite}
+                  title={isFavorite(player.playerId) ? "Remove from favorites" : "Add to favorites"}
+                  className="opacity-70 hover:opacity-100 transition-all duration-200 hover:scale-110 p-1"
+                  disabled={addFavoriteMutation.isPending || removeFavoriteMutation.isPending}
+                >
+                  <Heart 
+                    className={`w-6 h-6 ${
+                      isFavorite(player.playerId) 
+                        ? 'text-red-300 fill-red-300' 
+                        : 'text-white/60 hover:text-red-300'
+                    }`}
+                  />
+                </button>
+              </div>
               <p className="opacity-90" style={{ color: teamTextColor }}>
                 {getTeamColors(currentPlayerData.team).name} • {currentPlayerData.position} • {selectedSeason}
               </p>
