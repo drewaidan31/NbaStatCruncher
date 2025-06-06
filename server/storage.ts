@@ -130,10 +130,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserCustomStats(userId: string): Promise<CustomStat[]> {
-    return await db
+    console.log("Looking for stats with userId:", userId, "type:", typeof userId);
+    const stats = await db
       .select()
       .from(customStats)
       .where(eq(customStats.userId, userId));
+    console.log("Found stats count:", stats.length);
+    return stats;
   }
 
   async deleteCustomStat(statId: number, userId: string): Promise<boolean> {
