@@ -56,7 +56,7 @@ interface Player {
   availableSeasons?: string[] | null;
 }
 
-type ViewMode = 'leaderboard' | 'search' | 'analysis' | 'comparison' | 'usage-rate' | 'about' | 'stats-library' | 'profile' | 'scatter-plot' | 'guided-builder';
+type ViewMode = 'leaderboard' | 'search' | 'analysis' | 'comparison' | 'usage-rate' | 'about' | 'stats-library' | 'profile' | 'scatter-plot' | 'guided-builder' | 'examples';
 
 function MainApp() {
   const [players, setPlayers] = useState([]);
@@ -582,7 +582,9 @@ function MainApp() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <TrendingUp className="w-5 h-5 text-orange-400" />
-                    <h4 className="text-lg font-semibold text-slate-900 dark:text-white">Career Progression</h4>
+                    <h4 className="text-lg font-semibold text-slate-900 dark:text-white">
+                    {showShotChart ? "Shot Chart" : "Career Progression"}
+                  </h4>
                   </div>
                   <button
                     onClick={() => {
@@ -677,6 +679,36 @@ function MainApp() {
               </div>
             </div>
           </div>
+        ) : (
+          <div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-xl border border-purple-200 dark:border-purple-700 p-6">
+            <div className="text-center space-y-4">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <User className="w-6 h-6 text-purple-500" />
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Get Personalized Analytics</h2>
+              </div>
+              
+              <div className="space-y-3">
+                <p className="text-slate-600 dark:text-slate-400">
+                  Sign in and add favorite players to unlock personalized insights and shot charts
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button 
+                    onClick={() => setViewMode('search')}
+                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                  >
+                    Search Players
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setViewMode('guided-builder')}
+                    className="border-purple-300 text-purple-700 hover:bg-purple-50"
+                  >
+                    Try Simple Mode
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
 
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 p-6">
@@ -685,13 +717,23 @@ function MainApp() {
               <h2 className="text-lg font-semibold text-slate-900 dark:text-white">NBA Custom Stats Calculator</h2>
               <p className="text-slate-600 dark:text-slate-300 mt-2">Build your own basketball analytics formulas using real NBA player data. Create custom stats, compare players, and discover new insights.</p>
             </div>
-            <Button
-              onClick={() => setViewMode('guided-builder')}
-              className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2"
-            >
-              <Sparkles className="w-4 h-4" />
-              Simple Mode
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setViewMode('guided-builder')}
+                className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2"
+              >
+                <Sparkles className="w-4 h-4" />
+                Simple Mode
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setViewMode('leaderboard')}
+                className="flex items-center gap-2"
+              >
+                <Calculator className="w-4 h-4" />
+                Formula Guide
+              </Button>
+            </div>
           </div>
 
           <StatCalculator 
