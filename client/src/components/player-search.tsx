@@ -57,10 +57,16 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
   });
 
   // Fetch user's favorite players
-  const { data: favorites = [] } = useQuery<FavoritePlayer[]>({
+  const { data: favorites = [], isLoading: favoritesLoading, error: favoritesError } = useQuery<FavoritePlayer[]>({
     queryKey: ["/api/favorite-players"],
     enabled: isAuthenticated,
   });
+
+  // Debug favorites state
+  console.log("Favorites data:", favorites);
+  console.log("Favorites count:", favorites.length);
+  console.log("Favorites loading:", favoritesLoading);
+  console.log("Favorites error:", favoritesError);
 
   // Add favorite player mutation
   const addFavoriteMutation = useMutation({
