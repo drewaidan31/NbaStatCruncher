@@ -87,7 +87,7 @@ function MainApp() {
   const [featuredStat, setFeaturedStat] = useState<{name: string, formula: string, description: string} | null>(null);
   const [featuredChartData, setFeaturedChartData] = useState<Array<{season: string, value: number, team: string}>>([]);
   const [refreshCounter, setRefreshCounter] = useState(0);
-  const [showShotChart, setShowShotChart] = useState(false);
+
   const [hasFavorites, setHasFavorites] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<string>("all");
 
@@ -238,25 +238,18 @@ function MainApp() {
     
     const { selectedPlayer, selectedStat } = generatePersonalizedGraph(personalizedConfig);
     
-    // Randomly decide between showing chart or shot chart (50/50 chance)
-    const showChart = Math.random() < 0.5;
-    setShowShotChart(!showChart);
     setHasFavorites(userFavorites.length > 0);
     
-    if (showChart) {
-      // Generate career progression data using the personalized utility
-      const chartDataPoints = generateCareerProgressionData(
-        selectedPlayer,
-        selectedStat.formula,
-        selectedStat.name
-      );
-      setFeaturedChartData(chartDataPoints);
-    } else {
-      setFeaturedChartData([]);
-    }
+    // Generate career progression data using the personalized utility
+    const chartDataPoints = generateCareerProgressionData(
+      selectedPlayer,
+      selectedStat.formula,
+      selectedStat.name
+    );
     
     setFeaturedPlayer(selectedPlayer);
     setFeaturedStat(selectedStat);
+    setFeaturedChartData(chartDataPoints);
   }, [refreshCounter]);
 
   const handleSeasonChange = (season: string) => {
@@ -583,7 +576,7 @@ function MainApp() {
                   <div className="flex items-center gap-2">
                     <TrendingUp className="w-5 h-5 text-orange-400" />
                     <h4 className="text-lg font-semibold text-slate-900 dark:text-white">
-                    {showShotChart ? "Shot Chart" : "Career Progression"}
+                    Career Progression
                   </h4>
                   </div>
                   <button
@@ -599,12 +592,7 @@ function MainApp() {
                     Refresh
                   </button>
                 </div>
-                {showShotChart ? (
-                  <ShotChart 
-                    playerName={featuredPlayer.name}
-                    season={featuredPlayer.currentSeason || "2023-24"}
-                  />
-                ) : (
+                {(
                   <>
                     <div className="h-48 w-full">
                       <ResponsiveContainer width="100%" height="100%">

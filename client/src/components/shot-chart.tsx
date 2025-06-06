@@ -13,79 +13,17 @@ interface ShotChartProps {
   shotData?: ShotData[];
 }
 
-// Generate realistic shot chart data based on player position and era
-const generateShotData = (playerName: string, season: string): ShotData[] => {
-  const shots: ShotData[] = [];
-  const shotCount = Math.floor(Math.random() * 200) + 300; // 300-500 shots
-  
-  // Court dimensions (simplified)
-  const courtWidth = 500;
-  const courtHeight = 470;
-  
-  // Different shot patterns based on player name/era
-  const isModernEra = parseInt(season.split('-')[0]) >= 2010;
-  const isGuard = /chris paul|shai|coby|michael jordan/i.test(playerName);
-  const isBig = /lebron/i.test(playerName);
-  
-  for (let i = 0; i < shotCount; i++) {
-    let x, y;
-    
-    if (isGuard && isModernEra) {
-      // Modern guards: more 3-pointers
-      if (Math.random() < 0.4) {
-        // 3-point shots
-        const angle = Math.random() * Math.PI;
-        const radius = 237.5 + Math.random() * 30; // Beyond 3-point line
-        x = courtWidth/2 + Math.cos(angle) * radius;
-        y = courtHeight - 50 - Math.sin(angle) * radius;
-      } else {
-        // Mid-range and paint
-        x = courtWidth/2 + (Math.random() - 0.5) * 300;
-        y = courtHeight - 50 - Math.random() * 200;
-      }
-    } else if (isBig) {
-      // Big players: more paint shots
-      if (Math.random() < 0.7) {
-        // Paint and close shots
-        x = courtWidth/2 + (Math.random() - 0.5) * 120;
-        y = courtHeight - 50 - Math.random() * 120;
-      } else {
-        // Some mid-range
-        x = courtWidth/2 + (Math.random() - 0.5) * 200;
-        y = courtHeight - 50 - Math.random() * 150;
-      }
-    } else {
-      // Balanced distribution
-      x = courtWidth/2 + (Math.random() - 0.5) * 400;
-      y = courtHeight - 50 - Math.random() * 300;
-    }
-    
-    // Determine if shot was made (realistic percentages)
-    const distanceFromBasket = Math.sqrt(Math.pow(x - courtWidth/2, 2) + Math.pow(y - (courtHeight - 50), 2));
-    let makePercentage = 0.45; // Base percentage
-    
-    if (distanceFromBasket < 50) makePercentage = 0.65; // Close shots
-    else if (distanceFromBasket < 120) makePercentage = 0.55; // Paint
-    else if (distanceFromBasket < 200) makePercentage = 0.42; // Mid-range
-    else makePercentage = 0.35; // 3-pointers
-    
-    const made = Math.random() < makePercentage;
-    const value = distanceFromBasket > 237.5 ? 3 : 2;
-    
-    shots.push({ x, y, made, value });
-  }
-  
-  return shots;
-};
+// Note: This component currently requires actual NBA shot location data from the NBA API
+// Shot chart data is not available in our current dataset
 
 export default function ShotChart({ playerName, season, shotData }: ShotChartProps) {
   const [shots, setShots] = useState<ShotData[]>([]);
   
   useEffect(() => {
-    if (shotData) {
+    if (shotData && shotData.length > 0) {
       setShots(shotData);
     } else {
-      setShots(generateShotData(playerName, season));
+      setShots([]);
     }
   }, [playerName, season, shotData]);
   
