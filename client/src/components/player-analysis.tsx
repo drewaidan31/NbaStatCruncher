@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Calculator, TrendingUp, Sparkles, BarChart3, Calendar, Target, Heart } from "lucide-react";
+import { ArrowLeft, Calculator, TrendingUp, Sparkles, BarChart3, Calendar, Heart } from "lucide-react";
 import FormulaExamples from "./formula-examples";
-import ShotChart from "./shot-chart";
 import { PlayerAwards } from "./player-awards";
 import { evaluate } from "mathjs";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -612,20 +611,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
               Overview
             </div>
           </button>
-          <button
-            onClick={() => setActiveTab('shooting')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'shooting'
-                ? 'bg-white/20 backdrop-blur-sm'
-                : 'bg-black/10 hover:bg-black/20 backdrop-blur-sm'
-            }`}
-            style={{ color: teamTextColor }}
-          >
-            <div className="flex items-center gap-2">
-              <Target className="w-4 h-4" />
-              Shot Chart
-            </div>
-          </button>
+
           <button
             onClick={() => setActiveTab('calculator')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${

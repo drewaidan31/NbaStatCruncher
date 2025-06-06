@@ -8,7 +8,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
 
-import { getPlayerShotChart } from "./shot-chart-service";
+
 import { getTeamPossessionData } from "./team-stats-service";
 
 export async function registerRoutes(app: Express): Promise<Server> {
