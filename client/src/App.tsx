@@ -58,11 +58,11 @@ interface Player {
 type ViewMode = 'leaderboard' | 'search' | 'analysis' | 'comparison' | 'usage-rate' | 'about' | 'stats-library' | 'profile' | 'scatter-plot' | 'guided-builder' | 'examples';
 
 function MainApp() {
-  const [players, setPlayers] = useState([]);
+  const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [formula, setFormula] = useState("");
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState<any[]>([]);
   const [selectedSeason, setSelectedSeason] = useState("all-time");
   const [viewMode, setViewMode] = useState<ViewMode>('leaderboard');
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
@@ -74,7 +74,7 @@ function MainApp() {
     season2: string;
   } | null>(null);
   const [showSavedStats, setShowSavedStats] = useState(false);
-  const [savedStats, setSavedStats] = useState([]);
+  const [savedStats, setSavedStats] = useState<any[]>([]);
   const [customStatName, setCustomStatName] = useState("");
 
   // Featured analysis state
@@ -93,7 +93,7 @@ function MainApp() {
   });
 
   // Check if user is authenticated
-  const isAuthenticated = !userLoading && user && user.id;
+  const isAuthenticated = !userLoading && user && (user as any)?.id;
 
   // Load initial data
   useEffect(() => {
@@ -243,7 +243,7 @@ function MainApp() {
 
       const data = await response.json();
       console.log("Calculation response:", data);
-      setResults(data.results);
+      setResults(data || []);
       setError("");
     } catch (err: any) {
       console.error("Calculation error:", err);
@@ -308,7 +308,6 @@ function MainApp() {
       return (
         <PlayerAnalysis
           player={selectedPlayer}
-          season={selectedPlayerSeason}
           onBack={() => setViewMode('search')}
         />
       );
@@ -317,17 +316,14 @@ function MainApp() {
     if (viewMode === 'comparison' && comparisonData) {
       return (
         <PlayerComparison
-          player1={comparisonData.player1}
-          season1={comparisonData.season1}
-          player2={comparisonData.player2}
-          season2={comparisonData.season2}
-          formula={formula}
+          player1Data={comparisonData.player1}
+          player2Data={comparisonData.player2}
         />
       );
     }
 
-    if (viewMode === 'analysis') {
-      return <FormulaExamples />;
+    if (viewMode === 'examples') {
+      return <FormulaExamples onFormulaSelect={(formula) => setFormula(formula)} />;
     }
 
     if (viewMode === 'about') {
@@ -337,7 +333,6 @@ function MainApp() {
     if (viewMode === 'search') {
       return (
         <PlayerSearch
-          players={players}
           onPlayerSelect={handlePlayerSelect}
         />
       );
@@ -346,7 +341,6 @@ function MainApp() {
     if (viewMode === 'usage-rate') {
       return (
         <UsageRateLeaderboard
-          players={players}
           onPlayerSelect={handlePlayerSelect}
         />
       );
@@ -581,7 +575,7 @@ function MainApp() {
                   <h3 className="font-semibold text-slate-900 dark:text-white">
                     {customStatName ? `${customStatName} Results` : "Results"}
                   </h3>
-                  {results.length > 0 && (
+                  {results && results.length > 0 && (
                     <div className="flex items-center gap-2">
                       <select
                         value={selectedPosition}
