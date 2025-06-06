@@ -34,6 +34,10 @@ interface PlayerPreferences {
   efficiency: boolean;
   durability: boolean;
   clutchPerformance: boolean;
+  minimizeTO: boolean;
+  rewardMinutes: boolean;
+  emphasizeDefense: boolean;
+  penalizeFouls: boolean;
 }
 
 export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatBuilderProps) {
@@ -47,7 +51,11 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
     teamSuccess: false,
     efficiency: false,
     durability: false,
-    clutchPerformance: false
+    clutchPerformance: false,
+    minimizeTO: false,
+    rewardMinutes: false,
+    emphasizeDefense: false,
+    penalizeFouls: false
   });
   
   const [weights, setWeights] = useState<StatWeights>({
@@ -135,8 +143,28 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
     }
 
     // Plus/minus for overall impact
-    if (preferences.playstyles.includes("defensive-anchor") || preferences.playstyles.includes("playmaker")) {
+    if (preferences.clutchPerformance || preferences.playstyles.includes("defensive-anchor") || preferences.playstyles.includes("playmaker")) {
       formula = `(${formula}) * (1 + PLUS_MINUS / 100)`;
+    }
+
+    // Ball security penalty
+    if (preferences.minimizeTO) {
+      formula = `(${formula}) - (TOV * 1.5)`;
+    }
+
+    // High usage reward
+    if (preferences.rewardMinutes) {
+      formula = `(${formula}) * (MIN / 36)`;
+    }
+
+    // Defensive emphasis
+    if (preferences.emphasizeDefense) {
+      formula = `(${formula}) + ((STL + BLK) * 2)`;
+    }
+
+    // Foul penalty
+    if (preferences.penalizeFouls) {
+      formula = `(${formula}) - (PF * 0.8)`;
     }
 
     return formula;
@@ -437,6 +465,26 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
                     id: "clutchPerformance",
                     label: "Plus/Minus Impact",
                     desc: "Consider overall impact on team performance"
+                  },
+                  {
+                    id: "minimizeTO",
+                    label: "Ball Security",
+                    desc: "Heavily penalize turnovers and reward careful play"
+                  },
+                  {
+                    id: "rewardMinutes",
+                    label: "High Usage",
+                    desc: "Favor players who carry heavy workloads"
+                  },
+                  {
+                    id: "emphasizeDefense",
+                    label: "Defensive Impact",
+                    desc: "Boost steals and blocks significantly"
+                  },
+                  {
+                    id: "penalizeFouls",
+                    label: "Discipline",
+                    desc: "Reduce value for players with excessive fouling"
                   }
                 ].map((factor) => (
                   <div key={factor.id} className="flex items-start space-x-3 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
@@ -563,6 +611,10 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
                   {preferences.efficiency && <p>• Emphasizes shooting efficiency</p>}
                   {preferences.durability && <p>• Rewards availability</p>}
                   {preferences.clutchPerformance && <p>• Considers overall impact</p>}
+                  {preferences.minimizeTO && <p>• Penalizes turnovers heavily</p>}
+                  {preferences.rewardMinutes && <p>• Favors high usage players</p>}
+                  {preferences.emphasizeDefense && <p>• Boosts defensive stats</p>}
+                  {preferences.penalizeFouls && <p>• Reduces value for fouling</p>}
                 </div>
               </div>
 
