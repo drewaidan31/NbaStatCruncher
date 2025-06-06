@@ -17,6 +17,7 @@ import AboutSection from "./components/about-section";
 import StatsLibrary from "./pages/StatsLibrary";
 import UserProfilePage from "./pages/UserProfile";
 import ScatterPlotAnalyzer from "./components/scatter-plot-analyzer";
+import GuidedStatBuilder from "./components/guided-stat-builder";
 import { ColorfulFavoriteButton } from "./components/colorful-favorites";
 import { UserProfileDropdown } from "./components/user-profile-dropdown";
 import { MyCustomStats } from "./components/my-custom-stats";
@@ -54,7 +55,7 @@ interface Player {
   availableSeasons?: string[] | null;
 }
 
-type ViewMode = 'leaderboard' | 'search' | 'analysis' | 'comparison' | 'usage-rate' | 'about' | 'stats-library' | 'profile' | 'scatter-plot';
+type ViewMode = 'leaderboard' | 'search' | 'analysis' | 'comparison' | 'usage-rate' | 'about' | 'stats-library' | 'profile' | 'scatter-plot' | 'guided-builder';
 
 function MainApp() {
   const [players, setPlayers] = useState([]);
@@ -455,6 +456,18 @@ function MainApp() {
       );
     }
 
+    if (viewMode === 'guided-builder') {
+      return (
+        <GuidedStatBuilder 
+          onBack={() => setViewMode('leaderboard')}
+          onStatCreated={() => {
+            // Refresh the page to show the new stat
+            window.location.reload();
+          }}
+        />
+      );
+    }
+
     // Default leaderboard view
     return (
       <div className="space-y-6">
@@ -646,8 +659,19 @@ function MainApp() {
         )}
 
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 p-6">
-          <h2 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">NBA Custom Stats Calculator</h2>
-          <p className="text-slate-600 dark:text-slate-300 mb-6">Build your own basketball analytics formulas using real NBA player data. Create custom stats, compare players, and discover new insights.</p>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">NBA Custom Stats Calculator</h2>
+              <p className="text-slate-600 dark:text-slate-300 mt-2">Build your own basketball analytics formulas using real NBA player data. Create custom stats, compare players, and discover new insights.</p>
+            </div>
+            <Button
+              onClick={() => setViewMode('guided-builder')}
+              className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2"
+            >
+              <Sparkles className="w-4 h-4" />
+              Simple Mode
+            </Button>
+          </div>
 
           <StatCalculator 
             onFormulaChange={setFormula}
