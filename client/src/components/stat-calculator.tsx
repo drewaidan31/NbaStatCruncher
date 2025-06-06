@@ -192,6 +192,12 @@ export default function StatCalculator({ onFormulaChange, onCalculate, formula =
           <h4 className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">Actions</h4>
           <div className="space-y-3">
             <button
+              onClick={handleDelete}
+              className="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded transition-colors"
+            >
+              Delete
+            </button>
+            <button
               onClick={handleClear}
               className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded transition-colors"
             >

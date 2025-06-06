@@ -244,11 +244,11 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
 
     setIsCalculating(true);
     try {
-      const response = await fetch("/api/custom-stats/calculate", {
+      const response = await fetch("/api/nba/calculate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ formula: generatedFormula, season: "all-time" })
+        body: JSON.stringify({ formula: generatedFormula })
       });
 
       if (!response.ok) {
@@ -653,14 +653,14 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
                             #{index + 1}
                           </span>
                           <div>
-                            <span className="font-medium">{result.player.name}</span>
+                            <span className="font-medium">{result.name}</span>
                             <span className="text-xs text-slate-600 dark:text-slate-400 ml-2">
-                              {result.player.team} • {result.bestSeason}
+                              {result.team} • 2024-25
                             </span>
                           </div>
                         </div>
                         <span className="font-bold text-orange-600">
-                          {result.customStat?.toFixed(2) || "0.00"}
+                          {result.value?.toFixed(2) || "0.00"}
                         </span>
                       </div>
                     ))}
