@@ -38,9 +38,23 @@ export const getQueryFn: <T>(options: {
 
     console.log("API response status:", res.status, "for URL:", url);
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      console.log("Returning null for 401 status");
-      return null;
+    if (res.status === 401) {
+      // Check if this is a session expiration that requires re-login
+      try {
+        const errorData = await res.json();
+        if (errorData.redirectToLogin) {
+          console.log("Session expired, redirecting to login");
+          window.location.href = "/api/login";
+          return null;
+        }
+      } catch (e) {
+        // If JSON parsing fails, continue with normal 401 handling
+      }
+
+      if (unauthorizedBehavior === "returnNull") {
+        console.log("Returning null for 401 status");
+        return null;
+      }
     }
 
     await throwIfResNotOk(res);
