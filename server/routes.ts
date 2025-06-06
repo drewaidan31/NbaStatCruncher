@@ -619,70 +619,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Calculate custom stat for all players
   app.post("/api/custom-stats/calculate", async (req, res) => {
     try {
-      const { formula, season } = req.body;
+      const { formula } = req.body;
       
       if (!formula) {
         return res.status(400).json({ message: "Formula is required" });
       }
 
-      console.log("Original formula:", formula);
-      
-      // Resolve any saved stat names in the formula
-      const resolvedFormula = await resolveSavedStatsInFormula(formula);
-      console.log("Resolved formula:", resolvedFormula);
-      
       // Get all players
       const allPlayers = await storage.getAllPlayers();
       const results: any[] = [];
 
-      console.log(`Processing ${allPlayers.length} players for formula calculation`);
-      
       for (const player of allPlayers) {
         try {
-          const context: any = {};
-          
-          // Use proper property access - some may be from database columns directly
-          const playerData = player as any;
-          
-          context['PTS'] = playerData.points || 0;
-          context['AST'] = playerData.assists || 0;
-          context['REB'] = playerData.rebounds || 0;
-          context['TOV'] = playerData.turnovers || 0;
-          context['PLUS_MINUS'] = playerData.plusMinus || playerData.plus_minus || 0;
-          context['FG_PCT'] = playerData.fieldGoalPercentage || playerData.field_goal_percentage || 0;
-          context['FGA'] = Math.max(playerData.fieldGoalAttempts || playerData.field_goal_attempts || 0, 0.1); // Prevent division by zero
-          context['FT_PCT'] = playerData.freeThrowPercentage || playerData.free_throw_percentage || 0;
-          context['FTA'] = playerData.freeThrowAttempts || playerData.free_throw_attempts || 0;
-          context['THREE_PCT'] = playerData.threePointPercentage || playerData.three_point_percentage || 0;
-          context['3P_PCT'] = playerData.threePointPercentage || playerData.three_point_percentage || 0;
-          context['3PA'] = playerData.threePointAttempts || playerData.three_point_attempts || 0;
-          context['MIN'] = Math.max(playerData.minutesPerGame || playerData.minutes_per_game || 0, 0.1); // Prevent division by zero
-          context['STL'] = playerData.steals || 0;
-          context['BLK'] = playerData.blocks || 0;
-          context['GP'] = Math.max(playerData.gamesPlayed || playerData.games_played || 0, 1); // Prevent division by zero
-          context['W_PCT'] = playerData.winPercentage || playerData.win_percentage || 0;
+          // Simple context mapping - use direct player properties
+          const context: any = {
+            PTS: player.points || 0,
+            AST: player.assists || 0,
+            REB: player.rebounds || 0,
+            TOV: player.turnovers || 0,
+            PLUS_MINUS: player.plusMinus || 0,
+            FG_PCT: player.fieldGoalPercentage || 0,
+            FGA: Math.max(player.fieldGoalAttempts || 0, 1),
+            FT_PCT: player.freeThrowPercentage || 0,
+            FTA: player.freeThrowAttempts || 0,
+            THREE_PCT: player.threePointPercentage || 0,
+            '3P_PCT': player.threePointPercentage || 0,
+            '3PA': player.threePointAttempts || 0,
+            MIN: Math.max(player.minutesPerGame || 0, 1),
+            STL: player.steals || 0,
+            BLK: player.blocks || 0,
+            GP: Math.max(player.gamesPlayed || 0, 1),
+            W_PCT: player.winPercentage || 0
+          };
 
           // Calculate the custom stat value
-          const customStat = evaluate(resolvedFormula, context);
+          const customStat = evaluate(formula, context);
           
-          if (typeof customStat === 'number' && !isNaN(customStat) && isFinite(customStat) && customStat !== 0) {
+          if (typeof customStat === 'number' && !isNaN(customStat) && isFinite(customStat)) {
             results.push({
-              playerId: playerData.playerId || playerData.player_id,
-              name: playerData.name,
-              team: playerData.team,
-              customStat: Number(customStat.toFixed(2)),
-              points: playerData.points,
-              assists: playerData.assists,
-              rebounds: playerData.rebounds
+              playerId: player.playerId,
+              name: player.name,
+              team: player.team,
+              customStat: Math.round(customStat * 100) / 100,
+              points: player.points,
+              assists: player.assists,
+              rebounds: player.rebounds
             });
           }
         } catch (evalError) {
-          console.log(`Error evaluating formula for player ${player.name}:`, evalError.message);
+          // Skip players that cause evaluation errors
           continue;
         }
       }
-      
-      console.log(`Formula evaluation complete. ${results.length} valid results found.`);
 
       // Sort by custom stat value (highest first)
       results.sort((a, b) => b.customStat - a.customStat);
@@ -696,15 +684,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(rankedResults);
     } catch (error) {
       console.error("Error calculating custom stats:", error);
-      
-      if (error instanceof Error && error.message.includes("Unexpected")) {
-        return res.status(400).json({ 
-          message: "Invalid formula syntax. Please check your mathematical expression." 
-        });
-      }
-      
       res.status(500).json({ 
-        message: "Failed to calculate custom statistics. Please verify your formula and try again." 
+        message: "Failed to calculate custom statistics." 
       });
     }
   });
