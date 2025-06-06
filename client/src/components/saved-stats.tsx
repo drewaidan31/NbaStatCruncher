@@ -153,15 +153,28 @@ export default function SavedStats() {
   const queryClient = useQueryClient();
   const [editingStat, setEditingStat] = useState<CustomStat | null>(null);
 
-  const { data: savedStats = [], isLoading } = useQuery<CustomStat[]>({
+  const { data: savedStats = [], isLoading, error } = useQuery<CustomStat[]>({
     queryKey: ["/api/custom-stats/my"],
     retry: false,
     enabled: isAuthenticated,
-    staleTime: 0, // Always refetch
-    cacheTime: 0, // Don't cache
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
 
-  console.log("SavedStats component - isAuthenticated:", isAuthenticated, "isLoading:", isLoading, "savedStats:", savedStats);
+  console.log("SavedStats component - isAuthenticated:", isAuthenticated, "isLoading:", isLoading, "savedStats:", savedStats, "error:", error);
+  
+  // Manual test of the API endpoint
+  if (isAuthenticated && !isLoading && savedStats.length === 0 && !error) {
+    console.log("Manually testing API endpoint...");
+    fetch("/api/custom-stats/my", { credentials: "include" })
+      .then(res => {
+        console.log("Manual API test - status:", res.status);
+        return res.json();
+      })
+      .then(data => console.log("Manual API test - data:", data))
+      .catch(err => console.log("Manual API test - error:", err));
+  }
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
