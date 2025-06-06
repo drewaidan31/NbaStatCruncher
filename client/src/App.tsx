@@ -12,10 +12,10 @@ import PlayerAnalysis from "./components/player-analysis";
 import PlayerComparison from "./components/player-comparison";
 import FormulaExamples from "./components/formula-examples";
 import UsageRateLeaderboard from "./components/usage-rate-leaderboard";
-import UserProfile from "./components/user-profile";
 import TeamStats from "./components/team-stats";
 import AboutSection from "./components/about-section";
 import StatsLibrary from "./pages/StatsLibrary";
+import UserProfilePage from "./pages/UserProfile";
 import { ColorfulFavoriteButton } from "./components/colorful-favorites";
 import { UserProfileDropdown } from "./components/user-profile-dropdown";
 import { MyCustomStats } from "./components/my-custom-stats";
@@ -23,6 +23,7 @@ import { generatePersonalizedGraph, generateCareerProgressionData } from "./util
 import type { CustomStat, FavoritePlayer } from "@shared/schema";
 
 import { BarChart3, Search, Calculator, TrendingUp, Sparkles, RefreshCw, ChevronDown, Filter, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { evaluate } from "mathjs";
 
@@ -52,7 +53,7 @@ interface Player {
   availableSeasons?: string[] | null;
 }
 
-type ViewMode = 'leaderboard' | 'search' | 'analysis' | 'comparison' | 'usage-rate' | 'about' | 'stats-library';
+type ViewMode = 'leaderboard' | 'search' | 'analysis' | 'comparison' | 'usage-rate' | 'about' | 'stats-library' | 'profile';
 
 function MainApp() {
   const [players, setPlayers] = useState([]);
@@ -898,7 +899,18 @@ function MainApp() {
             </p>
           </div>
           <div className="ml-8 flex items-center gap-3">
-            <UserProfileDropdown players={players} />
+            <Button
+              variant="ghost"
+              onClick={() => setViewMode('profile')}
+              className="flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-red-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                D
+              </div>
+              <span className="hidden md:block text-slate-700 dark:text-slate-300">
+                Profile
+              </span>
+            </Button>
           </div>
         </div>
 
