@@ -640,19 +640,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Create a context with player stats using NBA_STAT_MAPPINGS
           const context: any = {};
           
-          // Map player stats to formula variables
-          Object.entries(NBA_STAT_MAPPINGS).forEach(([key, value]) => {
-            if (typeof value === 'string') {
-              const playerValue = (player as any)[value];
-              context[key] = typeof playerValue === 'number' ? playerValue : 0;
-            } else if (typeof value === 'function') {
-              try {
-                context[key] = value(player);
-              } catch {
-                context[key] = 0;
-              }
-            }
-          });
+          // Map player stats to formula variables - use direct database column names
+          context['PTS'] = player.points || 0;
+          context['AST'] = player.assists || 0;
+          context['REB'] = player.rebounds || 0;
+          context['TOV'] = player.turnovers || 0;
+          context['PLUS_MINUS'] = player.plus_minus || 0;
+          context['FG_PCT'] = player.field_goal_percentage || 0;
+          context['FGA'] = player.field_goal_attempts || 0;
+          context['FT_PCT'] = player.free_throw_percentage || 0;
+          context['FTA'] = player.free_throw_attempts || 0;
+          context['THREE_PCT'] = player.three_point_percentage || 0;
+          context['3P_PCT'] = player.three_point_percentage || 0;
+          context['3PA'] = player.three_point_attempts || 0;
+          context['MIN'] = player.minutes_per_game || 0;
+          context['STL'] = player.steals || 0;
+          context['BLK'] = player.blocks || 0;
+          context['GP'] = player.games_played || 0;
+          context['W_PCT'] = player.win_percentage || 0;
 
           // Calculate the custom stat value
           const customStat = evaluate(resolvedFormula, context);
