@@ -391,12 +391,17 @@ function MainApp() {
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <h4 className="text-lg font-semibold text-slate-900 dark:text-white">
-                      {featuredPlayer.name}
-                    </h4>
-                    <p className="text-slate-600 dark:text-slate-400">
-                      {featuredPlayer.team} • {featuredPlayer.position}
-                    </p>
+                    <button
+                      onClick={() => handlePlayerSelect(featuredPlayer, "2024-25")}
+                      className="text-left group"
+                    >
+                      <h4 className="text-lg font-semibold text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors cursor-pointer">
+                        {featuredPlayer.name} →
+                      </h4>
+                      <p className="text-slate-600 dark:text-slate-400">
+                        {featuredPlayer.team} • {featuredPlayer.position}
+                      </p>
+                    </button>
                   </div>
                   <div className="bg-orange-100 dark:bg-orange-900/30 rounded-lg p-4">
                     <h5 className="font-medium text-slate-900 dark:text-white mb-2">{featuredStat.name}</h5>
@@ -571,13 +576,7 @@ function MainApp() {
               />
 
               <div className="flex items-center gap-4">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowSavedStats(!showSavedStats)}
-                  className="text-slate-600 dark:text-slate-300"
-                >
-                  {showSavedStats ? 'Hide' : 'Show'} Saved Stats
-                </Button>
+
                 <Button
                   variant="outline"
                   onClick={() => {
@@ -590,43 +589,7 @@ function MainApp() {
                 </Button>
               </div>
 
-              {showSavedStats && (
-                <div className="space-y-2">
-                  <h3 className="font-semibold text-slate-900 dark:text-white">Saved Custom Stats</h3>
-                  {savedStats.length === 0 ? (
-                    <p className="text-slate-600 dark:text-slate-400">No saved stats yet.</p>
-                  ) : (
-                    <div className="grid gap-2">
-                      {savedStats.map((stat: any, index: number) => (
-                        <div
-                          key={index}
-                          className="p-3 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                          onClick={() => loadSavedStat(stat)}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h4 className="font-medium text-slate-900 dark:text-white">{stat.name}</h4>
-                              <code className="text-sm text-slate-600 dark:text-slate-400">{stat.formula}</code>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setFormula(stat.formula);
-                                setCustomStatName(stat.name);
-                              }}
-                              className="text-blue-600 hover:text-blue-700 dark:text-blue-400"
-                            >
-                              Load
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
+
             </div>
 
             <div className="lg:w-1/3">

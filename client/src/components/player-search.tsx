@@ -209,7 +209,12 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
     return result ? { value: result.value, rank: result.rank } : null;
   };
 
-  const handlePlayerClick = (player: Player) => {
+  const handlePlayerClick = (player: Player, e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     if (compareMode) {
       if (!selectedPlayer1) {
         // Select first player and show season picker
@@ -355,7 +360,7 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
                 {filteredPlayers.map((player: Player) => (
                   <div
                     key={player.playerId}
-                    onClick={() => handlePlayerClick(player)}
+                    onClick={(e) => handlePlayerClick(player, e)}
                     className="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 p-3 rounded-lg cursor-pointer transition-all duration-300 ease-in-out border border-slate-300 dark:border-slate-600 hover:border-orange-400 hover:shadow-lg hover:shadow-orange-500/20 transform hover:scale-[1.02] group"
                   >
                     <div className="flex justify-between items-start">
