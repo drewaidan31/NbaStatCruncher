@@ -640,7 +640,10 @@ function MainApp() {
         </div>
 
         {/* My Custom Stats Component */}
-        <MyCustomStats />
+        <MyCustomStats onStatSelect={(stat) => {
+          setFormula(stat.formula);
+          setCustomStatName(stat.name);
+        }} />
 
 
       </div>
