@@ -69,7 +69,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
   const [selectedSeason, setSelectedSeason] = useState(season || player.currentSeason);
   const [currentPlayerData, setCurrentPlayerData] = useState(player);
   const [chartData, setChartData] = useState<Array<{season: string, value: number, team: string}>>([]);
-  const [activeTab, setActiveTab] = useState<'overview' | 'shooting' | 'calculator'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'calculator'>('overview');
   const [cursorPosition, setCursorPosition] = useState(0);
 
   const { isAuthenticated } = useAuth();
@@ -670,13 +670,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
         </div>
       )}
 
-      {activeTab === 'shooting' && (
-        <ShotChart
-          playerId={player.playerId}
-          playerName={player.name}
-          season={selectedSeason ?? undefined}
-        />
-      )}
+  
 
       {activeTab === 'calculator' && (
         <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg p-8 border border-orange-500/30 shadow-xl">
