@@ -97,9 +97,12 @@ function MainApp() {
 
   // Load initial data
   useEffect(() => {
+    console.log('Starting to fetch players...');
     const fetchPlayers = async () => {
       try {
+        console.log('Making request to /api/players');
         const response = await fetch("/api/players");
+        console.log('Players API response status:', response.status);
         if (!response.ok) {
           throw new Error("Failed to fetch players");
         }
@@ -108,6 +111,7 @@ function MainApp() {
         setPlayers(data);
         setLoading(false);
       } catch (err: any) {
+        console.error('Error fetching players:', err);
         setError(err.message);
         setLoading(false);
       }
