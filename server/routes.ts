@@ -635,49 +635,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allPlayers = await storage.getAllPlayers();
       const results: any[] = [];
 
+      console.log(`Processing ${allPlayers.length} players for formula calculation`);
+      
       for (const player of allPlayers) {
         try {
-          // Create a context with player stats using NBA_STAT_MAPPINGS
           const context: any = {};
           
-          // Map player stats to formula variables - use direct database column names
-          context['PTS'] = player.points || 0;
-          context['AST'] = player.assists || 0;
-          context['REB'] = player.rebounds || 0;
-          context['TOV'] = player.turnovers || 0;
-          context['PLUS_MINUS'] = player.plus_minus || 0;
-          context['FG_PCT'] = player.field_goal_percentage || 0;
-          context['FGA'] = player.field_goal_attempts || 0;
-          context['FT_PCT'] = player.free_throw_percentage || 0;
-          context['FTA'] = player.free_throw_attempts || 0;
-          context['THREE_PCT'] = player.three_point_percentage || 0;
-          context['3P_PCT'] = player.three_point_percentage || 0;
-          context['3PA'] = player.three_point_attempts || 0;
-          context['MIN'] = player.minutes_per_game || 0;
-          context['STL'] = player.steals || 0;
-          context['BLK'] = player.blocks || 0;
-          context['GP'] = player.games_played || 0;
-          context['W_PCT'] = player.win_percentage || 0;
+          // Use proper property access - some may be from database columns directly
+          const playerData = player as any;
+          
+          context['PTS'] = playerData.points || 0;
+          context['AST'] = playerData.assists || 0;
+          context['REB'] = playerData.rebounds || 0;
+          context['TOV'] = playerData.turnovers || 0;
+          context['PLUS_MINUS'] = playerData.plusMinus || playerData.plus_minus || 0;
+          context['FG_PCT'] = playerData.fieldGoalPercentage || playerData.field_goal_percentage || 0;
+          context['FGA'] = Math.max(playerData.fieldGoalAttempts || playerData.field_goal_attempts || 0, 0.1); // Prevent division by zero
+          context['FT_PCT'] = playerData.freeThrowPercentage || playerData.free_throw_percentage || 0;
+          context['FTA'] = playerData.freeThrowAttempts || playerData.free_throw_attempts || 0;
+          context['THREE_PCT'] = playerData.threePointPercentage || playerData.three_point_percentage || 0;
+          context['3P_PCT'] = playerData.threePointPercentage || playerData.three_point_percentage || 0;
+          context['3PA'] = playerData.threePointAttempts || playerData.three_point_attempts || 0;
+          context['MIN'] = Math.max(playerData.minutesPerGame || playerData.minutes_per_game || 0, 0.1); // Prevent division by zero
+          context['STL'] = playerData.steals || 0;
+          context['BLK'] = playerData.blocks || 0;
+          context['GP'] = Math.max(playerData.gamesPlayed || playerData.games_played || 0, 1); // Prevent division by zero
+          context['W_PCT'] = playerData.winPercentage || playerData.win_percentage || 0;
 
           // Calculate the custom stat value
           const customStat = evaluate(resolvedFormula, context);
           
-          if (typeof customStat === 'number' && !isNaN(customStat) && isFinite(customStat)) {
+          if (typeof customStat === 'number' && !isNaN(customStat) && isFinite(customStat) && customStat !== 0) {
             results.push({
-              playerId: player.playerId,
-              name: player.name,
-              team: player.team,
+              playerId: playerData.playerId || playerData.player_id,
+              name: playerData.name,
+              team: playerData.team,
               customStat: Number(customStat.toFixed(2)),
-              points: player.points,
-              assists: player.assists,
-              rebounds: player.rebounds
+              points: playerData.points,
+              assists: playerData.assists,
+              rebounds: playerData.rebounds
             });
           }
         } catch (evalError) {
-          // Skip players that cause evaluation errors
+          console.log(`Error evaluating formula for player ${player.name}:`, evalError.message);
           continue;
         }
       }
+      
+      console.log(`Formula evaluation complete. ${results.length} valid results found.`);
 
       // Sort by custom stat value (highest first)
       results.sort((a, b) => b.customStat - a.customStat);
