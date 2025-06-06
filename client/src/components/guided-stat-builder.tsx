@@ -289,12 +289,12 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
               </p>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {[
-                  { id: "superstar", label: "Superstar", desc: "Elite all-around impact" },
-                  { id: "offensive-engine", label: "Offensive Engine", desc: "Scoring and creating offense" },
-                  { id: "defensive-anchor", label: "Defensive Anchor", desc: "Protecting the rim and perimeter" },
-                  { id: "floor-general", label: "Floor General", desc: "Leadership and court vision" },
-                  { id: "energy-player", label: "Energy Player", desc: "Hustle, rebounds, and effort" },
-                  { id: "clutch-performer", label: "Clutch Performer", desc: "Rising in big moments" }
+                  { id: "outside-shooter", label: "Outside Shooter", desc: "Three-point specialists" },
+                  { id: "slasher", label: "Slasher", desc: "Attacking the rim aggressively" },
+                  { id: "post-player", label: "Post Player", desc: "Dominant in the paint" },
+                  { id: "defensive-anchor", label: "Defensive Anchor", desc: "Rim protection and steals" },
+                  { id: "midrange-shooter", label: "Midrange Shooter", desc: "Effective from 15-20 feet" },
+                  { id: "playmaker", label: "Playmaker", desc: "Creating shots for teammates" }
                 ].map((type) => (
                   <button
                     key={type.id}
