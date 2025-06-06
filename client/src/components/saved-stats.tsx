@@ -155,6 +155,15 @@ export default function SavedStats() {
 
   const { data: savedStats = [], isLoading, error } = useQuery<CustomStat[]>({
     queryKey: ["/api/custom-stats/my"],
+    queryFn: async () => {
+      const response = await fetch("/api/custom-stats/my", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error(`${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    },
     retry: false,
     enabled: isAuthenticated,
     staleTime: 0,
