@@ -93,18 +93,18 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
       const combinedData: ScatterDataPoint[] = [];
       xData.forEach((xPoint: any) => {
         const yPoint = yData.find((y: any) => 
-          y.player.id === xPoint.player.id && y.bestSeason === xPoint.bestSeason
+          y.name === xPoint.name && y.team === xPoint.team
         );
         
-        if (yPoint && xPoint.customStat !== null && yPoint.customStat !== null) {
+        if (yPoint && xPoint.value !== null && yPoint.value !== null) {
           const dataPoint = {
-            name: xPoint.player.name,
-            team: xPoint.player.team,
-            season: xPoint.bestSeason,
-            x: xPoint.customStat,
-            y: yPoint.customStat,
-            teamColor: teamColors[xPoint.player.team] || '#666666',
-            playerId: xPoint.player.id
+            name: xPoint.name,
+            team: xPoint.team,
+            season: "2024-25",
+            x: xPoint.value,
+            y: yPoint.value,
+            teamColor: teamColors[xPoint.team] || '#666666',
+            playerId: xPoint.name + xPoint.team
           };
           
           // Filter by selected season if not "all"
