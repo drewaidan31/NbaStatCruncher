@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Search, User, TrendingUp } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { ColorfulFavoriteButton } from "./colorful-favorites";
+import { PlayerSearchFavorites } from "./player-search-favorites";
 
 interface Player {
   playerId: number;

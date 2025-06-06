@@ -16,7 +16,8 @@ import UserProfile from "./components/user-profile";
 import TeamStats from "./components/team-stats";
 import AboutSection from "./components/about-section";
 import StatsLibrary from "./pages/StatsLibrary";
-import { ColorfulFavorites, ColorfulFavoriteButton } from "./components/colorful-favorites";
+import { ColorfulFavoriteButton } from "./components/colorful-favorites";
+import { UserProfileDropdown } from "./components/user-profile-dropdown";
 import { generatePersonalizedGraph, generateCareerProgressionData } from "./utils/personalized-graphs";
 import type { CustomStat, FavoritePlayer } from "@shared/schema";
 
@@ -68,7 +69,7 @@ interface Player {
   availableSeasons?: string[];
 }
 
-type ViewMode = 'leaderboard' | 'search' | 'analysis' | 'comparison' | 'usage-rate' | 'about' | 'stats-library' | 'profile';
+type ViewMode = 'leaderboard' | 'search' | 'analysis' | 'comparison' | 'usage-rate' | 'about' | 'stats-library';
 
 function MainApp() {
   const [players, setPlayers] = useState([]);
@@ -449,18 +450,7 @@ function MainApp() {
       return <StatsLibrary />;
     }
 
-    if (viewMode === 'profile') {
-      return (
-        <div className="space-y-6">
-          <ColorfulFavorites 
-            players={players}
-            onFavoriteChange={(hasFavorites) => {
-              console.log('Favorites changed:', hasFavorites);
-            }}
-          />
-        </div>
-      );
-    }
+
 
     // Default leaderboard view
     return (
@@ -916,7 +906,7 @@ function MainApp() {
             </p>
           </div>
           <div className="ml-8 flex items-center gap-3">
-            <UserProfile />
+            <UserProfileDropdown players={players} />
           </div>
         </div>
 
@@ -957,17 +947,7 @@ function MainApp() {
                 <Calculator className="w-4 h-4" />
                 Stats Library
               </button>
-              <button
-                onClick={() => setViewMode('profile')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  viewMode === 'profile'
-                    ? "bg-orange-600 text-white"
-                    : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600"
-                }`}
-              >
-                <User className="w-4 h-4" />
-                Profile
-              </button>
+
               <button
                 onClick={() => setViewMode('about')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
