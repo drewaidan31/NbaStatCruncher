@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
+
+// Force dark mode immediately
+if (typeof document !== 'undefined') {
+  document.documentElement.classList.add('dark');
+  document.body.classList.add('dark', 'bg-slate-900', 'text-white');
+}
 import { BarChart3, Calculator, Search, TrendingUp, User, Info, Sparkles, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PlayerSearch from "@/components/player-search";
@@ -346,7 +352,7 @@ function MainApp() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white">
+    <div className="min-h-screen bg-slate-900 text-white dark">
       {/* Header */}
       <header className="bg-slate-900 border-b border-slate-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
