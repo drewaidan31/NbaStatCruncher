@@ -372,7 +372,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       console.log(`Returning ${results.length} results`);
-      res.json(results.slice(0, 100));
+      res.json(results);
     } catch (error) {
       console.error("Calculation error:", error);
       res.status(500).json({ message: "Calculation failed" });
