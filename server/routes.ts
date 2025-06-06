@@ -360,12 +360,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const customStat = evaluate(cleanFormula, context);
           
           if (typeof customStat === 'number' && !isNaN(customStat) && isFinite(customStat)) {
+            // Add bounds checking to prevent extreme outliers that cause clustering
+            const boundedValue = Math.max(-1000, Math.min(1000, customStat));
             results.push({
               rank: 0,
               name: player.name,
               team: player.team,
               position: player.position,
-              value: Math.round(customStat * 100) / 100,
+              value: Math.round(boundedValue * 100) / 100,
               points: player.points,
               assists: player.assists,
               rebounds: player.rebounds,
