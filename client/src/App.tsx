@@ -600,31 +600,28 @@ function MainApp() {
                   )}
                 </div>
                 
-                {results.length > 0 && (
+                {results && results.length > 0 && (
                   <div className="space-y-2 max-h-96 overflow-y-auto">
                     {results
-                      .filter((player: any) => selectedPosition === 'all' || player.position === selectedPosition)
+                      .filter((result: any) => {
+                        if (selectedPosition === 'all') return true;
+                        return result.player?.position?.includes(selectedPosition);
+                      })
                       .slice(0, 50)
-                      .map((player: any, index: number) => {
-                        const rank = selectedPosition === 'all' 
-                          ? index + 1 
-                          : results
-                              .filter((p: any) => selectedPosition === 'all' || p.position === selectedPosition)
-                              .indexOf(player) + 1;
-                        
+                      .map((result: any, index: number) => {
                         return (
                           <div key={index} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
                             <div className="flex items-center gap-3">
                               <div className="flex items-center justify-center w-8 h-8 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">
-                                {rank}
+                                {index + 1}
                               </div>
                               <div>
-                                <div className="font-medium text-slate-900 dark:text-white">{player.name}</div>
-                                <div className="text-sm text-slate-600 dark:text-slate-400">{player.team} • {player.position}</div>
+                                <div className="font-medium text-slate-900 dark:text-white">{result.player?.name || 'Unknown Player'}</div>
+                                <div className="text-sm text-slate-600 dark:text-slate-400">{result.player?.team || 'N/A'} • {result.player?.position || 'N/A'}</div>
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className="font-bold text-slate-900 dark:text-white">{player.customStat.toFixed(2)}</div>
+                              <div className="font-bold text-slate-900 dark:text-white">{typeof result.value === 'number' ? result.value.toFixed(2) : result.value}</div>
                               <div className="text-sm text-slate-600 dark:text-slate-400">
                                 {customStatName ? customStatName : "Custom"}
                               </div>
@@ -632,6 +629,18 @@ function MainApp() {
                           </div>
                         );
                       })}
+                  </div>
+                )}
+
+                {!results && !loading && !error && (
+                  <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+                    <p>No results to display. Try calculating a formula first.</p>
+                  </div>
+                )}
+
+                {results && results.length === 0 && !loading && !error && (
+                  <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+                    <p>No results found for the current filters.</p>
                   </div>
                 )}
               </div>
