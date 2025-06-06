@@ -607,6 +607,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       for (const player of allPlayers) {
         try {
+          // Replace ALL problematic variable names before evaluation
+          let cleanFormula = formula
+            .replace(/3P_PCT/g, 'THREE_PCT')
+            .replace(/3PA/g, 'THREE_PA')
+            .replace(/3P/g, 'THREE_P');
+          
           const context: any = {
             PTS: Number(player.points) || 0,
             AST: Number(player.assists) || 0,
@@ -618,8 +624,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             FT_PCT: Number(player.freeThrowPercentage) || 0,
             FTA: Number(player.freeThrowAttempts) || 0,
             THREE_PCT: Number(player.threePointPercentage) || 0,
-            '3P_PCT': Number(player.threePointPercentage) || 0,
-            '3PA': Number(player.threePointAttempts) || 0,
+            THREE_PA: Number(player.threePointAttempts) || 0,
+            THREE_P: Number(player.threePointAttempts) || 0,
             MIN: Math.max(Number(player.minutesPerGame) || 0, 0.1),
             STL: Number(player.steals) || 0,
             BLK: Number(player.blocks) || 0,
@@ -627,7 +633,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             W_PCT: Number(player.winPercentage) || 0
           };
 
-          const customStat = evaluate(formula, context);
+          const customStat = evaluate(cleanFormula, context);
           
           if (typeof customStat === 'number' && !isNaN(customStat) && isFinite(customStat)) {
             results.push({
