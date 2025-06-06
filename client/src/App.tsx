@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { BarChart3, Calculator, Search, TrendingUp, User, Info, Sparkles, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PlayerSearch from "@/components/player-search";
@@ -21,9 +21,11 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { generatePersonalizedGraph } from "@/utils/personalized-graphs";
 import type { Player, FavoritePlayer, CustomStat } from "@shared/schema";
 
+const queryClient = new QueryClient();
+
 type ViewMode = 'home' | 'search' | 'analysis' | 'comparison' | 'usage-rate' | 'examples' | 'stats-library' | 'about' | 'profile' | 'scatter-plot' | 'guided-builder' | 'saved-stats';
 
-function App() {
+function MainApp() {
   const [viewMode, setViewMode] = useState<ViewMode>('home');
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [selectedPlayerSeason, setSelectedPlayerSeason] = useState<string>('');
@@ -94,9 +96,10 @@ function App() {
 
         // Generate featured stat and chart data
         const personalizedData = generatePersonalizedGraph({
-          favoritesCount: favorites.length,
-          customStatsCount: 3,
-          playersCount: players.length
+          favorites: favorites,
+          userCustomStats: [],
+          allPlayers: players,
+          refreshCounter: refreshCounter
         });
 
         const selectedStat = {
@@ -181,9 +184,7 @@ function App() {
 
     if (viewMode === 'usage-rate') {
       return (
-        <UsageRateLeaderboard
-          onPlayerSelect={handlePlayerSelect}
-        />
+        <UsageRateLeaderboard />
       );
     }
 
@@ -411,7 +412,7 @@ function App() {
                   Profile
                 </Button>
               )}
-              <UserProfileDropdown players={players} />
+              <UserProfileDropdown />
             </div>
           </div>
         </div>
@@ -422,6 +423,14 @@ function App() {
         {renderContent()}
       </main>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <MainApp />
+    </QueryClientProvider>
   );
 }
 
