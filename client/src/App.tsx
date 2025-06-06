@@ -209,34 +209,49 @@ function MainApp() {
     }
   };
 
-  const setupFeaturedShowcase = useCallback((playerData: any[]) => {
+  const setupFeaturedShowcase = useCallback(async (playerData: any[]) => {
     // Filter players with multiple seasons
     const playersWithMultipleSeasons = playerData.filter(p => p.seasons && p.seasons.length >= 3);
     
     if (playersWithMultipleSeasons.length === 0) return;
     
-    // Generate truly random selection each time the function is called
-    // This ensures different players/stats on each website visit or refresh
-    const playerIndex = Math.floor(Math.random() * playersWithMultipleSeasons.length);
-    const statIndex = Math.floor(Math.random() * presetStats.length);
+    // Fetch user's favorites and custom stats for personalized graphs
+    let userFavorites: FavoritePlayer[] = [];
+    let userCustomStats: CustomStat[] = [];
     
-    const selectedPlayer = playersWithMultipleSeasons[playerIndex];
-    const selectedStat = presetStats[statIndex];
+    try {
+      const [favoritesResponse, customStatsResponse] = await Promise.all([
+        fetch('/api/favorite-players'),
+        fetch('/api/custom-stats/my')
+      ]);
+      
+      if (favoritesResponse.ok) {
+        userFavorites = await favoritesResponse.json();
+      }
+      
+      if (customStatsResponse.ok) {
+        userCustomStats = await customStatsResponse.json();
+      }
+    } catch (error) {
+      console.log('Using default showcase (not logged in or error fetching user data)');
+    }
     
-    console.log('Refresh counter:', refreshCounter, 'Player Index:', playerIndex, 'Stat Index:', statIndex, 'Selected Stat:', selectedStat.name);
+    // Use personalized graph generation
+    const personalizedConfig = {
+      favorites: userFavorites,
+      userCustomStats: userCustomStats,
+      allPlayers: playersWithMultipleSeasons,
+      refreshCounter: refreshCounter
+    };
     
-    // Calculate chart data for this player and stat
-    const chartDataPoints = selectedPlayer.seasons
-      .map((seasonData: any) => {
-        const value = calculateCustomStatForSeason(seasonData, selectedStat.formula);
-        return value !== null ? {
-          season: seasonData.season,
-          value: value,
-          team: seasonData.team
-        } : null;
-      })
-      .filter((point: any) => point !== null)
-      .sort((a: any, b: any) => a.season.localeCompare(b.season));
+    const { selectedPlayer, selectedStat } = generatePersonalizedGraph(personalizedConfig);
+    
+    // Generate career progression data using the personalized utility
+    const chartDataPoints = generateCareerProgressionData(
+      selectedPlayer,
+      selectedStat.formula,
+      selectedStat.name
+    );
     
     setFeaturedPlayer(selectedPlayer);
     setFeaturedStat(selectedStat);
