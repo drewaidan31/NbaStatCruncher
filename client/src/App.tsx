@@ -131,39 +131,65 @@ function MainApp() {
         fetch('/api/custom-stats/my')
       ]);
       
+      console.log('Favorites response status:', favoritesResponse.status);
+      
       if (favoritesResponse.ok) {
         userFavorites = await favoritesResponse.json();
+        console.log('Fetched user favorites:', userFavorites.length, 'favorites');
+      } else {
+        console.log('Failed to fetch favorites:', favoritesResponse.status);
       }
       
       if (customStatsResponse.ok) {
         userCustomStats = await customStatsResponse.json();
+        console.log('Fetched user custom stats:', userCustomStats.length, 'stats');
       }
     } catch (error) {
-      console.log('Using default showcase (not logged in or error fetching user data)');
+      console.log('Error fetching user data:', error);
     }
     
-    // Use personalized graph generation
-    const personalizedConfig = {
-      favorites: userFavorites,
-      userCustomStats: userCustomStats,
-      allPlayers: playersWithMultipleSeasons,
-      refreshCounter: refreshCounter
-    };
-    
-    const { selectedPlayer, selectedStat } = generatePersonalizedGraph(personalizedConfig);
+    console.log('Players with multiple seasons:', playersWithMultipleSeasons.length);
+    console.log('Setting hasFavorites to:', userFavorites.length > 0);
     
     setHasFavorites(userFavorites.length > 0);
     
-    // Generate career progression data using the personalized utility
-    const chartDataPoints = generateCareerProgressionData(
-      selectedPlayer,
-      selectedStat.formula,
-      selectedStat.name
-    );
-    
-    setFeaturedPlayer(selectedPlayer);
-    setFeaturedStat(selectedStat);
-    setFeaturedChartData(chartDataPoints);
+    if (userFavorites.length > 0) {
+      // Use personalized graph generation
+      const personalizedConfig = {
+        favorites: userFavorites,
+        userCustomStats: userCustomStats,
+        allPlayers: playersWithMultipleSeasons,
+        refreshCounter: refreshCounter
+      };
+      
+      console.log('Generating personalized graph with config:', {
+        favoritesCount: userFavorites.length,
+        customStatsCount: userCustomStats.length,
+        playersCount: playersWithMultipleSeasons.length
+      });
+      
+      const { selectedPlayer, selectedStat } = generatePersonalizedGraph(personalizedConfig);
+      
+      console.log('Generated personalized graph:', {
+        selectedPlayerName: selectedPlayer?.name,
+        selectedStatName: selectedStat?.name
+      });
+      
+      // Generate career progression data using the personalized utility
+      const chartDataPoints = generateCareerProgressionData(
+        selectedPlayer,
+        selectedStat.formula,
+        selectedStat.name
+      );
+      
+      console.log('Generated chart data points:', chartDataPoints.length);
+      
+      setFeaturedPlayer(selectedPlayer);
+      setFeaturedStat(selectedStat);
+      setFeaturedChartData(chartDataPoints);
+    } else {
+      console.log('No favorites found, not setting up featured showcase');
+    }
   }, [refreshCounter]);
 
   // Setup featured showcase when players load or refresh counter changes
