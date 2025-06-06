@@ -94,7 +94,12 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
       if (!response.ok) throw new Error("Failed to add favorite");
       return await response.json();
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
+      // Immediately update the cache with the new favorite
+      queryClient.setQueryData(["/api/favorite-players"], (oldData: FavoritePlayer[] | undefined) => {
+        if (!oldData) return [result];
+        return [...oldData, result];
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/favorite-players"] });
       toast({
         title: "Added to Favorites!",
@@ -119,7 +124,12 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
       if (!response.ok) throw new Error("Failed to remove favorite");
       return await response.json();
     },
-    onSuccess: () => {
+    onSuccess: (_, playerId) => {
+      // Immediately update the cache by removing the favorite
+      queryClient.setQueryData(["/api/favorite-players"], (oldData: FavoritePlayer[] | undefined) => {
+        if (!oldData) return [];
+        return oldData.filter(fav => fav.playerId !== playerId);
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/favorite-players"] });
       toast({
         title: "Removed from Favorites",

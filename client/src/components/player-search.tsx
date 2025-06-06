@@ -437,7 +437,10 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
 
       {/* Favorite Players Section */}
       <div className="mt-6">
-        <PlayerSearchFavorites players={players} />
+        <PlayerSearchFavorites 
+          players={players} 
+          onPlayerSelect={onPlayerSelect}
+        />
       </div>
     </div>
   );

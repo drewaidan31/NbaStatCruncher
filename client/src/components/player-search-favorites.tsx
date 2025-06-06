@@ -9,9 +9,10 @@ import type { FavoritePlayer, Player } from "@shared/schema";
 
 interface PlayerSearchFavoritesProps {
   players: Player[];
+  onPlayerSelect?: (player: Player, season: string) => void;
 }
 
-export function PlayerSearchFavorites({ players }: PlayerSearchFavoritesProps) {
+export function PlayerSearchFavorites({ players, onPlayerSelect }: PlayerSearchFavoritesProps) {
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -152,7 +153,12 @@ export function PlayerSearchFavorites({ players }: PlayerSearchFavoritesProps) {
                 return (
                   <div
                     key={favorite.id}
-                    className="flex items-center justify-between p-3 bg-gradient-to-r from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:shadow-md transition-all duration-200"
+                    className="flex items-center justify-between p-3 bg-gradient-to-r from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:shadow-md transition-all duration-200 cursor-pointer hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-900/20 dark:hover:to-purple-900/20"
+                    onClick={() => {
+                      if (player && onPlayerSelect) {
+                        onPlayerSelect(player, player.currentSeason || '2024-25');
+                      }
+                    }}
                   >
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-10 bg-gradient-to-br ${bgColor} rounded-full flex items-center justify-center shadow`}>
@@ -172,7 +178,10 @@ export function PlayerSearchFavorites({ players }: PlayerSearchFavoritesProps) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleRemoveFavorite(favorite.playerId)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveFavorite(favorite.playerId);
+                      }}
                       disabled={removeFavoriteMutation.isPending}
                       className="text-gray-400 hover:text-red-500 transition-colors"
                       title="Remove from favorites"
