@@ -101,7 +101,7 @@ function MainApp() {
     const fetchPlayers = async () => {
       try {
         console.log('Making request to /api/players');
-        const response = await fetch("/api/players");
+        const response = await fetch("/api/nba/players");
         console.log('Players API response status:', response.status);
         if (!response.ok) {
           throw new Error("Failed to fetch players");
