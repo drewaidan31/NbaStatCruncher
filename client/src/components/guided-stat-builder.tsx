@@ -29,7 +29,7 @@ interface StatWeights {
 }
 
 interface PlayerPreferences {
-  playstyle: string;
+  playstyles: string[];
   teamSuccess: boolean;
   efficiency: boolean;
   durability: boolean;
@@ -43,7 +43,7 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
   const [step, setStep] = useState(1);
   const [statName, setStatName] = useState("");
   const [preferences, setPreferences] = useState<PlayerPreferences>({
-    playstyle: "",
+    playstyles: [],
     teamSuccess: false,
     efficiency: false,
     durability: false,
@@ -132,7 +132,7 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
     }
 
     // Plus/minus for overall impact
-    if (preferences.playstyle === "two-way" || preferences.playstyle === "team-player") {
+    if (preferences.playstyles.includes("defensive-anchor") || preferences.playstyles.includes("playmaker")) {
       formula = `(${formula}) * (1 + PLUS_MINUS / 100)`;
     }
 
@@ -167,7 +167,7 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
         body: JSON.stringify({
           name: statName,
           formula: generatedFormula,
-          description: `Guided stat: ${preferences.playstyle} player focus`
+          description: `Guided stat: ${preferences.playstyles.join(" + ")} player focus`
         })
       });
 
@@ -284,9 +284,14 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
           {/* Step 1: Player Type */}
           {step === 1 && (
             <div className="space-y-4">
-              <p className="text-slate-600 dark:text-slate-400">
-                What type of player do you value most?
-              </p>
+              <div>
+                <p className="text-slate-600 dark:text-slate-400">
+                  What type of player do you value most? (Select up to 2)
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
+                  Choose 1-2 playing styles that best represent your ideal player
+                </p>
+              </div>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {[
                   { id: "outside-shooter", label: "Outside Shooter", desc: "Three-point specialists" },
@@ -295,20 +300,45 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
                   { id: "defensive-anchor", label: "Defensive Anchor", desc: "Rim protection and steals" },
                   { id: "midrange-shooter", label: "Midrange Shooter", desc: "Effective from 15-20 feet" },
                   { id: "playmaker", label: "Playmaker", desc: "Creating shots for teammates" }
-                ].map((type) => (
-                  <button
-                    key={type.id}
-                    onClick={() => setPreferences({ ...preferences, playstyle: type.id })}
-                    className={`p-4 rounded-lg border text-left transition-colors ${
-                      preferences.playstyle === type.id
-                        ? "border-orange-500 bg-orange-50 dark:bg-orange-950"
-                        : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
-                    }`}
-                  >
-                    <div className="font-medium">{type.label}</div>
-                    <div className="text-sm text-slate-600 dark:text-slate-400">{type.desc}</div>
-                  </button>
-                ))}
+                ].map((type) => {
+                  const isSelected = preferences.playstyles.includes(type.id);
+                  const canSelect = preferences.playstyles.length < 2 || isSelected;
+                  
+                  return (
+                    <button
+                      key={type.id}
+                      onClick={() => {
+                        if (isSelected) {
+                          setPreferences({ 
+                            ...preferences, 
+                            playstyles: preferences.playstyles.filter(p => p !== type.id)
+                          });
+                        } else if (canSelect) {
+                          setPreferences({ 
+                            ...preferences, 
+                            playstyles: [...preferences.playstyles, type.id]
+                          });
+                        }
+                      }}
+                      disabled={!canSelect}
+                      className={`p-4 rounded-lg border text-left transition-colors ${
+                        isSelected
+                          ? "border-orange-500 bg-orange-50 dark:bg-orange-950"
+                          : canSelect
+                          ? "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
+                          : "border-slate-200 dark:border-slate-700 opacity-50 cursor-not-allowed"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="font-medium">{type.label}</div>
+                        {isSelected && (
+                          <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                        )}
+                      </div>
+                      <div className="text-sm text-slate-600 dark:text-slate-400">{type.desc}</div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -436,7 +466,7 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
                   Your Player Profile
                 </h3>
                 <div className="space-y-1 text-sm text-blue-800 dark:text-blue-200">
-                  <p>• Focus: {preferences.playstyle.replace(/-/g, ' ')}</p>
+                  <p>• Focus: {preferences.playstyles.map(style => style.replace(/-/g, ' ')).join(" + ")}</p>
                   {preferences.teamSuccess && <p>• Values team success</p>}
                   {preferences.efficiency && <p>• Emphasizes shooting efficiency</p>}
                   {preferences.durability && <p>• Rewards availability</p>}
@@ -459,7 +489,7 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
             {step < 4 ? (
               <Button
                 onClick={nextStep}
-                disabled={step === 1 && !preferences.playstyle}
+                disabled={step === 1 && preferences.playstyles.length === 0}
                 className="bg-orange-600 hover:bg-orange-700 text-white"
               >
                 Next
