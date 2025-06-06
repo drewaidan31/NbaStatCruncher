@@ -47,26 +47,8 @@ interface Player {
   freeThrowPercentage: number;
   plusMinus: number;
   currentSeason?: string | null;
-  seasons?: Array<{
-    season: string;
-    team: string;
-    position: string;
-    gamesPlayed: number;
-    minutesPerGame: number;
-    points: number;
-    assists: number;
-    rebounds: number;
-    steals: number;
-    blocks: number;
-    turnovers: number;
-    fieldGoalPercentage: number;
-    fieldGoalAttempts?: number;
-    threePointPercentage: number;
-    threePointAttempts?: number;
-    freeThrowPercentage: number;
-    plusMinus: number;
-  }>;
-  availableSeasons?: string[];
+  seasons?: any;
+  availableSeasons?: string[] | null;
 }
 
 type ViewMode = 'leaderboard' | 'search' | 'analysis' | 'comparison' | 'usage-rate' | 'about' | 'stats-library';
@@ -605,9 +587,9 @@ function MainApp() {
                         stroke="#F97316" 
                         strokeWidth={2}
                         dot={(props: any) => {
-                          const { cx, cy, payload } = props;
+                          const { cx, cy, payload, index } = props;
                           return (
-                            <g>
+                            <g key={`dot-${index}`}>
                               <circle 
                                 cx={cx} 
                                 cy={cy} 
