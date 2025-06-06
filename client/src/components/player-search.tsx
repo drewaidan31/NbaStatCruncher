@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Search, User, TrendingUp } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { ColorfulFavoriteButton } from "./colorful-favorites";
 
 interface Player {
   playerId: number;
@@ -219,7 +220,7 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
                     className="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 p-3 rounded-lg cursor-pointer transition-all duration-300 ease-in-out border border-slate-300 dark:border-slate-600 hover:border-orange-400 hover:shadow-lg hover:shadow-orange-500/20 transform hover:scale-[1.02] group"
                   >
                     <div className="flex justify-between items-start">
-                      <div>
+                      <div className="flex-1">
                         <div className="font-medium text-slate-900 dark:text-white transition-all duration-300 ease-in-out group-hover:text-orange-400 group-hover:font-bold group-hover:transform group-hover:translate-x-1">{player.name}</div>
                         <div className="text-sm text-slate-600 dark:text-slate-300 transition-all duration-300 ease-in-out group-hover:text-slate-700 dark:group-hover:text-slate-200">
                           {player.team} • {player.position} • {player.currentSeason || "2024-25"}
@@ -230,27 +231,33 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
                           </div>
                         )}
                       </div>
-                      <div className="text-right text-sm">
-                        {(() => {
-                          const customStat = getCustomStatValue(player);
-                          if (customStat && currentFormula) {
-                            return (
-                              <>
-                                <div className="text-green-600 dark:text-green-400 font-bold text-base">#{customStat.rank}</div>
-                                <div className="text-green-700 dark:text-green-300 font-medium">{customStat.value.toFixed(2)}</div>
-                                <div className="text-xs text-slate-500 dark:text-slate-400">Custom Stat</div>
-                              </>
-                            );
-                          } else {
-                            return (
-                              <>
-                                <div className="text-orange-600 dark:text-orange-400 font-medium">{player.points.toFixed(1)} PPG</div>
-                                <div className="text-slate-600 dark:text-slate-400">{player.assists.toFixed(1)} APG</div>
-                                <div className="text-slate-600 dark:text-slate-400">{player.rebounds.toFixed(1)} RPG</div>
-                              </>
-                            );
-                          }
-                        })()}
+                      <div className="flex items-center gap-3">
+                        <div className="text-right text-sm">
+                          {(() => {
+                            const customStat = getCustomStatValue(player);
+                            if (customStat && currentFormula) {
+                              return (
+                                <>
+                                  <div className="text-green-600 dark:text-green-400 font-bold text-base">#{customStat.rank}</div>
+                                  <div className="text-green-700 dark:text-green-300 font-medium">{customStat.value.toFixed(2)}</div>
+                                  <div className="text-xs text-slate-500 dark:text-slate-400">Custom Stat</div>
+                                </>
+                              );
+                            } else {
+                              return (
+                                <>
+                                  <div className="text-orange-600 dark:text-orange-400 font-medium">{player.points.toFixed(1)} PPG</div>
+                                  <div className="text-slate-600 dark:text-slate-400">{player.assists.toFixed(1)} APG</div>
+                                  <div className="text-slate-600 dark:text-slate-400">{player.rebounds.toFixed(1)} RPG</div>
+                                </>
+                              );
+                            }
+                          })()}
+                        </div>
+                        <ColorfulFavoriteButton 
+                          player={player} 
+                          className="opacity-60 group-hover:opacity-100 transition-opacity" 
+                        />
                       </div>
                     </div>
                   </div>

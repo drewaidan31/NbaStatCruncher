@@ -16,11 +16,11 @@ import UserProfile from "./components/user-profile";
 import TeamStats from "./components/team-stats";
 import AboutSection from "./components/about-section";
 import StatsLibrary from "./pages/StatsLibrary";
-import { ColorfulFavorites } from "./components/colorful-favorites";
+import { ColorfulFavorites, ColorfulFavoriteButton } from "./components/colorful-favorites";
 import { generatePersonalizedGraph, generateCareerProgressionData } from "./utils/personalized-graphs";
 import type { CustomStat, FavoritePlayer } from "@shared/schema";
 
-import { BarChart3, Search, Calculator, TrendingUp, Sparkles, RefreshCw, ChevronDown, Filter } from "lucide-react";
+import { BarChart3, Search, Calculator, TrendingUp, Sparkles, RefreshCw, ChevronDown, Filter, User } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { evaluate } from "mathjs";
 
@@ -965,7 +965,7 @@ function MainApp() {
                     : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600"
                 }`}
               >
-                <Calculator className="w-4 h-4" />
+                <User className="w-4 h-4" />
                 Profile
               </button>
               <button
