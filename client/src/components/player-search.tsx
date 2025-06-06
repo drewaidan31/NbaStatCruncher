@@ -255,10 +255,12 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
                             }
                           })()}
                         </div>
-                        <ColorfulFavoriteButton 
-                          player={player} 
-                          className="opacity-60 group-hover:opacity-100 transition-opacity" 
-                        />
+                        <div title="Click ❤️ to add to favorites">
+                          <ColorfulFavoriteButton 
+                            player={player} 
+                            className="opacity-60 group-hover:opacity-100 transition-opacity" 
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -282,6 +284,11 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
           </div>
         </div>
       )}
+
+      {/* Favorite Players Section */}
+      <div className="mt-6">
+        <PlayerSearchFavorites players={players} />
+      </div>
     </div>
   );
 }
