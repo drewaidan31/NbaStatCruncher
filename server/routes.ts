@@ -366,7 +366,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Validate resolved formula contains valid NBA stats
-      const formulaUpper = resolvedFormula.toUpperCase();
+      const formulaUpper = formula.toUpperCase();
       const availableStats = Object.keys(NBA_STAT_MAPPINGS);
       const usedStats = availableStats.filter(stat => formulaUpper.includes(stat));
       
@@ -422,7 +422,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   },
                   customStat: Number(customStat.toFixed(2)),
                   bestSeason: targetSeason.season,
-                  formula: resolvedFormula
+                  formula: formula
                 });
               }
             }
@@ -431,7 +431,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (player.seasons && Array.isArray(player.seasons)) {
               for (const seasonData of player.seasons) {
                 // Check if formula uses percentage stats and apply minimum games filter
-                const formulaUpper = resolvedFormula.toUpperCase();
+                const formulaUpper = formula.toUpperCase();
                 const percentageStats = ['W_PCT', 'FG_PCT', 'FG%', '3P_PCT', '3P%', 'FT_PCT', 'FT%'];
                 const usesPercentageStats = percentageStats.some(stat => formulaUpper.includes(stat));
                 
@@ -440,7 +440,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   continue;
                 }
                 
-                let evaluationFormula = resolvedFormula.toUpperCase();
+                let evaluationFormula = formula.toUpperCase();
                 
                 // Replace NBA stat abbreviations with season values
                 for (const [abbrev, field] of Object.entries(NBA_STAT_MAPPINGS)) {
@@ -462,7 +462,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                       },
                       customStat: Number(seasonCustomStat.toFixed(2)),
                       bestSeason: seasonData.season,
-                      formula: resolvedFormula
+                      formula: formula
                     });
                   }
                 } catch (seasonError) {
@@ -472,7 +472,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             } else {
               // Fallback to career averages if no seasons data
               // Check if formula uses percentage stats and apply minimum games filter
-              const formulaUpper = resolvedFormula.toUpperCase();
+              const formulaUpper = formula.toUpperCase();
               const percentageStats = ['W_PCT', 'FG_PCT', 'FG%', '3P_PCT', '3P%', 'FT_PCT', 'FT%'];
               const usesPercentageStats = percentageStats.some(stat => formulaUpper.includes(stat));
               
@@ -481,7 +481,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 continue;
               }
               
-              let evaluationFormula = resolvedFormula.toUpperCase();
+              let evaluationFormula = formula.toUpperCase();
               
               for (const [abbrev, field] of Object.entries(NBA_STAT_MAPPINGS)) {
                 const value = player[field as keyof Player] as number;
@@ -502,7 +502,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   },
                   customStat: Number(customStat.toFixed(2)),
                   bestSeason: player.currentSeason || '2024-25',
-                  formula: resolvedFormula
+                  formula: formula
                 });
               }
             }
@@ -593,7 +593,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Calculate custom stat for all players
+  // Fixed calculation endpoint
   app.post("/api/custom-stats/calculate", async (req, res) => {
     try {
       const { formula } = req.body;
@@ -602,34 +602,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Formula is required" });
       }
 
-      // Get all players
       const allPlayers = await storage.getAllPlayers();
       const results: any[] = [];
 
       for (const player of allPlayers) {
         try {
-          // Simple context mapping - use direct player properties
           const context: any = {
-            PTS: player.points || 0,
-            AST: player.assists || 0,
-            REB: player.rebounds || 0,
-            TOV: player.turnovers || 0,
-            PLUS_MINUS: player.plusMinus || 0,
-            FG_PCT: player.fieldGoalPercentage || 0,
-            FGA: Math.max(player.fieldGoalAttempts || 0, 1),
-            FT_PCT: player.freeThrowPercentage || 0,
-            FTA: player.freeThrowAttempts || 0,
-            THREE_PCT: player.threePointPercentage || 0,
-            '3P_PCT': player.threePointPercentage || 0,
-            '3PA': player.threePointAttempts || 0,
-            MIN: Math.max(player.minutesPerGame || 0, 1),
-            STL: player.steals || 0,
-            BLK: player.blocks || 0,
-            GP: Math.max(player.gamesPlayed || 0, 1),
-            W_PCT: player.winPercentage || 0
+            PTS: Number(player.points) || 0,
+            AST: Number(player.assists) || 0,
+            REB: Number(player.rebounds) || 0,
+            TOV: Number(player.turnovers) || 0,
+            PLUS_MINUS: Number(player.plusMinus) || 0,
+            FG_PCT: Number(player.fieldGoalPercentage) || 0,
+            FGA: Math.max(Number(player.fieldGoalAttempts) || 0, 0.1),
+            FT_PCT: Number(player.freeThrowPercentage) || 0,
+            FTA: Number(player.freeThrowAttempts) || 0,
+            THREE_PCT: Number(player.threePointPercentage) || 0,
+            '3P_PCT': Number(player.threePointPercentage) || 0,
+            '3PA': Number(player.threePointAttempts) || 0,
+            MIN: Math.max(Number(player.minutesPerGame) || 0, 0.1),
+            STL: Number(player.steals) || 0,
+            BLK: Number(player.blocks) || 0,
+            GP: Math.max(Number(player.gamesPlayed) || 0, 1),
+            W_PCT: Number(player.winPercentage) || 0
           };
 
-          // Calculate the custom stat value
           const customStat = evaluate(formula, context);
           
           if (typeof customStat === 'number' && !isNaN(customStat) && isFinite(customStat)) {
@@ -640,30 +637,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
               customStat: Math.round(customStat * 100) / 100,
               points: player.points,
               assists: player.assists,
-              rebounds: player.rebounds
+              rebounds: player.rebounds,
+              rank: 0
             });
           }
-        } catch (evalError) {
-          // Skip players that cause evaluation errors
+        } catch (err) {
           continue;
         }
       }
 
-      // Sort by custom stat value (highest first)
       results.sort((a, b) => b.customStat - a.customStat);
-      
-      // Add rank and limit to top 100
-      const rankedResults = results.slice(0, 100).map((result, index) => ({
-        ...result,
-        rank: index + 1
-      }));
-
-      res.json(rankedResults);
-    } catch (error) {
-      console.error("Error calculating custom stats:", error);
-      res.status(500).json({ 
-        message: "Failed to calculate custom statistics." 
+      results.forEach((result, index) => {
+        result.rank = index + 1;
       });
+
+      res.json(results.slice(0, 100));
+    } catch (error) {
+      console.error("Calculation error:", error);
+      res.status(500).json({ message: "Calculation failed" });
     }
   });
 
