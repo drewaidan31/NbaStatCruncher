@@ -18,7 +18,18 @@ export function UserProfileDropdown({ players }: UserProfileDropdownProps) {
   // Fetch user's custom stats
   const { data: customStats = [] } = useQuery<CustomStat[]>({
     queryKey: ["/api/custom-stats/my"],
+    queryFn: async () => {
+      const response = await fetch("/api/custom-stats/my", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error(`${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    },
     enabled: isAuthenticated,
+    staleTime: 0,
+    refetchOnMount: true,
   });
 
   // Fetch user's favorite players
