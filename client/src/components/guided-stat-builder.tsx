@@ -108,67 +108,53 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
       components.push(`BLK * ${multiplier}`);
     }
 
-    // Archetype-specific advanced metrics
+    // Archetype-specific advanced metrics (simplified)
     if (preferences.playstyles.includes("outside-shooter")) {
       // Three-point shooting emphasis
       if (weights.threePointPct >= 3) {
-        archetypeComponents.push(`(3PA * 3P_PCT) * ${weights.threePointPct}`);
+        archetypeComponents.push(`3PA * ${weights.threePointPct * 0.5}`);
+        archetypeComponents.push(`3P_PCT * ${weights.threePointPct * 2}`);
       }
-      archetypeComponents.push("(3PA / FGA) * 10"); // Reward 3P attempt rate
-      
-      // Shooting efficiency for outside shooters
-      if (weights.fieldGoalPct >= 3) {
-        efficiencyMultipliers.push(`(0.8 + FG_PCT + 3P_PCT)`);
-      }
+      archetypeComponents.push("(3PA / FGA) * 5"); // Reward 3P attempt rate
     }
     
     if (preferences.playstyles.includes("slasher")) {
       // Reward attacking the rim
-      archetypeComponents.push("(FGA - 3PA) * 1.5"); // Inside attempts
+      archetypeComponents.push("(FGA - 3PA) * 0.8"); // Inside attempts
       if (weights.freeThrowPct >= 3) {
-        archetypeComponents.push(`(FTA * FT_PCT) * ${weights.freeThrowPct}`);
+        archetypeComponents.push(`FTA * ${weights.freeThrowPct * 0.4}`);
       }
-      archetypeComponents.push("FTA * 1.2"); // Getting to the line
     }
 
     if (preferences.playstyles.includes("post-player")) {
       // Inside game emphasis
-      archetypeComponents.push("(FGA - 3PA) * 2"); // Heavy inside shot reward
-      if (weights.fieldGoalPct >= 3) {
-        efficiencyMultipliers.push(`(0.5 + FG_PCT * 2)`);
-      }
+      archetypeComponents.push("(FGA - 3PA) * 1.2"); // Inside shot reward
       if (weights.rebounds >= 4) {
-        archetypeComponents.push(`REB * ${weights.rebounds * 0.8}`);
+        archetypeComponents.push(`REB * ${weights.rebounds * 0.4}`);
       }
     }
 
     if (preferences.playstyles.includes("playmaker")) {
       // Advanced playmaking
       if (weights.assists >= 3) {
-        archetypeComponents.push(`AST * ${weights.assists * 1.5}`);
+        archetypeComponents.push(`AST * ${weights.assists * 0.8}`);
       }
-      archetypeComponents.push("(AST / (TOV + 1)) * 4"); // AST/TO ratio
-      archetypeComponents.push("AST * (MIN / 36)"); // Usage-adjusted
+      archetypeComponents.push("(AST / (TOV + 1)) * 2"); // AST/TO ratio
     }
 
     if (preferences.playstyles.includes("defensive-anchor")) {
       // Defensive impact
       if (weights.steals >= 3) {
-        archetypeComponents.push(`STL * ${weights.steals * 2}`);
+        archetypeComponents.push(`STL * ${weights.steals * 1.5}`);
       }
       if (weights.blocks >= 3) {
-        archetypeComponents.push(`BLK * ${weights.blocks * 2.5}`);
+        archetypeComponents.push(`BLK * ${weights.blocks * 1.8}`);
       }
-      archetypeComponents.push("(STL + BLK) * 3");
     }
 
     if (preferences.playstyles.includes("two-way-player")) {
       // Balanced contributions
-      archetypeComponents.push("(PTS + AST) * 0.9");
-      archetypeComponents.push("(STL + BLK) * 2.5");
-      if (weights.fieldGoalPct >= 3) {
-        efficiencyMultipliers.push(`(0.7 + FG_PCT)`);
-      }
+      archetypeComponents.push("(STL + BLK) * 1.5");
     }
 
     // Build base formula
