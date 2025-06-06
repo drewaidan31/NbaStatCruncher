@@ -17,6 +17,7 @@ export function MyCustomStats({ onStatSelect }: MyCustomStatsProps) {
   // Always call useQuery hook regardless of authentication state
   const { data: userCustomStats = [], isLoading, error } = useQuery<CustomStat[]>({
     queryKey: ["/api/custom-stats/my"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
     enabled: isAuthenticated,
     retry: false,
     staleTime: 0,
