@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Heart, Calculator, Star, ArrowLeft, User, Crown } from "lucide-react";
-import type { CustomStat, FavoritePlayer, Player } from "@shared/schema";
+import type { CustomStat, FavoritePlayer, Player, User as UserType } from "@shared/schema";
 
 interface UserProfileProps {
   players: Player[];
@@ -13,6 +13,7 @@ interface UserProfileProps {
 
 export default function UserProfile({ players, onBack }: UserProfileProps) {
   const { isAuthenticated, user } = useAuth();
+  const typedUser = user as UserType | null;
 
   // Fetch user's custom stats
   const { data: customStats = [], isLoading: statsLoading } = useQuery<CustomStat[]>({
@@ -84,16 +85,16 @@ export default function UserProfile({ players, onBack }: UserProfileProps) {
           </Button>
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
-              {user?.firstName?.[0] || user?.email?.[0] || 'U'}
+              {typedUser?.firstName?.[0] || typedUser?.email?.[0] || 'U'}
             </div>
             <div>
               <h1 className="text-2xl font-bold">
-                {user?.firstName && user?.lastName 
-                  ? `${user.firstName} ${user.lastName}`
-                  : user?.email?.split('@')[0] || 'User'
+                {typedUser?.firstName && typedUser?.lastName 
+                  ? `${typedUser.firstName} ${typedUser.lastName}`
+                  : typedUser?.email?.split('@')[0] || 'User'
                 }
               </h1>
-              <p className="text-slate-600 dark:text-slate-400">{user?.email}</p>
+              <p className="text-slate-600 dark:text-slate-400">{typedUser?.email}</p>
             </div>
           </div>
         </div>
@@ -131,7 +132,7 @@ export default function UserProfile({ players, onBack }: UserProfileProps) {
                         {stat.formula}
                       </code>
                       <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
-                        Created: {new Date(stat.createdAt).toLocaleDateString()}
+                        Created: {stat.createdAt ? new Date(stat.createdAt).toLocaleDateString() : 'Unknown'}
                       </p>
                     </div>
                   ))}
@@ -241,7 +242,7 @@ export default function UserProfile({ players, onBack }: UserProfileProps) {
               </div>
               <div className="flex-1">
                 <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                  {user?.createdAt ? Math.ceil((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24)) : 0}
+                  {typedUser?.createdAt ? Math.ceil((Date.now() - new Date(typedUser.createdAt).getTime()) / (1000 * 60 * 60 * 24)) : 0}
                 </div>
                 <div className="text-sm text-slate-600 dark:text-slate-400">
                   Days as Member

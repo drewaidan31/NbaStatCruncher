@@ -436,7 +436,14 @@ function MainApp() {
       return <StatsLibrary />;
     }
 
-
+    if (viewMode === 'profile') {
+      return (
+        <UserProfilePage 
+          players={players}
+          onBack={() => setViewMode('leaderboard')}
+        />
+      );
+    }
 
     // Default leaderboard view
     return (
