@@ -578,16 +578,7 @@ function MainApp() {
 
               <div className="flex items-center gap-4">
 
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setFormula("");
-                    setCustomStatName("");
-                  }}
-                  className="text-slate-600 dark:text-slate-300"
-                >
-                  Clear Formula
-                </Button>
+
               </div>
 
 
