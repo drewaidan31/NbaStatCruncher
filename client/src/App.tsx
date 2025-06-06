@@ -366,7 +366,25 @@ function MainApp() {
     }
 
     if (viewMode === 'guided-builder') {
-      return <GuidedStatBuilder />;
+      return <GuidedStatBuilder onBack={() => setViewMode('home')} />;
+    }
+
+    if (viewMode === 'saved-stats') {
+      return (
+        <div className="max-w-4xl mx-auto p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">My Saved Custom Stats</h1>
+            <Button onClick={() => setViewMode('home')} variant="outline">
+              Back to Home
+            </Button>
+          </div>
+          <MyCustomStats onStatSelect={(formula, name) => {
+            setFormula(formula);
+            setCustomStatName(name);
+            setViewMode('home');
+          }} />
+        </div>
+      );
     }
 
     // Default leaderboard view
@@ -649,9 +667,9 @@ function MainApp() {
         </div>
 
         {/* My Custom Stats Component */}
-        <MyCustomStats onStatSelect={(stat) => {
-          setFormula(stat.formula);
-          setCustomStatName(stat.name);
+        <MyCustomStats onStatSelect={(formula, name) => {
+          setFormula(formula);
+          setCustomStatName(name);
         }} />
 
 
@@ -726,7 +744,7 @@ function MainApp() {
             </div>
             
             <div className="flex items-center gap-4">
-              <UserProfileDropdown />
+              <UserProfileDropdown players={players} />
             </div>
           </div>
         </div>
