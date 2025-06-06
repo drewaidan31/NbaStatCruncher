@@ -96,7 +96,9 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
           y.name === xPoint.name && y.team === xPoint.team
         );
         
-        if (yPoint && xPoint.value !== null && yPoint.value !== null) {
+        if (yPoint && xPoint.value !== null && yPoint.value !== null && 
+            !isNaN(xPoint.value) && !isNaN(yPoint.value) && 
+            isFinite(xPoint.value) && isFinite(yPoint.value)) {
           const dataPoint = {
             name: xPoint.name,
             team: xPoint.team,
@@ -107,10 +109,7 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
             playerId: xPoint.name + xPoint.team
           };
           
-          // Filter by selected season if not "all"
-          if (selectedSeason === "all" || dataPoint.season === selectedSeason) {
-            combinedData.push(dataPoint);
-          }
+          combinedData.push(dataPoint);
         }
       });
 

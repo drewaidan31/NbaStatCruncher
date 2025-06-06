@@ -239,35 +239,7 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
     return formula;
   };
 
-  const calculatePreview = async () => {
-    if (!generatedFormula) return;
-
-    setIsCalculating(true);
-    try {
-      const response = await fetch("/api/nba/calculate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ formula: generatedFormula })
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to calculate preview");
-      }
-
-      const results = await response.json();
-      setPreviewResults(results.slice(0, 20)); // Show top 20
-      setShowPreview(true);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to calculate preview",
-        variant: "destructive"
-      });
-    } finally {
-      setIsCalculating(false);
-    }
-  };
+  // Preview functionality removed
 
   const handleCreateStat = async () => {
     if (!isAuthenticated) {
@@ -611,65 +583,9 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
                 </p>
               </div>
 
-              {/* Preview Actions */}
-              <div className="flex gap-3">
-                <Button
-                  onClick={calculatePreview}
-                  disabled={isCalculating}
-                  variant="outline"
-                  className="flex items-center gap-2"
-                >
-                  <TrendingUp className="w-4 h-4" />
-                  {isCalculating ? "Calculating..." : "Preview Leaderboard"}
-                </Button>
-                <Button
-                  onClick={() => {
-                    setShowPreview(false);
-                    setPreviewResults([]);
-                  }}
-                  disabled={!showPreview}
-                  variant="ghost"
-                  className="text-slate-600"
-                >
-                  Hide Preview
-                </Button>
-              </div>
 
-              {/* Preview Results */}
-              {showPreview && previewResults.length > 0 && (
-                <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4">
-                  <h3 className="font-medium mb-4 flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-green-500" />
-                    Top 20 Players Preview
-                  </h3>
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {previewResults.map((result, index) => (
-                      <div 
-                        key={index}
-                        className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-700 rounded"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm font-medium text-slate-500 w-6">
-                            #{index + 1}
-                          </span>
-                          <div>
-                            <span className="font-medium">{result.name}</span>
-                            <span className="text-xs text-slate-600 dark:text-slate-400 ml-2">
-                              {result.team} • 2024-25
-                            </span>
-                          </div>
-                        </div>
-                        <span className="font-bold text-orange-600">
-                          {result.value?.toFixed(2) || "0.00"}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-xs text-slate-500 mt-3">
-                    This preview shows how your stat ranks current players. Save it to use in full analysis tools.
-                  </p>
-                </div>
-              )}
+
+
 
               <div className="bg-blue-50 dark:bg-blue-950 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
                 <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
