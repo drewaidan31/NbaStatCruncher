@@ -16,6 +16,7 @@ export function MyCustomStats({ onStatSelect }: MyCustomStatsProps) {
   const { data: userCustomStats = [], isLoading, error } = useQuery<CustomStat[]>({
     queryKey: ["/api/custom-stats/my"],
     enabled: isAuthenticated,
+    retry: false,
   });
 
   console.log("MyCustomStats - isAuthenticated:", isAuthenticated);

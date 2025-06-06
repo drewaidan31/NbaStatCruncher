@@ -620,10 +620,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/custom-stats/my", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      console.log("Fetching stats for user ID:", userId);
+      console.log("Fetching stats for user ID:", userId, "type:", typeof userId);
       console.log("User claims:", req.user.claims);
-      const userStats = await storage.getUserCustomStats(userId);
-      console.log("Found stats:", userStats.length);
+      
+      // Ensure userId is a string
+      const userIdString = String(userId);
+      console.log("Looking for stats with userId:", userIdString, "type:", typeof userIdString);
+      
+      const userStats = await storage.getUserCustomStats(userIdString);
+      console.log("Found stats count:", userStats.length);
+      console.log("Found stats:", userStats);
       res.json(userStats);
     } catch (error) {
       console.error("Error fetching user custom stats:", error);
