@@ -86,9 +86,9 @@ function MainApp() {
           value: item.customStat || item.value || 0
         }));
         
-        // Sort by value descending and take top 20
-        transformedResults.sort((a, b) => b.value - a.value);
-        setResults(transformedResults.slice(0, 20));
+        // Sort by value descending and show all results
+        transformedResults.sort((a: any, b: any) => b.value - a.value);
+        setResults(transformedResults);
         setCalculationError(null);
       } else {
         setCalculationError('No results found. Please check your formula.');
@@ -420,7 +420,7 @@ function MainApp() {
         {/* Results */}
         {(results.length > 0 || isCalculating) && (
           <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 p-6">
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50 mb-4">Top Players</h3>
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50 mb-4">All-Time Leaders ({results.length} players)</h3>
             
             {isCalculating ? (
               <div className="text-center py-8">
@@ -429,7 +429,7 @@ function MainApp() {
               </div>
             ) : (
               <div className="space-y-2">
-                {results.slice(0, 20).map((result, index) => (
+                {results.map((result, index) => (
                   <div key={index} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
                     <div className="flex items-center gap-3">
                       <span className="w-6 h-6 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
