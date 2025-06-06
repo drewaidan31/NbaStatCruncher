@@ -1,10 +1,15 @@
-import { useState, useEffect } from 'react';
-import { ArrowLeft, Calculator, TrendingUp, Calendar, Heart, BarChart3 } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
-import { getTeamColors, getTeamGradient, getTeamTextColor } from '../utils/team-colors';
+import { useState, useEffect } from "react";
+import { ArrowLeft, Calculator, TrendingUp, Sparkles, BarChart3, Calendar, Target, Heart } from "lucide-react";
+import FormulaExamples from "./formula-examples";
 
-import FormulaExamples from './formula-examples';
+import { PlayerAwards } from "./player-awards";
+import { evaluate } from "mathjs";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { getTeamColors, getTeamGradient, getTeamTextColor } from "../utils/team-colors";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import type { FavoritePlayer } from "@shared/schema";
 
 interface Player {
   playerId: number;
@@ -25,80 +30,137 @@ interface Player {
   threePointAttempts?: number;
   freeThrowPercentage: number;
   freeThrowAttempts?: number;
-  currentSeason?: string;
-  seasons?: unknown;
-  availableSeasons?: string[] | null;
+  plusMinus: number;
+  currentSeason?: string | null;
+  seasons?: Array<{
+    season: string;
+    team: string;
+    position: string;
+    gamesPlayed: number;
+    minutesPerGame: number;
+    points: number;
+    assists: number;
+    rebounds: number;
+    steals: number;
+    blocks: number;
+    turnovers: number;
+    fieldGoalPercentage: number;
+    fieldGoalAttempts?: number;
+    threePointPercentage: number;
+    threePointAttempts?: number;
+    freeThrowPercentage: number;
+    freeThrowAttempts?: number;
+    plusMinus: number;
+  }>;
+  availableSeasons?: string[];
 }
 
 interface PlayerAnalysisProps {
   player: Player;
+  season: string;
   onBack: () => void;
 }
 
-interface ChartDataPoint {
-  season: string;
-  value: number;
-  team?: string;
-}
-
-export default function PlayerAnalysis({ player, onBack }: PlayerAnalysisProps) {
-  const [activeTab, setActiveTab] = useState('overview');
-  const [selectedSeason, setSelectedSeason] = useState(player.currentSeason || '2023-24');
-  const [formula, setFormula] = useState('');
-  const [customStatName, setCustomStatName] = useState('');
+export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysisProps) {
+  const [formula, setFormula] = useState("");
+  const [customStatName, setCustomStatName] = useState("");
   const [calculatedValue, setCalculatedValue] = useState<number | null>(null);
-  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
-  const [cursorPosition, setCursorPosition] = useState(0);
+  const [showExamples, setShowExamples] = useState(false);
   const [showSavedStats, setShowSavedStats] = useState(false);
+  const [selectedSeason, setSelectedSeason] = useState(season || player.currentSeason);
+  const [currentPlayerData, setCurrentPlayerData] = useState(player);
+  const [chartData, setChartData] = useState<Array<{season: string, value: number, team: string}>>([]);
+  const [activeTab, setActiveTab] = useState<'overview' | 'calculator'>('overview');
+  const [cursorPosition, setCursorPosition] = useState(0);
 
+  const { isAuthenticated } = useAuth();
+  const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Get favorites data
-  const { data: favorites = [] } = useQuery({
-    queryKey: ['/api/favorite-players']
+  // Fetch user's favorite players
+  const { data: favorites = [] } = useQuery<FavoritePlayer[]>({
+    queryKey: ["/api/favorite-players"],
+    enabled: isAuthenticated,
   });
 
-  // Get saved stats
-  const { data: savedStats = [], isLoading: isLoadingStats, refetch: refetchStats } = useQuery({
-    queryKey: ['/api/custom-stats']
-  });
-
-  const isFavorite = (playerId: number) => {
-    return favorites.some((fav: any) => fav.playerId === playerId);
-  };
-
-  // Add to favorites mutation
+  // Add favorite player mutation
   const addFavoriteMutation = useMutation({
-    mutationFn: async (playerData: { playerId: number; playerName: string }) => {
-      const response = await fetch('/api/favorite-players', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(playerData),
+    mutationFn: async ({ playerId, playerName }: { playerId: number; playerName: string }) => {
+      const response = await fetch(`/api/favorite-players`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ playerId, playerName }),
       });
-      if (!response.ok) throw new Error('Failed to add favorite');
-      return response.json();
+      if (!response.ok) throw new Error("Failed to add favorite");
+      return await response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/favorite-players'] });
+    onSuccess: (result) => {
+      // Immediately update the cache with the new favorite
+      queryClient.setQueryData(["/api/favorite-players"], (oldData: FavoritePlayer[] | undefined) => {
+        if (!oldData) return [result];
+        return [...oldData, result];
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/favorite-players"] });
+      toast({
+        title: "Added to Favorites!",
+        description: "Player added with personalized insights",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to add player to favorites",
+        variant: "destructive",
+      });
     },
   });
 
-  // Remove from favorites mutation
+  // Remove favorite player mutation
   const removeFavoriteMutation = useMutation({
     mutationFn: async (playerId: number) => {
       const response = await fetch(`/api/favorite-players/${playerId}`, {
-        method: 'DELETE',
-        credentials: 'include',
+        method: "DELETE",
       });
-      if (!response.ok) throw new Error('Failed to remove favorite');
+      if (!response.ok) throw new Error("Failed to remove favorite");
+      return await response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/favorite-players'] });
+    onSuccess: (_, playerId) => {
+      // Immediately update the cache by removing the favorite
+      queryClient.setQueryData(["/api/favorite-players"], (oldData: FavoritePlayer[] | undefined) => {
+        if (!oldData) return [];
+        return oldData.filter(fav => fav.playerId !== playerId);
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/favorite-players"] });
+      toast({
+        title: "Removed from Favorites",
+        description: "Player removed from your favorites",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to remove player from favorites",
+        variant: "destructive",
+      });
     },
   });
 
-  const handleToggleFavorite = () => {
+  const isFavorite = (playerId: number) => {
+    return favorites.some((fav: FavoritePlayer) => fav.playerId === playerId);
+  };
+
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!isAuthenticated) {
+      toast({
+        title: "Please Log In",
+        description: "Log in to save favorite players and get personalized insights",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (isFavorite(player.playerId)) {
       removeFavoriteMutation.mutate(player.playerId);
     } else {
@@ -109,58 +171,234 @@ export default function PlayerAnalysis({ player, onBack }: PlayerAnalysisProps) 
     }
   };
 
-  // Get current season data
-  const getCurrentSeasonData = () => {
-    if (!player.seasons) return player;
-    
-    const seasons = Array.isArray(player.seasons) ? player.seasons : [player.seasons];
-    const currentSeasonData = seasons.find((s: any) => s.season === selectedSeason);
-    return currentSeasonData || player;
+  // Query to fetch specific season data for the player
+  const { data: seasonPlayerData, isLoading: isLoadingSeason } = useQuery({
+    queryKey: ['/api/nba/players', player.playerId, 'season', selectedSeason],
+    queryFn: async () => {
+      const response = await fetch(`/api/nba/players/${player.playerId}?season=${selectedSeason}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch season data');
+      }
+      return response.json();
+    },
+    enabled: !!selectedSeason && selectedSeason !== player.currentSeason,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+  });
+
+  // Query to fetch saved custom stats
+  const { data: savedStats = [], isLoading: isLoadingStats, refetch: refetchStats } = useQuery({
+    queryKey: ['/api/custom-stats/my'],
+    enabled: showSavedStats,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    queryFn: async () => {
+      const response = await fetch('/api/custom-stats/my', {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch saved stats: ${response.status} ${response.statusText}`);
+      }
+      
+      return response.json();
+    },
+  });
+
+  // Update selected season when season prop changes from navigation
+  useEffect(() => {
+    if (season && season !== selectedSeason) {
+      setSelectedSeason(season);
+    }
+  }, [season]);
+
+  // Update current player data when season changes
+  useEffect(() => {
+    if (selectedSeason && player.seasons) {
+      // Find the season data from the player's seasons array
+      const seasonData = player.seasons.find(s => s.season === selectedSeason);
+      if (seasonData) {
+        // Create a player object with the season-specific data
+        const updatedPlayerData = {
+          ...player,
+          team: seasonData.team,
+          position: seasonData.position,
+          gamesPlayed: seasonData.gamesPlayed,
+          minutesPerGame: seasonData.minutesPerGame,
+          points: seasonData.points,
+          assists: seasonData.assists,
+          rebounds: seasonData.rebounds,
+          steals: seasonData.steals,
+          blocks: seasonData.blocks,
+          turnovers: seasonData.turnovers,
+          fieldGoalPercentage: seasonData.fieldGoalPercentage,
+          fieldGoalAttempts: seasonData.fieldGoalAttempts,
+          threePointPercentage: seasonData.threePointPercentage,
+          threePointAttempts: seasonData.threePointAttempts,
+          freeThrowPercentage: seasonData.freeThrowPercentage,
+          freeThrowAttempts: seasonData.freeThrowAttempts,
+          plusMinus: seasonData.plusMinus
+        };
+        setCurrentPlayerData(updatedPlayerData);
+      }
+    } else if (selectedSeason === player.currentSeason) {
+      setCurrentPlayerData(player);
+    }
+  }, [selectedSeason, player]);
+
+  const statMappings = {
+    'PTS': currentPlayerData.points,
+    'AST': currentPlayerData.assists,
+    'REB': currentPlayerData.rebounds,
+    'STL': currentPlayerData.steals,
+    'BLK': currentPlayerData.blocks,
+    'TOV': currentPlayerData.turnovers,
+    'FG_PCT': currentPlayerData.fieldGoalPercentage,
+    'FG%': currentPlayerData.fieldGoalPercentage,
+    'FGA': currentPlayerData.fieldGoalAttempts || 0,
+    '3P_PCT': currentPlayerData.threePointPercentage,
+    '3P%': currentPlayerData.threePointPercentage,
+    '3PA': currentPlayerData.threePointAttempts || 0,
+    'FT_PCT': currentPlayerData.freeThrowPercentage,
+    'FT%': currentPlayerData.freeThrowPercentage,
+    'FTA': currentPlayerData.freeThrowAttempts || 0,
+    'GP': currentPlayerData.gamesPlayed,
+    'PLUS_MINUS': currentPlayerData.plusMinus,
+    '+/-': currentPlayerData.plusMinus,
+    'MIN': currentPlayerData.minutesPerGame || 0,
+    'W_PCT': (currentPlayerData as any).winPercentage || 0
   };
 
-  const currentPlayerData = getCurrentSeasonData();
-
   const calculateStatForSeason = (formula: string, seasonData: any) => {
-    try {
-      // Replace stat abbreviations with actual values
-      let processedFormula = formula
-        .replace(/PTS/g, seasonData.points?.toString() || '0')
-        .replace(/AST/g, seasonData.assists?.toString() || '0')
-        .replace(/REB/g, seasonData.rebounds?.toString() || '0')
-        .replace(/STL/g, seasonData.steals?.toString() || '0')
-        .replace(/BLK/g, seasonData.blocks?.toString() || '0')
-        .replace(/TOV/g, seasonData.turnovers?.toString() || '0')
-        .replace(/FG_PCT/g, seasonData.fieldGoalPercentage?.toString() || '0')
-        .replace(/FGA/g, seasonData.fieldGoalAttempts?.toString() || '0')
-        .replace(/THREE_PCT/g, seasonData.threePointPercentage?.toString() || '0')
-        .replace(/3PA/g, seasonData.threePointAttempts?.toString() || '0')
-        .replace(/FT_PCT/g, seasonData.freeThrowPercentage?.toString() || '0')
-        .replace(/FTA/g, seasonData.freeThrowAttempts?.toString() || '0')
-        .replace(/PLUS_MINUS/g, seasonData.plusMinus?.toString() || '0')
-        .replace(/W_PCT/g, seasonData.winPercentage?.toString() || '0')
-        .replace(/MIN/g, seasonData.minutesPerGame?.toString() || '0')
-        .replace(/GP/g, seasonData.gamesPlayed?.toString() || '0');
+    const seasonStatMappings = {
+      'PTS': seasonData.points,
+      'PPG': seasonData.points, // Support both formats
+      'AST': seasonData.assists,
+      'APG': seasonData.assists, // Support both formats
+      'REB': seasonData.rebounds,
+      'RPG': seasonData.rebounds, // Support both formats
+      'STL': seasonData.steals,
+      'SPG': seasonData.steals, // Support both formats
+      'BLK': seasonData.blocks,
+      'BPG': seasonData.blocks, // Support both formats
+      'TOV': seasonData.turnovers,
+      'TPG': seasonData.turnovers, // Support both formats
+      'FG_PCT': seasonData.fieldGoalPercentage,
+      'FG%': seasonData.fieldGoalPercentage, // Support both formats
+      'FGA': seasonData.fieldGoalAttempts || 0,
+      '3P_PCT': seasonData.threePointPercentage,
+      '3P%': seasonData.threePointPercentage, // Support both formats
+      '3PA': seasonData.threePointAttempts || 0,
+      'FT_PCT': seasonData.freeThrowPercentage,
+      'FT%': seasonData.freeThrowPercentage, // Support both formats
+      'FTA': seasonData.freeThrowAttempts || 0,
+      'GP': seasonData.gamesPlayed,
+      'PLUS_MINUS': seasonData.plusMinus,
+      '+/-': seasonData.plusMinus, // Support both formats
+      'MIN': seasonData.minutesPerGame || 0,
+      'W_PCT': seasonData.winPercentage || 0
+    };
 
-      return eval(processedFormula);
+    try {
+      let expression = formula;
+      
+      // Handle +/- first since it has special characters
+      if (expression.includes('+/-')) {
+        expression = expression.replace(/\+\/-/g, seasonStatMappings['+/-'].toString());
+      }
+      
+      // Replace stat abbreviations with actual values
+      // First handle percentage stats specifically
+      if (expression.includes('FG%')) {
+        expression = expression.replace(/FG%/g, seasonStatMappings['FG%'].toString());
+      }
+      if (expression.includes('3P%')) {
+        expression = expression.replace(/3P%/g, seasonStatMappings['3P%'].toString());
+      }
+      if (expression.includes('FT%')) {
+        expression = expression.replace(/FT%/g, seasonStatMappings['FT%'].toString());
+      }
+      
+      // Then handle other stats
+      Object.entries(seasonStatMappings).forEach(([key, value]) => {
+        if (key === '+/-' || key.includes('%')) {
+          // Skip these as we handled them above
+          return;
+        }
+        const regex = new RegExp(`\\b${key}\\b`, 'g');
+        expression = expression.replace(regex, value.toString());
+      });
+      
+      const result = evaluate(expression);
+      return typeof result === 'number' ? result : null;
     } catch (error) {
       return null;
     }
   };
 
   const calculateCustomStat = () => {
-    if (!formula.trim()) return;
+    console.log('Starting calculation with formula:', formula);
+    console.log('Current player data:', currentPlayerData);
+    console.log('Stat mappings:', statMappings);
     
     try {
-      const result = calculateStatForSeason(formula, currentPlayerData);
-      setCalculatedValue(result);
+      let expression = formula;
       
-      // Generate chart data for career progression if multiple seasons available
-      if (player.seasons && Array.isArray(player.seasons)) {
+      // Handle +/- first since it has special characters
+      if (expression.includes('+/-')) {
+        expression = expression.replace(/\+\/-/g, statMappings['+/-'].toString());
+      }
+      
+      // Create extended mappings for backward compatibility
+      const extendedMappings = {
+        ...statMappings,
+        'PPG': currentPlayerData.points,
+        'APG': currentPlayerData.assists,
+        'RPG': currentPlayerData.rebounds,
+        'SPG': currentPlayerData.steals,
+        'BPG': currentPlayerData.blocks,
+        'TPG': currentPlayerData.turnovers,
+      };
+      
+      // Replace stat abbreviations with actual values
+      // First handle percentage stats specifically
+      if (expression.includes('FG%')) {
+        expression = expression.replace(/FG%/g, extendedMappings['FG%'].toString());
+      }
+      if (expression.includes('3P%')) {
+        expression = expression.replace(/3P%/g, extendedMappings['3P%'].toString());
+      }
+      if (expression.includes('FT%')) {
+        expression = expression.replace(/FT%/g, extendedMappings['FT%'].toString());
+      }
+      
+      // Then handle other stats
+      Object.entries(extendedMappings).forEach(([key, value]) => {
+        if (key === '+/-' || key.includes('%')) {
+          // Skip these as we handled them above
+          return;
+        }
+        const regex = new RegExp(`\\b${key}\\b`, 'g');
+        expression = expression.replace(regex, value.toString());
+      });
+      
+      console.log('Final expression:', expression);
+      const result = evaluate(expression);
+      console.log('Calculated result:', result);
+      
+      setCalculatedValue(typeof result === 'number' ? result : null);
+      
+      // Build chart data if seasons are available
+      if (player.seasons && player.seasons.length > 0) {
         const chartPoints = player.seasons
-          .sort((a: any, b: any) => {
+          .sort((a, b) => {
+            // Convert season format (e.g., "2019-20") to comparable numbers
             const yearA = parseInt(a.season.split('-')[0]);
             const yearB = parseInt(b.season.split('-')[0]);
-            return yearA - yearB;
+            return yearA - yearB; // Sort from oldest to newest
           })
           .map(seasonData => {
             const seasonResult = calculateStatForSeason(formula, seasonData);
@@ -183,6 +421,7 @@ export default function PlayerAnalysis({ player, onBack }: PlayerAnalysisProps) 
 
   const handleFormulaChange = (newFormula: string) => {
     setFormula(newFormula);
+    // Don't auto-calculate, let users press the Calculate button
     if (!newFormula.trim()) {
       setCalculatedValue(null);
       setChartData([]);
@@ -195,6 +434,14 @@ export default function PlayerAnalysis({ player, onBack }: PlayerAnalysisProps) 
     setFormula(newFormula);
     setCursorPosition(cursorPosition + insertion.length);
     handleFormulaChange(newFormula);
+  };
+
+  const moveCursor = (direction: 'left' | 'right') => {
+    if (direction === 'left' && cursorPosition > 0) {
+      setCursorPosition(cursorPosition - 1);
+    } else if (direction === 'right' && cursorPosition < formula.length) {
+      setCursorPosition(cursorPosition + 1);
+    }
   };
 
   const saveStat = async () => {
@@ -264,14 +511,18 @@ export default function PlayerAnalysis({ player, onBack }: PlayerAnalysisProps) 
 
   const insertSavedStat = (stat: any) => {
     const insertion = `(${stat.formula})`;
+    console.log('Inserting saved stat:', stat.name, 'formula:', stat.formula);
+    console.log('Current formula before insert:', formula);
     setFormula(prev => {
       const newFormula = prev + insertion;
+      console.log('New formula after insert:', newFormula);
       handleFormulaChange(newFormula);
       return newFormula;
     });
     setShowSavedStats(false);
   };
 
+  // Get team colors for current player's team
   const teamColors = getTeamColors(currentPlayerData.team);
   const teamGradient = getTeamGradient(currentPlayerData.team);
   const teamTextColor = getTeamTextColor(currentPlayerData.team);
@@ -320,6 +571,7 @@ export default function PlayerAnalysis({ player, onBack }: PlayerAnalysisProps) 
             </div>
           </div>
           <div className="flex items-center gap-4">
+            {/* Season Selector */}
             {player.availableSeasons && player.availableSeasons.length > 1 && (
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" style={{ color: teamTextColor }} />
@@ -331,6 +583,7 @@ export default function PlayerAnalysis({ player, onBack }: PlayerAnalysisProps) 
                     color: teamTextColor,
                     borderColor: teamTextColor + '50'
                   }}
+                  disabled={false}
                 >
                   {player.availableSeasons.map((season) => (
                     <option key={season} value={season} className="bg-slate-800 text-white">
@@ -343,66 +596,83 @@ export default function PlayerAnalysis({ player, onBack }: PlayerAnalysisProps) 
           </div>
         </div>
 
-        {/* Tab Navigation */}
+        {/* Tab Navigation with Team Colors */}
         <div className="flex space-x-1 mb-4">
           <button
             onClick={() => setActiveTab('overview')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               activeTab === 'overview'
-                ? 'bg-white/20 backdrop-blur-sm text-white'
-                : 'text-white/70 hover:text-white hover:bg-white/10'
+                ? 'bg-white/20 backdrop-blur-sm'
+                : 'bg-black/10 hover:bg-black/20 backdrop-blur-sm'
             }`}
+            style={{ color: teamTextColor }}
           >
-            Overview
+            <div className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Overview
+            </div>
           </button>
+
           <button
             onClick={() => setActiveTab('calculator')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               activeTab === 'calculator'
-                ? 'bg-white/20 backdrop-blur-sm text-white'
-                : 'text-white/70 hover:text-white hover:bg-white/10'
+                ? 'bg-white/20 backdrop-blur-sm'
+                : 'bg-black/10 hover:bg-black/20 backdrop-blur-sm'
             }`}
+            style={{ color: teamTextColor }}
           >
-            Calculator
+            <div className="flex items-center gap-2">
+              <Calculator className="w-4 h-4" />
+              Custom Stats
+            </div>
           </button>
         </div>
       </div>
 
-      {/* Overview Tab */}
+      {/* Tab Content */}
       {activeTab === 'overview' && (
-        <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border border-slate-300 dark:border-slate-700">
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-3">
-              <div className="text-slate-600 dark:text-slate-400 text-xs">Points</div>
-              <div className="text-blue-600 dark:text-blue-400 font-bold">{currentPlayerData.points.toFixed(1)} PPG</div>
+        <div className="space-y-6">
+          {/* Compact Player Stats */}
+          <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border border-slate-300 dark:border-slate-700">
+            <div className="flex items-center gap-2 mb-4">
+              <BarChart3 className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+              <h3 className="text-lg font-medium text-slate-900 dark:text-white">Season Statistics</h3>
             </div>
-            <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-3">
-              <div className="text-slate-600 dark:text-slate-400 text-xs">Assists</div>
-              <div className="text-purple-600 dark:text-purple-400 font-bold">{currentPlayerData.assists.toFixed(1)} APG</div>
-            </div>
-            <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-3">
-              <div className="text-slate-600 dark:text-slate-400 text-xs">Rebounds</div>
-              <div className="text-green-600 dark:text-green-400 font-bold">{currentPlayerData.rebounds.toFixed(1)} RPG</div>
-            </div>
-            <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-3">
-              <div className="text-slate-600 dark:text-slate-400 text-xs">Field Goal %</div>
-              <div className="text-yellow-600 dark:text-yellow-400 font-bold">{(currentPlayerData.fieldGoalPercentage * 100).toFixed(1)}%</div>
-            </div>
-            <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-3">
-              <div className="text-slate-600 dark:text-slate-400 text-xs">Plus/Minus</div>
-              <div className={`font-bold ${currentPlayerData.plusMinus >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                {currentPlayerData.plusMinus > 0 ? '+' : ''}{currentPlayerData.plusMinus.toFixed(1)}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-3">
+                <div className="text-slate-600 dark:text-slate-400 text-xs">Points</div>
+                <div className="text-orange-600 dark:text-orange-400 font-bold">{currentPlayerData.points.toFixed(1)} PPG</div>
               </div>
-            </div>
-            <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-3">
-              <div className="text-slate-600 dark:text-slate-400 text-xs">Games Played</div>
-              <div className="text-purple-600 dark:text-purple-400 font-bold">{currentPlayerData.gamesPlayed}</div>
+              <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-3">
+                <div className="text-slate-600 dark:text-slate-400 text-xs">Assists</div>
+                <div className="text-blue-600 dark:text-blue-400 font-bold">{currentPlayerData.assists.toFixed(1)} APG</div>
+              </div>
+              <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-3">
+                <div className="text-slate-600 dark:text-slate-400 text-xs">Rebounds</div>
+                <div className="text-green-600 dark:text-green-400 font-bold">{currentPlayerData.rebounds.toFixed(1)} RPG</div>
+              </div>
+              <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-3">
+                <div className="text-slate-600 dark:text-slate-400 text-xs">Field Goal %</div>
+                <div className="text-yellow-600 dark:text-yellow-400 font-bold">{(currentPlayerData.fieldGoalPercentage * 100).toFixed(1)}%</div>
+              </div>
+              <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-3">
+                <div className="text-slate-600 dark:text-slate-400 text-xs">Plus/Minus</div>
+                <div className={`font-bold ${currentPlayerData.plusMinus >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                  {currentPlayerData.plusMinus > 0 ? '+' : ''}{currentPlayerData.plusMinus.toFixed(1)}
+                </div>
+              </div>
+              <div className="bg-slate-100 dark:bg-slate-700 rounded-lg p-3">
+                <div className="text-slate-600 dark:text-slate-400 text-xs">Games Played</div>
+                <div className="text-purple-600 dark:text-purple-400 font-bold">{currentPlayerData.gamesPlayed}</div>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Calculator Tab */}
+
+
       {activeTab === 'calculator' && (
         <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg p-8 border border-orange-500/30 shadow-xl">
           <div className="flex items-center justify-between mb-6">
@@ -415,9 +685,18 @@ export default function PlayerAnalysis({ player, onBack }: PlayerAnalysisProps) 
                 <p className="text-slate-400">Create your own performance metrics</p>
               </div>
             </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowSavedStats(!showSavedStats)}
+                className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-slate-300 text-sm transition-colors"
+              >
+                <BarChart3 className="w-4 h-4" />
+                Saved Stats
+              </button>
+            </div>
           </div>
 
-          {/* Result Display */}
+          {/* Result Display - Prominent */}
           {calculatedValue !== null && (
             <>
               <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-xl p-6 mb-6 text-center shadow-lg">
@@ -431,6 +710,7 @@ export default function PlayerAnalysis({ player, onBack }: PlayerAnalysisProps) 
                 </div>
               </div>
 
+              {/* Custom Stat Chart - Right after result */}
               {chartData.length > 0 && (
                 <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border border-slate-300 dark:border-slate-700 mb-6">
                   <div className="flex items-center gap-2 mb-4">
@@ -464,6 +744,7 @@ export default function PlayerAnalysis({ player, onBack }: PlayerAnalysisProps) 
                           }}
                         />
                         <Line 
+                          key="custom-stat-line"
                           type="monotone" 
                           dataKey="value" 
                           stroke="#F97316" 
@@ -476,6 +757,8 @@ export default function PlayerAnalysis({ player, onBack }: PlayerAnalysisProps) 
                   </div>
                 </div>
               )}
+
+
             </>
           )}
 
@@ -522,6 +805,25 @@ export default function PlayerAnalysis({ player, onBack }: PlayerAnalysisProps) 
               className="bg-green-600 hover:bg-green-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg transition-colors"
             >
               Save Custom Stat
+            </button>
+            <button
+              onClick={() => {
+                setShowSavedStats(!showSavedStats);
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+            >
+              Saved Stats
+            </button>
+            <button
+              onClick={() => {
+                setFormula("");
+                setCustomStatName("");
+                setCalculatedValue(null);
+                setChartData([]);
+              }}
+              className="bg-slate-600 hover:bg-slate-500 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              Clear
             </button>
           </div>
 
@@ -691,6 +993,20 @@ export default function PlayerAnalysis({ player, onBack }: PlayerAnalysisProps) 
               )}
             </div>
           )}
+
+          <div className="bg-slate-700 rounded-lg p-4">
+            <div className="text-sm text-slate-400 mb-3 font-medium">Available Player Stats (Per Game):</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              {Object.entries(statMappings).map(([key, value]) => (
+                <div key={key} className="bg-slate-600 rounded-lg p-3 text-center">
+                  <div className="text-orange-300 font-bold text-sm">{key}</div>
+                  <div className="text-white font-medium">
+                    {key.includes('%') ? (value * 100).toFixed(1) + '%' : value.toFixed(1)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>
