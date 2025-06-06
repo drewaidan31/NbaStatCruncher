@@ -16,6 +16,7 @@ import UserProfile from "./components/user-profile";
 import TeamStats from "./components/team-stats";
 import AboutSection from "./components/about-section";
 import StatsLibrary from "./pages/StatsLibrary";
+import { FavoritePlayers } from "./components/favorite-players";
 
 
 import { BarChart3, Search, Calculator, TrendingUp, Sparkles, RefreshCw, ChevronDown, Filter } from "lucide-react";

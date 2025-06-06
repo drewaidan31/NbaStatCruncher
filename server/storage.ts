@@ -268,7 +268,7 @@ export class DatabaseStorage implements IStorage {
         eq(favoritePlayers.userId, userId),
         eq(favoritePlayers.playerId, playerId)
       ));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 }
 

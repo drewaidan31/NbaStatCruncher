@@ -961,6 +961,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Favorite players routes (requires authentication)
+  app.get("/api/favorite-players", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const favorites = await storage.getUserFavoritePlayers(userId);
+      res.json(favorites);
+    } catch (error) {
+      console.error("Error fetching favorite players:", error);
+      res.status(500).json({ message: "Failed to fetch favorite players" });
+    }
+  });
+
+  app.post("/api/favorite-players", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { playerId, playerName } = req.body;
+      
+      if (!playerId || !playerName) {
+        return res.status(400).json({ message: "Player ID and name are required" });
+      }
+
+      const favoritePlayer = await storage.addFavoritePlayer({
+        userId,
+        playerId,
+        playerName
+      });
+      
+      res.json(favoritePlayer);
+    } catch (error) {
+      console.error("Error adding favorite player:", error);
+      res.status(500).json({ message: "Failed to add favorite player" });
+    }
+  });
+
+  app.delete("/api/favorite-players/:playerId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const playerId = parseInt(req.params.playerId);
+      
+      if (isNaN(playerId)) {
+        return res.status(400).json({ message: "Invalid player ID" });
+      }
+
+      const success = await storage.removeFavoritePlayer(userId, playerId);
+      
+      if (success) {
+        res.json({ message: "Favorite player removed successfully" });
+      } else {
+        res.status(404).json({ message: "Favorite player not found" });
+      }
+    } catch (error) {
+      console.error("Error removing favorite player:", error);
+      res.status(500).json({ message: "Failed to remove favorite player" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
