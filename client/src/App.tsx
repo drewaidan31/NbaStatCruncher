@@ -225,7 +225,7 @@ function MainApp() {
     setError("");
     
     try {
-      const response = await fetch("/api/calculate", {
+      const response = await fetch("/api/nba/calculate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
