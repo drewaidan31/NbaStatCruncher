@@ -18,6 +18,7 @@ import StatsLibrary from "./pages/StatsLibrary";
 import UserProfilePage from "./pages/UserProfile";
 import ScatterPlotAnalyzer from "./components/scatter-plot-analyzer";
 import GuidedStatBuilder from "./components/guided-stat-builder";
+import ShotChart from "./components/shot-chart";
 import { ColorfulFavoriteButton } from "./components/colorful-favorites";
 import { UserProfileDropdown } from "./components/user-profile-dropdown";
 import { MyCustomStats } from "./components/my-custom-stats";
@@ -86,6 +87,8 @@ function MainApp() {
   const [featuredStat, setFeaturedStat] = useState<{name: string, formula: string, description: string} | null>(null);
   const [featuredChartData, setFeaturedChartData] = useState<Array<{season: string, value: number, team: string}>>([]);
   const [refreshCounter, setRefreshCounter] = useState(0);
+  const [showShotChart, setShowShotChart] = useState(false);
+  const [hasFavorites, setHasFavorites] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<string>("all");
 
 
@@ -235,16 +238,25 @@ function MainApp() {
     
     const { selectedPlayer, selectedStat } = generatePersonalizedGraph(personalizedConfig);
     
-    // Generate career progression data using the personalized utility
-    const chartDataPoints = generateCareerProgressionData(
-      selectedPlayer,
-      selectedStat.formula,
-      selectedStat.name
-    );
+    // Randomly decide between showing chart or shot chart (50/50 chance)
+    const showChart = Math.random() < 0.5;
+    setShowShotChart(!showChart);
+    setHasFavorites(userFavorites.length > 0);
+    
+    if (showChart) {
+      // Generate career progression data using the personalized utility
+      const chartDataPoints = generateCareerProgressionData(
+        selectedPlayer,
+        selectedStat.formula,
+        selectedStat.name
+      );
+      setFeaturedChartData(chartDataPoints);
+    } else {
+      setFeaturedChartData([]);
+    }
     
     setFeaturedPlayer(selectedPlayer);
     setFeaturedStat(selectedStat);
-    setFeaturedChartData(chartDataPoints);
   }, [refreshCounter]);
 
   const handleSeasonChange = (season: string) => {
@@ -472,7 +484,7 @@ function MainApp() {
     return (
       <div className="space-y-6">
         {/* Featured Player Showcase */}
-        {featuredPlayer && featuredStat && featuredChartData.length > 0 && (
+        {featuredPlayer && featuredStat && hasFavorites ? (
           <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 rounded-xl border border-slate-300 dark:border-slate-700 p-6 transition-all duration-500 ease-in-out hover:shadow-2xl hover:shadow-orange-500/20 hover:scale-[1.02] hover:border-orange-400 group">
             <div className="flex items-center gap-3 mb-4">
               <Sparkles className="w-6 h-6 text-orange-400" />
@@ -585,74 +597,83 @@ function MainApp() {
                     Refresh
                   </button>
                 </div>
-                <div className="h-48 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={featuredChartData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
-                      <XAxis 
-                        dataKey="season" 
-                        stroke="var(--chart-text)"
-                        fontSize={10}
-                        angle={-45}
-                        textAnchor="end"
-                        height={40}
-                      />
-                      <YAxis stroke="var(--chart-text)" fontSize={10} />
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: '#1F2937', 
-                          border: '1px solid #374151',
-                          borderRadius: '8px',
-                          color: '#F9FAFB'
-                        }}
-                        formatter={(value: number) => [
-                          `${value.toFixed(2)}`,
-                          featuredStat.name
-                        ]}
-                        labelFormatter={(label: string) => {
-                          const point = featuredChartData.find(d => d.season === label);
-                          return `${label} (${point?.team || 'N/A'})`;
-                        }}
-                      />
-                      <Line 
-                        key="featured-player-line"
-                        type="monotone" 
-                        dataKey="value" 
-                        stroke="#F97316" 
-                        strokeWidth={2}
-                        dot={(props: any) => {
-                          const { cx, cy, payload, index } = props;
-                          return (
-                            <g key={`dot-${index}`}>
-                              <circle 
-                                cx={cx} 
-                                cy={cy} 
-                                r={4} 
-                                fill="#F97316" 
-                                stroke="#1F2937" 
-                                strokeWidth={2}
-                              />
-                              <text 
-                                x={cx} 
-                                y={cy - 8} 
-                                textAnchor="middle" 
-                                fontSize={8} 
-                                fill="#9CA3AF"
-                                fontWeight="bold"
-                              >
-                                {payload?.team}
-                              </text>
-                            </g>
-                          );
-                        }}
-                        activeDot={{ r: 6, stroke: '#F97316', strokeWidth: 2 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-                <p className="text-xs text-slate-400 mt-2">
-                  Hover over points to see detailed season data
-                </p>
+                {showShotChart ? (
+                  <ShotChart 
+                    playerName={featuredPlayer.name}
+                    season={featuredPlayer.currentSeason || "2023-24"}
+                  />
+                ) : (
+                  <>
+                    <div className="h-48 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={featuredChartData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
+                          <XAxis 
+                            dataKey="season" 
+                            stroke="var(--chart-text)"
+                            fontSize={10}
+                            angle={-45}
+                            textAnchor="end"
+                            height={40}
+                          />
+                          <YAxis stroke="var(--chart-text)" fontSize={10} />
+                          <Tooltip 
+                            contentStyle={{ 
+                              backgroundColor: '#1F2937', 
+                              border: '1px solid #374151',
+                              borderRadius: '8px',
+                              color: '#F9FAFB'
+                            }}
+                            formatter={(value: number) => [
+                              `${value.toFixed(2)}`,
+                              featuredStat.name
+                            ]}
+                            labelFormatter={(label: string) => {
+                              const point = featuredChartData.find(d => d.season === label);
+                              return `${label} (${point?.team || 'N/A'})`;
+                            }}
+                          />
+                          <Line 
+                            key="featured-player-line"
+                            type="monotone" 
+                            dataKey="value" 
+                            stroke="#F97316" 
+                            strokeWidth={2}
+                            dot={(props: any) => {
+                              const { cx, cy, payload, index } = props;
+                              return (
+                                <g key={`dot-${index}`}>
+                                  <circle 
+                                    cx={cx} 
+                                    cy={cy} 
+                                    r={4} 
+                                    fill="#F97316" 
+                                    stroke="#1F2937" 
+                                    strokeWidth={2}
+                                  />
+                                  <text 
+                                    x={cx} 
+                                    y={cy - 8} 
+                                    textAnchor="middle" 
+                                    fontSize={8} 
+                                    fill="#9CA3AF"
+                                    fontWeight="bold"
+                                  >
+                                    {payload?.team}
+                                  </text>
+                                </g>
+                              );
+                            }}
+                            activeDot={{ r: 6, stroke: '#F97316', strokeWidth: 2 }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-2">
+                      Hover over points to see detailed season data
+                    </p>
+                  </>
+                )}
               </div>
             </div>
           </div>
