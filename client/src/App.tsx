@@ -429,7 +429,7 @@ function MainApp() {
               </div>
             ) : (
               <div className="space-y-2">
-                {results.slice(0, 10).map((result, index) => (
+                {results.slice(0, 20).map((result, index) => (
                   <div key={index} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
                     <div className="flex items-center gap-3">
                       <span className="w-6 h-6 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
@@ -501,16 +501,14 @@ function MainApp() {
                   <Calculator className="w-4 h-4" />
                   Guided Builder
                 </Button>
-                {isAuthenticated && (
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleNavigation('saved-stats')}
-                    className="flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-700"
-                  >
-                    <Heart className="w-4 h-4" />
-                    Saved Stats
-                  </Button>
-                )}
+                <Button
+                  variant="ghost"
+                  onClick={() => handleNavigation('saved-stats')}
+                  className="flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-700"
+                >
+                  <Heart className="w-4 h-4" />
+                  Saved Stats
+                </Button>
               </nav>
             </div>
             
