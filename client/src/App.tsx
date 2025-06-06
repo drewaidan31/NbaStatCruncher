@@ -874,20 +874,19 @@ function MainApp() {
                     return false;
                   }).map((result: any, index) => (
                     <tr 
-                      key={`${result.player.id}-${result.bestSeason}-${index}`} 
-                      onClick={() => handlePlayerSelect(result.player, result.bestSeason)}
+                      key={`${result.name}-${index}`} 
                       className="border-b border-slate-700 hover:bg-slate-700/50 transition-all duration-300 ease-in-out transform hover:scale-[1.02] hover:shadow-lg hover:shadow-orange-500/20 group cursor-pointer"
                     >
                       <td className="py-2">{index + 1}</td>
                       <td className="py-2 font-medium">
                         <span className="text-white group-hover:text-orange-400 transition-all duration-300 ease-in-out underline decoration-slate-500 group-hover:decoration-orange-400 group-hover:transform group-hover:translate-x-2 font-medium group-hover:font-bold">
-                          {result.player.name}
+                          {result.name}
                         </span>
                       </td>
                       <td className="py-2">
                         <span className="bg-slate-700 text-orange-400 px-2 py-1 rounded text-xs font-medium transition-all duration-300 ease-in-out group-hover:bg-orange-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">
                           {(() => {
-                            const playerName = result.player.name.toLowerCase();
+                            const playerName = result.name.toLowerCase();
                             const pointGuards = ["chris paul", "stephen curry", "russell westbrook", "damian lillard", 
                                                "kyrie irving", "ja morant", "trae young", "luka dončić", "de'aaron fox",
                                                "tyrese haliburton", "fred vanvleet", "mike conley", "kyle lowry", "terry rozier"];
@@ -905,15 +904,15 @@ function MainApp() {
                           })()}
                         </span>
                       </td>
-                      <td className="py-2 transition-all duration-300 ease-in-out group-hover:text-blue-400 group-hover:font-semibold">{result.player.team}</td>
+                      <td className="py-2 transition-all duration-300 ease-in-out group-hover:text-blue-400 group-hover:font-semibold">{result.team}</td>
                       <td className="py-2 transition-all duration-300 ease-in-out group-hover:text-green-400 group-hover:font-bold group-hover:scale-110">
-                        {result.customStat !== null && result.customStat !== undefined ? (
+                        {result.value !== null && result.value !== undefined ? (
                           customStatName.includes("eFG%") || customStatName.includes("TS%") ? 
-                            `${(result.customStat * 100).toFixed(1)}%` : 
-                            result.customStat.toFixed(2)
+                            `${(result.value * 100).toFixed(1)}%` : 
+                            result.value.toFixed(2)
                         ) : 'N/A'}
                       </td>
-                      <td className="py-2 text-orange-400 font-medium transition-all duration-300 ease-in-out group-hover:text-yellow-400 group-hover:font-bold">{result.bestSeason}</td>
+                      <td className="py-2 text-orange-400 font-medium transition-all duration-300 ease-in-out group-hover:text-yellow-400 group-hover:font-bold">2024-25</td>
                     </tr>
                   ))}
                 </tbody>
