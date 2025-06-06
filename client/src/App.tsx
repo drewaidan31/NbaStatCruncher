@@ -304,11 +304,12 @@ function MainApp() {
   };
 
   const renderContent = () => {
-    if (viewMode === 'search' && selectedPlayer) {
+    if (viewMode === 'analysis' && selectedPlayer) {
       return (
         <PlayerAnalysis
           player={selectedPlayer}
           season={selectedPlayerSeason}
+          onBack={() => setViewMode('search')}
         />
       );
     }
