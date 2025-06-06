@@ -8,10 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import type { CustomStat, FavoritePlayer, Player } from "@shared/schema";
 
 interface UserProfileDropdownProps {
-  players?: Player[];
+  players: Player[];
 }
 
-export function UserProfileDropdown({ players = [] }: UserProfileDropdownProps) {
+export function UserProfileDropdown({ players }: UserProfileDropdownProps) {
   const { isAuthenticated, user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 

@@ -3,7 +3,7 @@ import { ArrowLeft, Calculator, TrendingUp, GitCompare } from "lucide-react";
 
 import { evaluate } from "mathjs";
 import FormulaExamples from "./formula-examples";
-import PlayerAwards from "./player-awards";
+import { PlayerAwards } from "./player-awards";
 import { getTeamColors, getTeamGradient, getTeamTextColor } from "../utils/team-colors";
 
 interface Player {

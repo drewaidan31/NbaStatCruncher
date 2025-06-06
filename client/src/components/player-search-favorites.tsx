@@ -126,7 +126,16 @@ export function PlayerSearchFavorites({ players, onPlayerSelect }: PlayerSearchF
           </div>
         ) : (
           <div className="space-y-4">
-
+            {/* Personalized Insights Banner */}
+            <div className="bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 p-3 rounded-lg border border-blue-200 dark:border-blue-700">
+              <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300 mb-1">
+                <Sparkles className="h-4 w-4 text-yellow-500" />
+                <span className="font-semibold text-sm">Personalized Analytics Active</span>
+              </div>
+              <p className="text-xs text-blue-600 dark:text-blue-400">
+                Your custom stats appear 2x more often in featured analysis for these players
+              </p>
+            </div>
 
             {/* Favorites List */}
             <div className="space-y-2 max-h-48 overflow-y-auto">

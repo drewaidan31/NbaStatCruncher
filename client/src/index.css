@@ -2,20 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Force dark mode globally */
-html {
-  @apply dark;
-}
-
-body {
-  @apply bg-slate-900 text-white;
-}
-
-/* Ensure all components use dark theme */
-* {
-  @apply dark;
-}
-
 :root {
   /* Light mode colors */
   --background: 0 0% 100%; /* white */

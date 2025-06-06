@@ -6,7 +6,7 @@ interface PlayerAwardsProps {
   season: string;
 }
 
-export default function PlayerAwards({ playerName, season }: PlayerAwardsProps) {
+export function PlayerAwards({ playerName, season }: PlayerAwardsProps) {
   // Convert NBA season format to award year format
   // NBA seasons like "2022-23" correspond to awards given in 2023
   const getAwardYear = (season: string) => {
