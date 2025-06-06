@@ -17,7 +17,7 @@ export function UserProfileDropdown({ players }: UserProfileDropdownProps) {
 
   // Fetch user's custom stats
   const { data: customStats = [] } = useQuery<CustomStat[]>({
-    queryKey: ["/api/custom-stats"],
+    queryKey: ["/api/custom-stats/my"],
     enabled: isAuthenticated,
   });
 
