@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Search, User, TrendingUp } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { ColorfulFavoriteButton } from "./colorful-favorites";
+import { Search, User, TrendingUp, Heart } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { PlayerSearchFavorites } from "./player-search-favorites";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import type { FavoritePlayer } from "@shared/schema";
 
 interface Player {
   playerId: number;
@@ -39,6 +41,10 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
   const [selectedSeason2, setSelectedSeason2] = useState("");
   const [showSeasonPicker, setShowSeasonPicker] = useState<{ player: Player; isPlayer2: boolean } | null>(null);
 
+  const { isAuthenticated } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   const { data: players = [], isLoading, error } = useQuery({
     queryKey: ["/api/nba/players"],
     queryFn: async () => {
@@ -49,6 +55,90 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
       return response.json();
     },
   });
+
+  // Fetch user's favorite players
+  const { data: favorites = [] } = useQuery<FavoritePlayer[]>({
+    queryKey: ["/api/favorite-players"],
+    enabled: isAuthenticated,
+  });
+
+  // Add favorite player mutation
+  const addFavoriteMutation = useMutation({
+    mutationFn: async ({ playerId, playerName }: { playerId: number; playerName: string }) => {
+      const response = await fetch(`/api/favorite-players`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ playerId, playerName }),
+      });
+      if (!response.ok) throw new Error("Failed to add favorite");
+      return await response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/favorite-players"] });
+      toast({
+        title: "Added to Favorites!",
+        description: "Player added with personalized insights",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to add player to favorites",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Remove favorite player mutation
+  const removeFavoriteMutation = useMutation({
+    mutationFn: async (playerId: number) => {
+      const response = await fetch(`/api/favorite-players/${playerId}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to remove favorite");
+      return await response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/favorite-players"] });
+      toast({
+        title: "Removed from Favorites",
+        description: "Player removed from your favorites",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to remove player from favorites",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const isFavorite = (playerId: number) => {
+    return favorites.some((fav: FavoritePlayer) => fav.playerId === playerId);
+  };
+
+  const handleToggleFavorite = (player: Player, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!isAuthenticated) {
+      toast({
+        title: "Please Log In",
+        description: "Log in to save favorite players and get personalized insights",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (isFavorite(player.playerId)) {
+      removeFavoriteMutation.mutate(player.playerId);
+    } else {
+      addFavoriteMutation.mutate({
+        playerId: player.playerId,
+        playerName: player.name,
+      });
+    }
+  };
 
   // Debug: Log the data structure
   console.log("Players data:", players);
@@ -255,12 +345,20 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
                             }
                           })()}
                         </div>
-                        <div title="Click ❤️ to add to favorites">
-                          <ColorfulFavoriteButton 
-                            player={player} 
-                            className="opacity-60 group-hover:opacity-100 transition-opacity" 
+                        <button
+                          onClick={(e) => handleToggleFavorite(player, e)}
+                          title={isFavorite(player.playerId) ? "Remove from favorites" : "Add to favorites"}
+                          className="opacity-60 group-hover:opacity-100 transition-all duration-200 hover:scale-110"
+                          disabled={addFavoriteMutation.isPending || removeFavoriteMutation.isPending}
+                        >
+                          <Heart 
+                            className={`w-5 h-5 ${
+                              isFavorite(player.playerId) 
+                                ? 'text-red-500 fill-red-500' 
+                                : 'text-slate-400 hover:text-red-400'
+                            }`}
                           />
-                        </div>
+                        </button>
                       </div>
                     </div>
                   </div>
