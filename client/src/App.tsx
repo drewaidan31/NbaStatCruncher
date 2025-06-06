@@ -562,18 +562,9 @@ function MainApp() {
               </div>
 
               <StatCalculator 
-                onSeasonChange={handleSeasonChange}
+                onFormulaChange={setFormula}
                 onCalculate={calculateStats}
                 formula={formula}
-                setFormula={setFormula}
-                results={results}
-                error={error}
-                loading={loading}
-                selectedSeason={selectedSeason}
-                players={players}
-                customStatName={customStatName}
-                setCustomStatName={setCustomStatName}
-                onSaveCustomStat={saveCustomStat}
               />
 
               <div className="flex items-center gap-4">
