@@ -316,7 +316,7 @@ export default function PlayerAnalysis({ player, onBack }: PlayerAnalysisProps) 
               <p className="opacity-90" style={{ color: teamTextColor }}>
                 {getTeamColors(currentPlayerData.team).name} • {currentPlayerData.position} • {selectedSeason}
               </p>
-              <PlayerAwards playerName={player.name} season={selectedSeason || ''} />
+
             </div>
           </div>
           <div className="flex items-center gap-4">
