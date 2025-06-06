@@ -40,6 +40,7 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
   const { isAuthenticated } = useAuth();
   const [xAxisStat, setXAxisStat] = useState<string>("");
   const [yAxisStat, setYAxisStat] = useState<string>("");
+  const [selectedSeason, setSelectedSeason] = useState<string>("all");
   const [scatterData, setScatterData] = useState<ScatterDataPoint[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -96,7 +97,7 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
         );
         
         if (yPoint && xPoint.customStat !== null && yPoint.customStat !== null) {
-          combinedData.push({
+          const dataPoint = {
             name: xPoint.player.name,
             team: xPoint.player.team,
             season: xPoint.bestSeason,
@@ -104,7 +105,12 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
             y: yPoint.customStat,
             teamColor: teamColors[xPoint.player.team] || '#666666',
             playerId: xPoint.player.id
-          });
+          };
+          
+          // Filter by selected season if not "all"
+          if (selectedSeason === "all" || dataPoint.season === selectedSeason) {
+            combinedData.push(dataPoint);
+          }
         }
       });
 
@@ -120,7 +126,7 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
     if (xAxisStat && yAxisStat) {
       calculateScatterData();
     }
-  }, [xAxisStat, yAxisStat]);
+  }, [xAxisStat, yAxisStat, selectedSeason]);
 
   if (!isAuthenticated) {
     return (
@@ -205,7 +211,7 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-3 gap-6">
               <div>
                 <label className="block text-sm font-medium mb-2">X-Axis Stat</label>
                 <Select value={xAxisStat} onValueChange={setXAxisStat}>
@@ -246,6 +252,50 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
                     {customStats.find(s => s.formula === yAxisStat)?.formula}
                   </p>
                 )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Season</label>
+                <Select value={selectedSeason} onValueChange={setSelectedSeason}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select season" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Seasons</SelectItem>
+                    <SelectItem value="2024-25">2024-25</SelectItem>
+                    <SelectItem value="2023-24">2023-24</SelectItem>
+                    <SelectItem value="2022-23">2022-23</SelectItem>
+                    <SelectItem value="2021-22">2021-22</SelectItem>
+                    <SelectItem value="2020-21">2020-21</SelectItem>
+                    <SelectItem value="2019-20">2019-20</SelectItem>
+                    <SelectItem value="2018-19">2018-19</SelectItem>
+                    <SelectItem value="2017-18">2017-18</SelectItem>
+                    <SelectItem value="2016-17">2016-17</SelectItem>
+                    <SelectItem value="2015-16">2015-16</SelectItem>
+                    <SelectItem value="2014-15">2014-15</SelectItem>
+                    <SelectItem value="2013-14">2013-14</SelectItem>
+                    <SelectItem value="2012-13">2012-13</SelectItem>
+                    <SelectItem value="2011-12">2011-12</SelectItem>
+                    <SelectItem value="2010-11">2010-11</SelectItem>
+                    <SelectItem value="2009-10">2009-10</SelectItem>
+                    <SelectItem value="2008-09">2008-09</SelectItem>
+                    <SelectItem value="2007-08">2007-08</SelectItem>
+                    <SelectItem value="2006-07">2006-07</SelectItem>
+                    <SelectItem value="2005-06">2005-06</SelectItem>
+                    <SelectItem value="2004-05">2004-05</SelectItem>
+                    <SelectItem value="2003-04">2003-04</SelectItem>
+                    <SelectItem value="2002-03">2002-03</SelectItem>
+                    <SelectItem value="2001-02">2001-02</SelectItem>
+                    <SelectItem value="2000-01">2000-01</SelectItem>
+                    <SelectItem value="1999-00">1999-00</SelectItem>
+                    <SelectItem value="1998-99">1998-99</SelectItem>
+                    <SelectItem value="1997-98">1997-98</SelectItem>
+                    <SelectItem value="1996-97">1996-97</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-slate-500 mt-1">
+                  Filter data by specific season
+                </p>
               </div>
             </div>
           </CardContent>
