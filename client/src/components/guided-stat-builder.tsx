@@ -78,93 +78,174 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
   const [showPreview, setShowPreview] = useState(false);
 
   const generateFormula = () => {
-    let formula = "";
     let components: string[] = [];
+    let efficiencyMultipliers: string[] = [];
+    let archetypeComponents: string[] = [];
 
-    // Positive contributions based on weights
+    // Core stat components with proper weighting
     if (weights.points > 1) {
-      const multiplier = weights.points === 5 ? 2 : weights.points === 4 ? 1.5 : weights.points === 3 ? 1.25 : 1;
+      const multiplier = weights.points * 0.4;
       components.push(`PTS * ${multiplier}`);
     }
 
     if (weights.assists > 1) {
-      const multiplier = weights.assists === 5 ? 2 : weights.assists === 4 ? 1.5 : weights.assists === 3 ? 1.25 : 1;
+      const multiplier = weights.assists * 0.6;
       components.push(`AST * ${multiplier}`);
     }
 
     if (weights.rebounds > 1) {
-      const multiplier = weights.rebounds === 5 ? 1.5 : weights.rebounds === 4 ? 1.25 : weights.rebounds === 3 ? 1 : 0.75;
+      const multiplier = weights.rebounds * 0.5;
       components.push(`REB * ${multiplier}`);
     }
 
     if (weights.steals > 1) {
-      const multiplier = weights.steals === 5 ? 2 : weights.steals === 4 ? 1.5 : weights.steals === 3 ? 1 : 0.5;
+      const multiplier = weights.steals * 0.8;
       components.push(`STL * ${multiplier}`);
     }
 
     if (weights.blocks > 1) {
-      const multiplier = weights.blocks === 5 ? 2 : weights.blocks === 4 ? 1.5 : weights.blocks === 3 ? 1 : 0.5;
+      const multiplier = weights.blocks * 0.9;
       components.push(`BLK * ${multiplier}`);
     }
 
-    // Base formula from positive stats
-    formula = `(${components.join(" + ")})`;
-
-    // Efficiency multipliers
-    if (preferences.efficiency) {
-      formula += " * FG_PCT";
+    // Archetype-specific advanced metrics
+    if (preferences.playstyles.includes("outside-shooter")) {
+      // Three-point shooting emphasis
+      if (weights.threePointPct >= 3) {
+        archetypeComponents.push(`(3PA * 3P_PCT) * ${weights.threePointPct}`);
+      }
+      archetypeComponents.push("(3PA / FGA) * 10"); // Reward 3P attempt rate
+      
+      // Shooting efficiency for outside shooters
+      if (weights.fieldGoalPct >= 3) {
+        efficiencyMultipliers.push(`(0.8 + FG_PCT + 3P_PCT)`);
+      }
+    }
+    
+    if (preferences.playstyles.includes("slasher")) {
+      // Reward attacking the rim
+      archetypeComponents.push("(FGA - 3PA) * 1.5"); // Inside attempts
+      if (weights.freeThrowPct >= 3) {
+        archetypeComponents.push(`(FTA * FT_PCT) * ${weights.freeThrowPct}`);
+      }
+      archetypeComponents.push("FTA * 1.2"); // Getting to the line
     }
 
-    if (weights.fieldGoalPct > 3) {
-      formula += " * (FG_PCT + 0.5)";
+    if (preferences.playstyles.includes("post-player")) {
+      // Inside game emphasis
+      archetypeComponents.push("(FGA - 3PA) * 2"); // Heavy inside shot reward
+      if (weights.fieldGoalPct >= 3) {
+        efficiencyMultipliers.push(`(0.5 + FG_PCT * 2)`);
+      }
+      if (weights.rebounds >= 4) {
+        archetypeComponents.push(`REB * ${weights.rebounds * 0.8}`);
+      }
     }
 
-    // Penalties for negative stats
+    if (preferences.playstyles.includes("playmaker")) {
+      // Advanced playmaking
+      if (weights.assists >= 3) {
+        archetypeComponents.push(`AST * ${weights.assists * 1.5}`);
+      }
+      archetypeComponents.push("(AST / (TOV + 1)) * 4"); // AST/TO ratio
+      archetypeComponents.push("AST * (MIN / 36)"); // Usage-adjusted
+    }
+
+    if (preferences.playstyles.includes("defensive-anchor")) {
+      // Defensive impact
+      if (weights.steals >= 3) {
+        archetypeComponents.push(`STL * ${weights.steals * 2}`);
+      }
+      if (weights.blocks >= 3) {
+        archetypeComponents.push(`BLK * ${weights.blocks * 2.5}`);
+      }
+      archetypeComponents.push("(STL + BLK) * 3");
+    }
+
+    if (preferences.playstyles.includes("two-way-player")) {
+      // Balanced contributions
+      archetypeComponents.push("(PTS + AST) * 0.9");
+      archetypeComponents.push("(STL + BLK) * 2.5");
+      if (weights.fieldGoalPct >= 3) {
+        efficiencyMultipliers.push(`(0.7 + FG_PCT)`);
+      }
+    }
+
+    // Build base formula
+    let allComponents = [...components, ...archetypeComponents];
+    
+    // Ensure we have components
+    if (allComponents.length === 0) {
+      allComponents = ["PTS * 1.2", "AST * 1.8", "REB * 1.0"];
+    }
+
+    let formula = allComponents.join(" + ");
+
+    // Apply efficiency multipliers
+    if (efficiencyMultipliers.length > 0) {
+      formula = `(${formula}) * ${efficiencyMultipliers.join(" * ")}`;
+    } else if (preferences.efficiency) {
+      formula = `(${formula}) * (0.5 + FG_PCT)`;
+    }
+
+    // Add percentage stats as multipliers when highly weighted
+    if (weights.fieldGoalPct >= 4 && !efficiencyMultipliers.length) {
+      formula = `(${formula}) * (0.5 + FG_PCT * ${weights.fieldGoalPct * 0.5})`;
+    }
+
+    if (weights.threePointPct >= 4 && preferences.playstyles.includes("outside-shooter")) {
+      formula = `(${formula}) * (0.7 + 3P_PCT)`;
+    }
+
+    if (weights.freeThrowPct >= 4) {
+      formula = `(${formula}) * (0.8 + FT_PCT * 0.5)`;
+    }
+
+    // Penalties
     let penalties: string[] = [];
-    if (weights.turnovers > 3) {
-      penalties.push("TOV * 0.5");
+    if (weights.turnovers >= 4) {
+      penalties.push(`TOV * ${weights.turnovers * 0.5}`);
+    } else if (weights.turnovers >= 2) {
+      penalties.push("TOV * 0.8");
     }
-    if (weights.fouls > 3) {
-      penalties.push("PF * 0.25");
+
+    if (weights.fouls >= 4) {
+      penalties.push(`PF * ${weights.fouls * 0.4}`);
+    } else if (weights.fouls >= 2) {
+      penalties.push("PF * 0.5");
     }
 
     if (penalties.length > 0) {
-      formula += ` - (${penalties.join(" + ")})`;
+      formula = `(${formula}) - (${penalties.join(" + ")})`;
     }
 
-    // Team success factors
+    // Advanced factors
     if (preferences.teamSuccess) {
-      formula = `(${formula}) * W_PCT`;
+      formula = `(${formula}) * (0.8 + PLUS_MINUS / 100)`;
     }
 
-    // Durability factor
     if (preferences.durability) {
       formula = `(${formula}) * (GP / 82)`;
     }
 
-    // Plus/minus for overall impact
-    if (preferences.clutchPerformance || preferences.playstyles.includes("defensive-anchor") || preferences.playstyles.includes("playmaker")) {
+    if (preferences.clutchPerformance) {
       formula = `(${formula}) * (1 + PLUS_MINUS / 100)`;
     }
 
-    // Ball security penalty
     if (preferences.minimizeTO) {
-      formula = `(${formula}) - (TOV * 1.5)`;
+      formula = `(${formula}) - (TOV * 2.5)`;
     }
 
-    // High usage reward
     if (preferences.rewardMinutes) {
       formula = `(${formula}) * (MIN / 36)`;
     }
 
-    // Defensive emphasis
     if (preferences.emphasizeDefense) {
-      formula = `(${formula}) + ((STL + BLK) * 2)`;
+      formula = `(${formula}) + ((STL + BLK) * 4)`;
     }
 
-    // Foul penalty
     if (preferences.penalizeFouls) {
-      formula = `(${formula}) - (PF * 0.8)`;
+      formula = `(${formula}) - (PF * 1.5)`;
     }
 
     return formula;
