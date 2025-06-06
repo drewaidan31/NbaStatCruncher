@@ -973,6 +973,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user's favorite players
+  app.get("/api/favorite-players", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const favorites = await storage.getUserFavoritePlayers(userId);
+      res.json(favorites);
+    } catch (error) {
+      console.error("Error fetching favorite players:", error);
+      res.status(500).json({ message: "Failed to fetch favorite players" });
+    }
+  });
+
   app.post("/api/favorite-players", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
