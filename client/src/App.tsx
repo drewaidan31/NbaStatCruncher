@@ -64,11 +64,11 @@ function MainApp() {
     
     try {
       console.log('Calculating formula:', formula);
-      const response = await fetch('/api/calculate-custom-stat', {
+      const response = await fetch('/api/nba/calculate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ formula })
+        body: JSON.stringify({ formula, season: 'all-time' })
       });
       
       if (!response.ok) {
@@ -77,15 +77,18 @@ function MainApp() {
       
       const data = await response.json();
       
-      console.log('Calculation response:', response);
+      console.log('Calculation response:', data);
       
       if (data && data.length > 0) {
         // Transform the response to match expected format
         const transformedResults = data.map((item: any) => ({
-          player: item.player || item.name,
+          player: item.player?.name || item.player || item.name || 'Unknown Player',
           value: item.customStat || item.value || 0
         }));
-        setResults(transformedResults);
+        
+        // Sort by value descending and take top 20
+        transformedResults.sort((a, b) => b.value - a.value);
+        setResults(transformedResults.slice(0, 20));
         setCalculationError(null);
       } else {
         setCalculationError('No results found. Please check your formula.');
@@ -496,7 +499,7 @@ function MainApp() {
                   className="flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-700"
                 >
                   <Calculator className="w-4 h-4" />
-                  Custom Stats Guide
+                  Guided Builder
                 </Button>
                 {isAuthenticated && (
                   <Button
