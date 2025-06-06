@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { BarChart3, Calculator, Search, TrendingUp, User, Info, Sparkles, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PlayerSearch } from "@/components/player-search";
-import { PlayerAnalysis } from "@/components/player-analysis";
-import { PlayerComparison } from "@/components/player-comparison";
-import { ScatterPlotAnalyzer } from "@/components/scatter-plot-analyzer";
-import { GuidedStatBuilder } from "@/components/guided-stat-builder";
-import { UsageRateLeaderboard } from "@/components/usage-rate-leaderboard";
-import { FormulaExamples } from "@/components/formula-examples";
+import PlayerSearch from "@/components/player-search";
+import PlayerAnalysis from "@/components/player-analysis";
+import PlayerComparison from "@/components/player-comparison";
+import ScatterPlotAnalyzer from "@/components/scatter-plot-analyzer";
+import GuidedStatBuilder from "@/components/guided-stat-builder";
+import UsageRateLeaderboard from "@/components/usage-rate-leaderboard";
+import FormulaExamples from "@/components/formula-examples";
 import StatsLibrary from "@/pages/StatsLibrary";
 import AboutSection from "@/components/about-section";
 import UserProfilePage from "@/pages/UserProfile";
@@ -18,7 +18,7 @@ import StatCalculator from "@/components/stat-calculator";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { setupFeaturedShowcase } from "@/utils/personalized-graphs";
+import { generatePersonalizedGraph } from "@/utils/personalized-graphs";
 import type { Player, FavoritePlayer, CustomStat } from "@shared/schema";
 
 type ViewMode = 'home' | 'search' | 'analysis' | 'comparison' | 'usage-rate' | 'examples' | 'stats-library' | 'about' | 'profile' | 'scatter-plot' | 'guided-builder' | 'saved-stats';
@@ -93,18 +93,16 @@ function App() {
         }
 
         // Generate featured stat and chart data
-        const { selectedPlayerName, selectedStatName } = await import('@/utils/personalized-graphs').then(module => 
-          module.generatePersonalizedGraph({
-            favoritesCount: favorites.length,
-            customStatsCount: 3,
-            playersCount: players.length
-          }, refreshCounter)
-        );
+        const personalizedData = generatePersonalizedGraph({
+          favoritesCount: favorites.length,
+          customStatsCount: 3,
+          playersCount: players.length
+        });
 
         const selectedStat = {
-          name: selectedStatName,
-          formula: "PTS + AST + REB",
-          description: `Showcasing ${selectedStatName} analysis`
+          name: personalizedData.selectedStat.name,
+          formula: personalizedData.selectedStat.formula,
+          description: personalizedData.selectedStat.description
         };
 
         const chartDataPoints = selectedPlayer.seasons ? 
@@ -130,7 +128,7 @@ function App() {
   }, [players, isAuthenticated, refreshCounter]);
 
   const handlePlayerSelect = (player: any, season: string) => {
-    setSelectedPlayer(player as Player);
+    setSelectedPlayer(player);
     setSelectedPlayerSeason(season);
     setViewMode('analysis');
   };
@@ -159,10 +157,8 @@ function App() {
     if (viewMode === 'comparison' && comparisonData) {
       return (
         <PlayerComparison
-          player1={comparisonData.player1}
-          season1={comparisonData.season1}
-          player2={comparisonData.player2}
-          season2={comparisonData.season2}
+          comparison={comparisonData}
+          onBack={() => setViewMode('search')}
         />
       );
     }
@@ -175,8 +171,8 @@ function App() {
       return (
         <PlayerSearch
           onPlayerSelect={handlePlayerSelect}
-          onCompareSelect={(player1, season1, player2, season2) => {
-            setComparisonData({ player1, season1, player2, season2 });
+          onCompareSelect={(comparisonData: any) => {
+            setComparisonData(comparisonData);
             setViewMode('comparison');
           }}
         />
@@ -186,7 +182,6 @@ function App() {
     if (viewMode === 'usage-rate') {
       return (
         <UsageRateLeaderboard
-          players={players}
           onPlayerSelect={handlePlayerSelect}
         />
       );
@@ -197,15 +192,15 @@ function App() {
     }
 
     if (viewMode === 'examples') {
-      return <FormulaExamples />;
+      return <FormulaExamples onFormulaSelect={() => {}} />;
     }
 
     if (viewMode === 'profile') {
-      return <UserProfilePage />;
+      return <UserProfilePage players={players} onBack={() => setViewMode('home')} />;
     }
 
     if (viewMode === 'scatter-plot') {
-      return <ScatterPlotAnalyzer />;
+      return <ScatterPlotAnalyzer players={players} onBack={() => setViewMode('home')} />;
     }
 
     if (viewMode === 'guided-builder') {
@@ -261,7 +256,7 @@ function App() {
                   </div>
                   <div>
                     <h3 className="font-bold text-orange-900 dark:text-orange-200 text-lg">{featuredPlayer.name} ➜</h3>
-                    <p className="text-orange-700 dark:text-orange-300 text-sm">{featuredPlayer.team} • Career Spanning {featuredPlayer.seasons?.length || 0} Seasons</p>
+                    <p className="text-orange-700 dark:text-orange-300 text-sm">{featuredPlayer.team} • Career Spanning {(featuredPlayer.seasons as any[] || []).length} Seasons</p>
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -341,7 +336,10 @@ function App() {
         )}
 
         {/* Custom Stats Calculator */}
-        <StatCalculator />
+        <StatCalculator 
+          onFormulaChange={() => {}}
+          onCalculate={() => {}}
+        />
       </div>
     );
   };
@@ -413,7 +411,7 @@ function App() {
                   Profile
                 </Button>
               )}
-              <UserProfileDropdown />
+              <UserProfileDropdown players={players} />
             </div>
           </div>
         </div>
