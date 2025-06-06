@@ -1,8 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calculator } from "lucide-react";
+import { getQueryFn } from "@/lib/queryClient";
 import type { CustomStat } from "@shared/schema";
 
 interface MyCustomStatsProps {
@@ -11,12 +12,16 @@ interface MyCustomStatsProps {
 
 export function MyCustomStats({ onStatSelect }: MyCustomStatsProps) {
   const { isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
 
-  // Fetch user's custom stats
+  // Always call useQuery hook regardless of authentication state
   const { data: userCustomStats = [], isLoading, error } = useQuery<CustomStat[]>({
     queryKey: ["/api/custom-stats/my"],
     enabled: isAuthenticated,
     retry: false,
+    staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   console.log("MyCustomStats - isAuthenticated:", isAuthenticated);
@@ -24,12 +29,13 @@ export function MyCustomStats({ onStatSelect }: MyCustomStatsProps) {
   console.log("MyCustomStats - isLoading:", isLoading);
   console.log("MyCustomStats - error:", error);
 
+  // Early returns after all hooks
   if (!isAuthenticated) {
     console.log("MyCustomStats - Not authenticated, hiding component");
     return null;
   }
 
-  if (userCustomStats.length === 0) {
+  if (userCustomStats.length === 0 && !isLoading) {
     console.log("MyCustomStats - No custom stats found, hiding component");
     return null;
   }

@@ -219,33 +219,46 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
       formula = `(${formula}) - (${penalties.join(" + ")})`;
     }
 
-    // Advanced factors
+    // Advanced factors (simplified to prevent overflow)
+    let advancedMultipliers: string[] = [];
+    let advancedPenalties: string[] = [];
+
     if (preferences.teamSuccess) {
-      formula = `(${formula}) * (0.8 + PLUS_MINUS / 100)`;
+      advancedMultipliers.push("(0.9 + PLUS_MINUS / 200)");
     }
 
     if (preferences.durability) {
-      formula = `(${formula}) * (GP / 82)`;
+      advancedMultipliers.push("(GP / 82)");
     }
 
     if (preferences.clutchPerformance) {
-      formula = `(${formula}) * (1 + PLUS_MINUS / 100)`;
+      advancedMultipliers.push("(1 + PLUS_MINUS / 200)");
     }
 
     if (preferences.minimizeTO) {
-      formula = `(${formula}) - (TOV * 2.5)`;
+      advancedPenalties.push("TOV * 1.5");
     }
 
     if (preferences.rewardMinutes) {
-      formula = `(${formula}) * (MIN / 36)`;
+      advancedMultipliers.push("(MIN / 36)");
     }
 
     if (preferences.emphasizeDefense) {
-      formula = `(${formula}) + ((STL + BLK) * 4)`;
+      formula = `(${formula}) + (STL + BLK) * 2`;
     }
 
     if (preferences.penalizeFouls) {
-      formula = `(${formula}) - (PF * 1.5)`;
+      advancedPenalties.push("PF * 1.0");
+    }
+
+    // Apply one multiplier at a time to prevent overflow
+    if (advancedMultipliers.length > 0) {
+      formula = `(${formula}) * ${advancedMultipliers[0]}`;
+    }
+
+    // Apply penalties
+    if (advancedPenalties.length > 0) {
+      formula = `(${formula}) - (${advancedPenalties.join(" + ")})`;
     }
 
     return formula;
