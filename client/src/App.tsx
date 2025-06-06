@@ -1,287 +1,133 @@
-import { useState, useEffect, useCallback } from "react";
-
-// Force dark mode on app load
-if (typeof document !== 'undefined') {
-  document.documentElement.classList.add('dark');
-}
-import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
-import StatCalculator from "./components/stat-calculator";
-import SaveStatDialog from "./components/save-stat-dialog";
-import PlayerSearch from "./components/player-search";
-import PlayerAnalysis from "./components/player-analysis";
-import PlayerComparison from "./components/player-comparison";
-import FormulaExamples from "./components/formula-examples";
-import UsageRateLeaderboard from "./components/usage-rate-leaderboard";
-import TeamStats from "./components/team-stats";
-import AboutSection from "./components/about-section";
-import StatsLibrary from "./pages/StatsLibrary";
-import UserProfilePage from "./pages/UserProfile";
-import ScatterPlotAnalyzer from "./components/scatter-plot-analyzer";
-import GuidedStatBuilder from "./components/guided-stat-builder";
-import { ColorfulFavoriteButton } from "./components/colorful-favorites";
-import { UserProfileDropdown } from "./components/user-profile-dropdown";
-import { MyCustomStats } from "./components/my-custom-stats";
-import { generatePersonalizedGraph, generateCareerProgressionData } from "./utils/personalized-graphs";
-import type { CustomStat, FavoritePlayer } from "@shared/schema";
-
-import { BarChart3, Search, Calculator, TrendingUp, Sparkles, RefreshCw, ChevronDown, Filter, User, Home, Info, BookOpen, Activity, Wand2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { BarChart3, Calculator, Search, TrendingUp, User, Info, Sparkles, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { evaluate } from "mathjs";
+import { PlayerSearch } from "@/components/player-search";
+import { PlayerAnalysis } from "@/components/player-analysis";
+import { PlayerComparison } from "@/components/player-comparison";
+import { ScatterPlotAnalyzer } from "@/components/scatter-plot-analyzer";
+import { GuidedStatBuilder } from "@/components/guided-stat-builder";
+import { UsageRateLeaderboard } from "@/components/usage-rate-leaderboard";
+import { FormulaExamples } from "@/components/formula-examples";
+import StatsLibrary from "@/pages/StatsLibrary";
+import AboutSection from "@/components/about-section";
+import UserProfilePage from "@/pages/UserProfile";
+import { UserProfileDropdown } from "@/components/user-profile-dropdown";
+import { MyCustomStats } from "@/components/my-custom-stats";
+import StatCalculator from "@/components/stat-calculator";
+import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { setupFeaturedShowcase } from "@/utils/personalized-graphs";
+import type { Player, FavoritePlayer, CustomStat } from "@shared/schema";
 
-const queryClient = new QueryClient();
+type ViewMode = 'home' | 'search' | 'analysis' | 'comparison' | 'usage-rate' | 'examples' | 'stats-library' | 'about' | 'profile' | 'scatter-plot' | 'guided-builder' | 'saved-stats';
 
-interface Player {
-  playerId: number;
-  name: string;
-  team: string;
-  position: string;
-  gamesPlayed: number;
-  minutesPerGame?: number;
-  points: number;
-  assists: number;
-  rebounds: number;
-  steals: number;
-  blocks: number;
-  turnovers: number;
-  fieldGoalPercentage: number;
-  fieldGoalAttempts?: number;
-  threePointPercentage: number;
-  threePointAttempts?: number;
-  freeThrowPercentage: number;
-  freeThrowAttempts?: number;
-  currentSeason?: string;
-  seasons?: unknown;
-  availableSeasons?: string[] | null;
-}
-
-type ViewMode = 'leaderboard' | 'search' | 'analysis' | 'comparison' | 'usage-rate' | 'about' | 'stats-library' | 'profile' | 'scatter-plot' | 'guided-builder' | 'examples';
-
-function MainApp() {
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [formula, setFormula] = useState("");
-  const [results, setResults] = useState<any[]>([]);
-  const [selectedSeason, setSelectedSeason] = useState("all-time");
-  const [viewMode, setViewMode] = useState<ViewMode>('leaderboard');
+function App() {
+  const [viewMode, setViewMode] = useState<ViewMode>('home');
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
-  const [selectedPlayerSeason, setSelectedPlayerSeason] = useState("");
+  const [selectedPlayerSeason, setSelectedPlayerSeason] = useState<string>('');
   const [comparisonData, setComparisonData] = useState<{
     player1: Player;
     season1: string;
     player2: Player;
     season2: string;
   } | null>(null);
-  const [showSavedStats, setShowSavedStats] = useState(false);
-  const [savedStats, setSavedStats] = useState<any[]>([]);
-  const [customStatName, setCustomStatName] = useState("");
 
-  // Featured analysis state
+  // Navigation handler
+  const handleNavigation = (mode: ViewMode) => {
+    setViewMode(mode);
+  };
+
+  // Authentication state
+  const { isAuthenticated } = useAuth();
+
+  // Featured showcase state
   const [featuredPlayer, setFeaturedPlayer] = useState<Player | null>(null);
   const [featuredStat, setFeaturedStat] = useState<{name: string, formula: string, description: string} | null>(null);
   const [featuredChartData, setFeaturedChartData] = useState<Array<{season: string, value: number, team: string}>>([]);
   const [refreshCounter, setRefreshCounter] = useState(0);
 
-  const [hasFavorites, setHasFavorites] = useState(false);
-  const [selectedPosition, setSelectedPosition] = useState<string>("all");
-
-  // User authentication state
-  const { data: user, isLoading: userLoading } = useQuery({
-    queryKey: ['/api/auth/user'],
-    retry: false,
+  // Fetch players data
+  const { data: players = [], isLoading: playersLoading } = useQuery<Player[]>({
+    queryKey: ["/api/players"],
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
-  // Check if user is authenticated
-  const isAuthenticated = !userLoading && user && (user as any)?.id;
-
-  // Load initial data
+  // Setup featured showcase
   useEffect(() => {
-    console.log('Starting to fetch players...');
-    const fetchPlayers = async () => {
+    const setupFeaturedShowcase = async (players: Player[]) => {
+      console.log('setupFeaturedShowcase called with', players.length, 'players');
+      
+      if (!isAuthenticated) {
+        console.log('Not authenticated, skipping featured showcase');
+        return;
+      }
+
       try {
-        console.log('Making request to /api/players');
-        const response = await fetch("/api/nba/players");
-        console.log('Players API response status:', response.status);
-        if (!response.ok) {
-          throw new Error("Failed to fetch players");
+        // Fetch user's favorites
+        const favoritesResponse = await fetch('/api/favorite-players', {
+          credentials: 'include'
+        });
+        
+        if (!favoritesResponse.ok) {
+          console.log('Failed to fetch favorites');
+          return;
         }
-        const data = await response.json();
-        console.log('Loaded players data:', data.length, 'players');
-        setPlayers(data);
-        setLoading(false);
-      } catch (err: any) {
-        console.error('Error fetching players:', err);
-        setError(err.message);
-        setLoading(false);
+
+        const favorites: FavoritePlayer[] = await favoritesResponse.json();
+        console.log('Fetched user favorites:', favorites.length, 'favorites');
+
+        if (favorites.length === 0) {
+          console.log('No favorites found, not setting up featured showcase');
+          return;
+        }
+
+        // Get a random favorite player
+        const randomFavorite = favorites[Math.floor(Math.random() * favorites.length)];
+        const selectedPlayer = players.find(p => p.playerId === randomFavorite.playerId);
+
+        if (!selectedPlayer) {
+          console.log('Selected player not found in players data');
+          return;
+        }
+
+        // Generate featured stat and chart data
+        const { selectedPlayerName, selectedStatName } = await import('@/utils/personalized-graphs').then(module => 
+          module.generatePersonalizedGraph({
+            favoritesCount: favorites.length,
+            customStatsCount: 3,
+            playersCount: players.length
+          }, refreshCounter)
+        );
+
+        const selectedStat = {
+          name: selectedStatName,
+          formula: "PTS + AST + REB",
+          description: `Showcasing ${selectedStatName} analysis`
+        };
+
+        const chartDataPoints = selectedPlayer.seasons ? 
+          (selectedPlayer.seasons as any[]).slice(0, 10).map((season: any) => ({
+            season: season.season,
+            value: season.points + season.assists + season.rebounds,
+            team: season.team
+          })) : [];
+
+        console.log('Generated chart data points:', chartDataPoints.length);
+
+        setFeaturedPlayer(selectedPlayer);
+        setFeaturedStat(selectedStat);
+        setFeaturedChartData(chartDataPoints);
+      } catch (error) {
+        console.error('Error setting up featured showcase:', error);
       }
     };
 
-    fetchPlayers();
-  }, []);
-
-  const setupFeaturedShowcase = useCallback(async (playerData: any[]) => {
-    console.log('setupFeaturedShowcase called with', playerData.length, 'players');
-    
-    // Filter players with multiple seasons
-    const playersWithMultipleSeasons = playerData.filter(p => p.seasons && p.seasons.length >= 3);
-    
-    if (playersWithMultipleSeasons.length === 0) return;
-    
-    // Fetch user's favorites and custom stats for personalized graphs
-    let userFavorites: FavoritePlayer[] = [];
-    let userCustomStats: CustomStat[] = [];
-    
-    try {
-      const [favoritesResponse, customStatsResponse] = await Promise.all([
-        fetch('/api/favorite-players'),
-        fetch('/api/custom-stats/my')
-      ]);
-      
-      console.log('Favorites response status:', favoritesResponse.status);
-      
-      if (favoritesResponse.ok) {
-        userFavorites = await favoritesResponse.json();
-        console.log('Fetched user favorites:', userFavorites.length, 'favorites');
-      } else {
-        console.log('Failed to fetch favorites:', favoritesResponse.status);
-      }
-      
-      if (customStatsResponse.ok) {
-        userCustomStats = await customStatsResponse.json();
-        console.log('Fetched user custom stats:', userCustomStats.length, 'stats');
-      }
-    } catch (error) {
-      console.log('Error fetching user data:', error);
-    }
-    
-    console.log('Players with multiple seasons:', playersWithMultipleSeasons.length);
-    console.log('Setting hasFavorites to:', userFavorites.length > 0);
-    
-    setHasFavorites(userFavorites.length > 0);
-    
-    if (userFavorites.length > 0) {
-      // Use personalized graph generation
-      const personalizedConfig = {
-        favorites: userFavorites,
-        userCustomStats: userCustomStats,
-        allPlayers: playersWithMultipleSeasons,
-        refreshCounter: refreshCounter
-      };
-      
-      console.log('Generating personalized graph with config:', {
-        favoritesCount: userFavorites.length,
-        customStatsCount: userCustomStats.length,
-        playersCount: playersWithMultipleSeasons.length
-      });
-      
-      const { selectedPlayer, selectedStat } = generatePersonalizedGraph(personalizedConfig);
-      
-      console.log('Generated personalized graph:', {
-        selectedPlayerName: selectedPlayer?.name,
-        selectedStatName: selectedStat?.name
-      });
-      
-      // Generate career progression data using the personalized utility
-      const chartDataPoints = generateCareerProgressionData(
-        selectedPlayer,
-        selectedStat.formula,
-        selectedStat.name
-      );
-      
-      console.log('Generated chart data points:', chartDataPoints.length);
-      
-      setFeaturedPlayer(selectedPlayer as Player);
-      setFeaturedStat(selectedStat);
-      setFeaturedChartData(chartDataPoints);
-    } else {
-      console.log('No favorites found, not setting up featured showcase');
-    }
-  }, [refreshCounter]);
-
-  // Setup featured showcase when players load or refresh counter changes
-  useEffect(() => {
-    console.log('useEffect triggered - players.length:', players.length);
     if (players.length > 0) {
-      console.log('Calling setupFeaturedShowcase with', players.length, 'players');
       setupFeaturedShowcase(players);
     }
-  }, [players, setupFeaturedShowcase]);
-
-  const handleSeasonChange = (season: string) => {
-    setSelectedSeason(season);
-    setLoading(true);
-    setResults([]);
-  };
-
-  const calculateStats = async () => {
-    console.log("Calculate button clicked, formula:", formula, "season:", selectedSeason);
-    if (!formula.trim()) {
-      console.log("No formula provided, returning");
-      return;
-    }
-    
-    // Clear any previous errors when starting a new calculation
-    setError("");
-    
-    try {
-      const response = await fetch("/api/nba/calculate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          formula,
-          season: selectedSeason,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to calculate stats");
-      }
-
-      const data = await response.json();
-      console.log("Calculation response:", data);
-      setResults(data || []);
-      setError("");
-    } catch (err: any) {
-      console.error("Calculation error:", err);
-      setError(err.message);
-      setResults([]);
-    }
-  };
-
-  const saveCustomStat = async (statName: string, formula: string, description: string) => {
-    try {
-      const response = await fetch("/api/stats/save", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: statName,
-          formula,
-          description,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to save stat");
-      }
-
-      // Refresh saved stats
-      setSavedStats(prev => [...prev, { name: statName, formula, description }]);
-    } catch (err: any) {
-      setError(err.message);
-    }
-  };
-
-  const loadSavedStat = (stat: any) => {
-    setFormula(stat.formula);
-    setCustomStatName(stat.name);
-    setShowSavedStats(false);
-  };
+  }, [players, isAuthenticated, refreshCounter]);
 
   const handlePlayerSelect = (player: any, season: string) => {
     setSelectedPlayer(player as Player);
@@ -299,15 +145,12 @@ function MainApp() {
     setViewMode('comparison');
   };
 
-  const handleNavigation = (mode: ViewMode) => {
-    setViewMode(mode);
-  };
-
   const renderContent = () => {
     if (viewMode === 'analysis' && selectedPlayer) {
       return (
         <PlayerAnalysis
           player={selectedPlayer}
+          season={selectedPlayerSeason}
           onBack={() => setViewMode('search')}
         />
       );
@@ -322,10 +165,6 @@ function MainApp() {
           season2={comparisonData.season2}
         />
       );
-    }
-
-    if (viewMode === 'examples') {
-      return <FormulaExamples onFormulaSelect={(formula) => setFormula(formula)} />;
     }
 
     if (viewMode === 'about') {
@@ -357,6 +196,10 @@ function MainApp() {
       return <StatsLibrary />;
     }
 
+    if (viewMode === 'examples') {
+      return <FormulaExamples />;
+    }
+
     if (viewMode === 'profile') {
       return <UserProfilePage />;
     }
@@ -379,374 +222,198 @@ function MainApp() {
             </Button>
           </div>
           <MyCustomStats onStatSelect={(formula, name) => {
-            setFormula(formula);
-            setCustomStatName(name);
+            // This will be handled by the StatCalculator component
             setViewMode('home');
           }} />
         </div>
       );
     }
 
-    // Default leaderboard view
+    // Default home view
     return (
       <div className="space-y-6">
+        {/* Season Selector */}
+        <div className="flex justify-center">
+          <div className="bg-slate-800 rounded-lg p-1">
+            <select className="bg-slate-700 text-white px-4 py-2 rounded border-none outline-none">
+              <option>All-Time Leaders (1996-2025)</option>
+              <option>2024-25 Season</option>
+              <option>2023-24 Season</option>
+            </select>
+          </div>
+        </div>
+
         {/* Featured Analysis Section */}
-        {featuredPlayer && featuredStat && hasFavorites && (
-          <div className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-xl border border-orange-200 dark:border-orange-700 p-6">
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="flex items-center gap-2">
-                    <BarChart3 className="w-6 h-6 text-orange-500" />
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">Featured Analysis</h3>
+        {featuredPlayer && featuredStat && featuredChartData.length > 0 && (
+          <div className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-xl p-6 border border-orange-200 dark:border-orange-700">
+            <div className="flex items-center gap-3 mb-4">
+              <Sparkles className="w-6 h-6 text-orange-600" />
+              <h2 className="text-xl font-bold text-orange-900 dark:text-orange-200">Featured Analysis</h2>
+              <span className="text-sm text-orange-700 dark:text-orange-300">• Changes daily</span>
+            </div>
+            
+            <div className="grid lg:grid-cols-2 gap-6">
+              {/* Player Info */}
+              <div className="bg-gradient-to-r from-orange-100 to-amber-100 dark:from-orange-800/30 dark:to-amber-800/30 rounded-lg p-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    {featuredPlayer.name.split(' ').map(n => n[0]).join('')}
                   </div>
-                  <ColorfulFavoriteButton 
-                    player={{
-                      ...featuredPlayer,
-                      name: featuredPlayer.name,
-                      team: featuredPlayer.team,
-                      position: featuredPlayer.position
-                    }}
-                  />
-                </div>
-                <div className="space-y-3">
                   <div>
-                    <button
-                      onClick={() => handlePlayerSelect(featuredPlayer, "2024-25")}
-                      className="text-left group"
-                    >
-                      <h4 className="text-lg font-semibold text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors cursor-pointer">
-                        {featuredPlayer.name} →
-                      </h4>
-                      <p className="text-slate-600 dark:text-slate-400">
-                        {featuredPlayer.team} • {featuredPlayer.position}
-                      </p>
-                    </button>
+                    <h3 className="font-bold text-orange-900 dark:text-orange-200 text-lg">{featuredPlayer.name} ➜</h3>
+                    <p className="text-orange-700 dark:text-orange-300 text-sm">{featuredPlayer.team} • Career Spanning {featuredPlayer.seasons?.length || 0} Seasons</p>
                   </div>
-                  <div className="bg-orange-100 dark:bg-orange-900/30 rounded-lg p-4">
-                    <h5 className="font-medium text-slate-900 dark:text-white mb-2">{featuredStat.name}</h5>
-                    <code className="text-sm bg-white dark:bg-slate-800 px-2 py-1 rounded">
-                      {featuredStat.formula}
-                    </code>
-                    <button
-                      onClick={() => {
-                        setFormula(featuredStat.formula);
-                        setCustomStatName(featuredStat.name);
-                      }}
-                      className="block mt-3 text-sm text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300"
-                    >
-                      Copy to Formula Builder →
-                    </button>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-orange-900 dark:text-orange-200 font-medium">{featuredStat.name} ➜</div>
+                  <div className="text-orange-700 dark:text-orange-300 text-sm">{featuredStat.description}</div>
+                  <div className="text-orange-600 dark:text-orange-400 text-sm font-mono">
+                    {featuredStat.formula}
                   </div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
-                    {featuredStat.description}
-                  </p>
+                  <div className="text-orange-700 dark:text-orange-300 text-sm">
+                    Click to see all-time leaders
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 mt-3">
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-orange-900 dark:text-orange-200">
+                        {featuredChartData.length > 0 ? Number(featuredChartData[featuredChartData.length - 1]?.value || 0).toFixed(1) : '0.0'}
+                      </div>
+                      <div className="text-xs text-orange-600 dark:text-orange-400">Current Value</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-orange-900 dark:text-orange-200">
+                        {Math.max(...featuredChartData.map(d => d.value || 0)).toFixed(1)}
+                      </div>
+                      <div className="text-xs text-orange-600 dark:text-orange-400">Peak Value</div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              
-              <div className="bg-slate-200 dark:bg-slate-700 rounded-lg p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-orange-400" />
-                    <h4 className="text-lg font-semibold text-slate-900 dark:text-white">
-                      Career Progression
-                    </h4>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setRefreshCounter(prev => prev + 1);
-                      setResults([]);
-                      setError("");
-                    }}
-                    className="flex items-center gap-2 px-3 py-1 text-sm bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 rounded-lg hover:bg-orange-200 dark:hover:bg-orange-900/70 transition-colors"
+
+              {/* Chart */}
+              <div className="bg-white dark:bg-slate-800 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-semibold text-slate-900 dark:text-white">📈 Career Progression</h4>
+                  <Button 
+                    onClick={() => setRefreshCounter(prev => prev + 1)} 
+                    variant="outline" 
+                    size="sm"
+                    className="text-orange-600 border-orange-300 hover:bg-orange-50"
                   >
-                    <RefreshCw className="w-4 h-4" />
-                    Refresh
-                  </button>
+                    🔄 Refresh
+                  </Button>
                 </div>
-                <div className="h-48 w-full">
+                <div className="h-48">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={featuredChartData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
-                      <XAxis 
-                        dataKey="season" 
-                        stroke="var(--chart-text)"
-                        fontSize={10}
-                        angle={-45}
-                        textAnchor="end"
-                        height={60}
-                      />
-                      <YAxis 
-                        stroke="var(--chart-text)"
-                        fontSize={10}
-                        tickFormatter={(value) => value.toFixed(1)}
-                      />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis dataKey="season" tick={{ fontSize: 12 }} />
+                      <YAxis tick={{ fontSize: 12 }} />
                       <Tooltip 
-                        content={({ active, payload, label }) => {
-                          if (active && payload && payload.length) {
-                            return (
-                              <div className="bg-white dark:bg-slate-800 p-3 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg">
-                                <p className="font-medium text-slate-900 dark:text-white">{label} Season</p>
-                                <p className="text-orange-600 dark:text-orange-400">
-                                  {featuredStat?.name}: {payload[0].value?.toFixed(2)}
-                                </p>
-                                <p className="text-sm text-slate-600 dark:text-slate-400">
-                                  Team: {payload[0].payload?.team}
-                                </p>
-                              </div>
-                            );
-                          }
-                          return null;
+                        contentStyle={{ 
+                          backgroundColor: 'white',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '8px'
                         }}
+                        formatter={(value: any, name: string) => [
+                          typeof value === 'number' ? Number(value).toFixed(2) : value,
+                          featuredStat?.name || name
+                        ]}
+                        labelFormatter={(label) => `Season: ${label}`}
                       />
                       <Line 
                         type="monotone" 
                         dataKey="value" 
-                        stroke="#F97316" 
+                        stroke="#ea580c" 
                         strokeWidth={3}
-                        dot={{ fill: '#F97316', strokeWidth: 2, r: 4 }}
-                        connectNulls={false}
-                        activeDot={{ r: 6, stroke: '#F97316', strokeWidth: 2 }}
+                        dot={{ fill: '#ea580c', strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6, stroke: '#ea580c', strokeWidth: 2 }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
-                <p className="text-xs text-slate-400 mt-2">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
                   Hover over points to see detailed season data
                 </p>
               </div>
             </div>
           </div>
         )}
-        
-        {/* Non-authenticated fallback */}
-        {(!hasFavorites || !isAuthenticated) && (
-          <div className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-xl border border-purple-200 dark:border-purple-700 p-6">
-            <div className="text-center space-y-4">
-              <div className="flex items-center justify-center gap-3 mb-4">
-                <User className="w-6 h-6 text-purple-500" />
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Get Personalized Analytics</h2>
-              </div>
-              <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-                Create an account and add favorite players to see personalized featured analysis with career progression charts and custom statistics for the players you follow most.
-              </p>
-              <div className="flex items-center justify-center gap-4 mt-6">
-                <Button
-                  onClick={() => setViewMode('profile')}
-                  className="bg-purple-600 hover:bg-purple-700 text-white"
-                >
-                  <User className="w-4 h-4 mr-2" />
-                  View Profile
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setViewMode('search')}
-                  className="border-purple-300 text-purple-700 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-300"
-                >
-                  <Search className="w-4 h-4 mr-2" />
-                  Explore Players
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
 
-        {/* Custom Stat Builder Section */}
-        <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border border-slate-200 dark:border-slate-700">
-          <div className="flex flex-col lg:flex-row gap-6">
-            <div className="lg:w-2/3 space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Calculator className="w-6 h-6 text-blue-500" />
-                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Custom Stat Builder</h2>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setViewMode('guided-builder')}
-                    className="flex items-center gap-2"
-                  >
-                    <Sparkles className="w-4 h-4" />
-                    Simple Mode
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setViewMode('analysis')}
-                    className="flex items-center gap-2"
-                  >
-                    <Calculator className="w-4 h-4" />
-                    Formula Guide
-                  </Button>
-                </div>
-              </div>
-
-              <StatCalculator 
-                onFormulaChange={setFormula}
-                onCalculate={calculateStats}
-                formula={formula}
-              />
-
-              <div className="flex items-center gap-4">
-
-
-              </div>
-
-
-            </div>
-
-            <div className="lg:w-1/3">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-slate-900 dark:text-white">
-                    {customStatName ? `${customStatName} Results` : "Results"}
-                  </h3>
-                  {results && results.length > 0 && (
-                    <div className="flex items-center gap-2">
-                      <select
-                        value={selectedPosition}
-                        onChange={(e) => setSelectedPosition(e.target.value)}
-                        className="px-3 py-1 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-sm"
-                      >
-                        <option value="all">All Positions</option>
-                        <option value="PG">Point Guard</option>
-                        <option value="SG">Shooting Guard</option>
-                        <option value="SF">Small Forward</option>
-                        <option value="PF">Power Forward</option>
-                        <option value="C">Center</option>
-                      </select>
-                    </div>
-                  )}
-                </div>
-                
-                {results && results.length > 0 && (
-                  <div className="space-y-2 max-h-96 overflow-y-auto">
-                    {results
-                      .filter((result: any) => {
-                        if (selectedPosition === 'all') return true;
-                        return result.player?.position?.includes(selectedPosition);
-                      })
-                      .slice(0, 50)
-                      .map((result: any, index: number) => {
-                        console.log('Rendering result:', result);
-                        console.log('Player name:', result.player?.name);
-                        return (
-                          <div key={index} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <div className="flex items-center justify-center w-8 h-8 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">
-                                {index + 1}
-                              </div>
-                              <div>
-                                <div className="font-medium text-slate-900 dark:text-white">{result.player?.name || 'Unknown Player'}</div>
-                                <div className="text-sm text-slate-600 dark:text-slate-400">{result.player?.team || 'N/A'} • {result.player?.position || 'N/A'}</div>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <div className="font-bold text-slate-900 dark:text-white">{typeof result.value === 'number' ? result.value.toFixed(2) : result.value}</div>
-                              <div className="text-sm text-slate-600 dark:text-slate-400">
-                                {customStatName ? customStatName : "Custom"}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                  </div>
-                )}
-
-                {!results && !loading && !error && (
-                  <div className="text-center py-8 text-slate-500 dark:text-slate-400">
-                    <p>No results to display. Try calculating a formula first.</p>
-                  </div>
-                )}
-
-                {results && results.length === 0 && !loading && !error && (
-                  <div className="text-center py-8 text-slate-500 dark:text-slate-400">
-                    <p>No results found for the current filters.</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* My Custom Stats Component */}
-        <MyCustomStats onStatSelect={(formula, name) => {
-          setFormula(formula);
-          setCustomStatName(name);
-        }} />
-
-
+        {/* Custom Stats Calculator */}
+        <StatCalculator />
       </div>
     );
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-slate-900 text-white">
       {/* Header */}
-      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50">
+      <header className="bg-slate-900 border-b border-slate-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-8">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
-                  <BarChart3 className="w-5 h-5 text-white" />
-                </div>
-                <h1 className="text-xl font-bold text-slate-900 dark:text-white">NBA Analytics</h1>
+              <div>
+                <h1 className="text-xl font-bold text-orange-400">NBA Custom Stats Calculator</h1>
+                <p className="text-sm text-slate-400">Create custom basketball statistics with authentic NBA player data</p>
               </div>
               
               <nav className="hidden md:flex items-center gap-1">
                 <Button
-                  variant={viewMode === 'leaderboard' ? 'default' : 'ghost'}
-                  onClick={() => handleNavigation('leaderboard')}
-                  className="flex items-center gap-2"
+                  variant={viewMode === 'home' ? 'default' : 'ghost'}
+                  onClick={() => handleNavigation('home')}
+                  className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700"
                 >
-                  <Home className="w-4 h-4" />
-                  Home
+                  <BarChart3 className="w-4 h-4" />
+                  Leaderboards
                 </Button>
                 <Button
-                  variant={viewMode === 'search' ? 'default' : 'ghost'}
+                  variant="ghost"
                   onClick={() => handleNavigation('search')}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-700"
                 >
                   <Search className="w-4 h-4" />
                   Player Search
                 </Button>
                 <Button
-                  variant={viewMode === 'scatter-plot' ? 'default' : 'ghost'}
-                  onClick={() => handleNavigation('scatter-plot')}
-                  className="flex items-center gap-2"
-                >
-                  <Activity className="w-4 h-4" />
-                  Analysis
-                </Button>
-                <Button
-                  variant={viewMode === 'guided-builder' ? 'default' : 'ghost'}
-                  onClick={() => handleNavigation('guided-builder')}
-                  className="flex items-center gap-2"
-                >
-                  <Wand2 className="w-4 h-4" />
-                  Stat Builder
-                </Button>
-                <Button
-                  variant={viewMode === 'stats-library' ? 'default' : 'ghost'}
+                  variant="ghost"
                   onClick={() => handleNavigation('stats-library')}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-700"
                 >
-                  <BookOpen className="w-4 h-4" />
-                  Library
+                  <Calculator className="w-4 h-4" />
+                  Stats Library
                 </Button>
                 <Button
-                  variant={viewMode === 'about' ? 'default' : 'ghost'}
-                  onClick={() => handleNavigation('about')}
-                  className="flex items-center gap-2"
+                  variant="ghost"
+                  onClick={() => handleNavigation('scatter-plot')}
+                  className="flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-700"
                 >
-                  <Info className="w-4 h-4" />
-                  About
+                  <TrendingUp className="w-4 h-4" />
+                  Scatter Plot
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => handleNavigation('guided-builder')}
+                  className="flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-700"
+                >
+                  <Calculator className="w-4 h-4" />
+                  Custom Stats Guide
                 </Button>
               </nav>
             </div>
             
             <div className="flex items-center gap-4">
-              <UserProfileDropdown players={players} />
+              {isAuthenticated && (
+                <Button
+                  variant="ghost"
+                  onClick={() => handleNavigation('profile')}
+                  className="flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-700"
+                >
+                  <User className="w-4 h-4" />
+                  Profile
+                </Button>
+              )}
+              <UserProfileDropdown />
             </div>
           </div>
         </div>
@@ -760,10 +427,4 @@ function MainApp() {
   );
 }
 
-export default function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <MainApp />
-    </QueryClientProvider>
-  );
-}
+export default App;
