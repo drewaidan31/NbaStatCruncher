@@ -134,7 +134,7 @@ function MainApp() {
     
     try {
       const [favoritesResponse, customStatsResponse] = await Promise.all([
-        fetch('/api/favorites'),
+        fetch('/api/favorite-players'),
         fetch('/api/custom-stats/my')
       ]);
       

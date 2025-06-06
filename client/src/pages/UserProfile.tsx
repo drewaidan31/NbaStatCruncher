@@ -172,7 +172,7 @@ export default function UserProfile({ players, onBack }: UserProfileProps) {
               ) : favorites.length > 0 ? (
                 <div className="space-y-3 max-h-96 overflow-y-auto">
                   {favorites.map((favorite, index) => {
-                    const player = players.find(p => p.playerId === favorite.playerId);
+                    const player = players?.find(p => p.playerId === favorite.playerId);
                     const colors = [
                       'from-red-400 to-pink-400',
                       'from-purple-400 to-indigo-400', 
