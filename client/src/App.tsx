@@ -104,6 +104,7 @@ function MainApp() {
           throw new Error("Failed to fetch players");
         }
         const data = await response.json();
+        console.log('Loaded players data:', data.length, 'players');
         setPlayers(data);
         setLoading(false);
       } catch (err: any) {
@@ -196,7 +197,9 @@ function MainApp() {
 
   // Setup featured showcase when players load or refresh counter changes
   useEffect(() => {
+    console.log('useEffect triggered - players.length:', players.length);
     if (players.length > 0) {
+      console.log('Calling setupFeaturedShowcase with', players.length, 'players');
       setupFeaturedShowcase(players);
     }
   }, [players, setupFeaturedShowcase]);
