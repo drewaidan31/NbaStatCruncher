@@ -46,7 +46,7 @@ interface Player {
   threePointAttempts?: number;
   freeThrowPercentage: number;
   plusMinus: number;
-  currentSeason?: string;
+  currentSeason?: string | null;
   seasons?: Array<{
     season: string;
     team: string;
@@ -599,6 +599,7 @@ function MainApp() {
                         }}
                       />
                       <Line 
+                        key="featured-player-line"
                         type="monotone" 
                         dataKey="value" 
                         stroke="#F97316" 

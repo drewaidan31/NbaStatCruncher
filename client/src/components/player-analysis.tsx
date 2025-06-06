@@ -230,8 +230,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
           threePointAttempts: seasonData.threePointAttempts,
           freeThrowPercentage: seasonData.freeThrowPercentage,
           freeThrowAttempts: seasonData.freeThrowAttempts,
-          plusMinus: seasonData.plusMinus,
-          winPercentage: seasonData.winPercentage
+          plusMinus: seasonData.plusMinus
         };
         setCurrentPlayerData(updatedPlayerData);
       }
@@ -754,6 +753,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
                           }}
                         />
                         <Line 
+                          key="custom-stat-line"
                           type="monotone" 
                           dataKey="value" 
                           stroke="#F97316" 
