@@ -364,9 +364,13 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
                           })()}
                         </div>
                         <button
-                          onClick={(e) => handleToggleFavorite(player, e)}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleToggleFavorite(player, e);
+                          }}
                           title={isFavorite(player.playerId) ? "Remove from favorites" : "Add to favorites"}
-                          className="opacity-60 group-hover:opacity-100 transition-all duration-200 hover:scale-110"
+                          className="opacity-60 group-hover:opacity-100 transition-all duration-200 hover:scale-110 z-10 relative"
                           disabled={addFavoriteMutation.isPending || removeFavoriteMutation.isPending}
                         >
                           <Heart 
