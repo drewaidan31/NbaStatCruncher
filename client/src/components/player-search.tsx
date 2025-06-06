@@ -404,10 +404,10 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
                           disabled={addFavoriteMutation.isPending || removeFavoriteMutation.isPending}
                         >
                           <Heart 
-                            className={`w-5 h-5 ${
+                            className={`w-5 h-5 transition-colors ${
                               isFavorite(player.playerId) 
-                                ? 'text-red-500 fill-red-500' 
-                                : 'text-slate-400 hover:text-red-400'
+                                ? 'text-orange-500 fill-orange-500' 
+                                : 'text-slate-400 hover:text-orange-400'
                             }`}
                           />
                         </button>

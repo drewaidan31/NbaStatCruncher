@@ -546,10 +546,10 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
                   disabled={addFavoriteMutation.isPending || removeFavoriteMutation.isPending}
                 >
                   <Heart 
-                    className={`w-6 h-6 ${
+                    className={`w-6 h-6 transition-colors ${
                       isFavorite(player.playerId) 
-                        ? 'text-red-300 fill-red-300' 
-                        : 'text-white/60 hover:text-red-300'
+                        ? 'text-orange-400 fill-orange-400' 
+                        : 'text-white/60 hover:text-orange-400'
                     }`}
                   />
                 </button>
