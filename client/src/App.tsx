@@ -41,10 +41,56 @@ function MainApp() {
     player2: Player;
     season2: string;
   } | null>(null);
+  
+  // Calculator state
+  const [formula, setFormula] = useState('');
+  const [results, setResults] = useState<Array<{player: string, value: number}>>([]);
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [calculationError, setCalculationError] = useState<string | null>(null);
 
   // Navigation handler
   const handleNavigation = (mode: ViewMode) => {
     setViewMode(mode);
+  };
+
+  const calculateFormula = async () => {
+    if (!formula.trim()) {
+      setCalculationError('Please enter a formula first');
+      return;
+    }
+    
+    setIsCalculating(true);
+    setCalculationError(null);
+    
+    try {
+      console.log('Calculating formula:', formula);
+      const response = await apiRequest('/api/calculate-custom-stat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ formula })
+      });
+      
+      console.log('Calculation response:', response);
+      
+      if (response && response.length > 0) {
+        // Transform the response to match expected format
+        const transformedResults = response.map((item: any) => ({
+          player: item.player || item.name,
+          value: item.customStat || item.value || 0
+        }));
+        setResults(transformedResults);
+        setCalculationError(null);
+      } else {
+        setCalculationError('No results found. Please check your formula.');
+        setResults([]);
+      }
+    } catch (error) {
+      console.error('Calculation error:', error);
+      setCalculationError('Error calculating formula. Please check the syntax.');
+      setResults([]);
+    } finally {
+      setIsCalculating(false);
+    }
   };
 
   // Authentication state
@@ -344,9 +390,50 @@ function MainApp() {
 
         {/* Custom Stats Calculator */}
         <StatCalculator 
-          onFormulaChange={() => {}}
-          onCalculate={() => {}}
+          onFormulaChange={setFormula}
+          onCalculate={calculateFormula}
+          formula={formula}
         />
+        
+        {/* Error Message */}
+        {calculationError && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-xs">!</span>
+              </div>
+              <p className="text-red-700 dark:text-red-300 font-medium">{calculationError}</p>
+            </div>
+          </div>
+        )}
+        
+        {/* Results */}
+        {(results.length > 0 || isCalculating) && (
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 p-6">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50 mb-4">Top Players</h3>
+            
+            {isCalculating ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p className="text-slate-600 dark:text-slate-400">Calculating custom stat rankings...</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {results.slice(0, 10).map((result, index) => (
+                  <div key={index} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <span className="w-6 h-6 bg-orange-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                        {index + 1}
+                      </span>
+                      <span className="font-medium text-slate-900 dark:text-slate-100">{result.player}</span>
+                    </div>
+                    <span className="text-blue-600 dark:text-blue-400 font-semibold">{result.value.toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     );
   };
@@ -404,6 +491,16 @@ function MainApp() {
                   <Calculator className="w-4 h-4" />
                   Custom Stats Guide
                 </Button>
+                {isAuthenticated && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleNavigation('saved-stats')}
+                    className="flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-700"
+                  >
+                    <Heart className="w-4 h-4" />
+                    Saved Stats
+                  </Button>
+                )}
               </nav>
             </div>
             
