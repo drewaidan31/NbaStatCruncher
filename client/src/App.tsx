@@ -627,6 +627,8 @@ function MainApp() {
                       })
                       .slice(0, 50)
                       .map((result: any, index: number) => {
+                        console.log('Rendering result:', result);
+                        console.log('Player name:', result.player?.name);
                         return (
                           <div key={index} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
                             <div className="flex items-center gap-3">
