@@ -102,8 +102,13 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
       console.log("Add favorite success:", result);
       return result;
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       console.log("Add favorite mutation success");
+      // Immediately update the cache with the new favorite
+      queryClient.setQueryData(["/api/favorite-players"], (oldData: FavoritePlayer[] | undefined) => {
+        if (!oldData) return [result];
+        return [...oldData, result];
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/favorite-players"] });
       toast({
         title: "Added to Favorites!",
@@ -129,7 +134,12 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
       if (!response.ok) throw new Error("Failed to remove favorite");
       return await response.json();
     },
-    onSuccess: () => {
+    onSuccess: (_, playerId) => {
+      // Immediately update the cache by removing the favorite
+      queryClient.setQueryData(["/api/favorite-players"], (oldData: FavoritePlayer[] | undefined) => {
+        if (!oldData) return [];
+        return oldData.filter(fav => fav.playerId !== playerId);
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/favorite-players"] });
       toast({
         title: "Removed from Favorites",
