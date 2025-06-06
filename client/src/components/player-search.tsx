@@ -65,22 +65,33 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
   // Add favorite player mutation
   const addFavoriteMutation = useMutation({
     mutationFn: async ({ playerId, playerName }: { playerId: number; playerName: string }) => {
+      console.log("Making API call to add favorite:", { playerId, playerName });
       const response = await fetch(`/api/favorite-players`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ playerId, playerName }),
+        credentials: 'include',
       });
-      if (!response.ok) throw new Error("Failed to add favorite");
-      return await response.json();
+      console.log("Add favorite response status:", response.status);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.log("Add favorite error:", errorText);
+        throw new Error(`Failed to add favorite: ${response.status} ${errorText}`);
+      }
+      const result = await response.json();
+      console.log("Add favorite success:", result);
+      return result;
     },
     onSuccess: () => {
+      console.log("Add favorite mutation success");
       queryClient.invalidateQueries({ queryKey: ["/api/favorite-players"] });
       toast({
         title: "Added to Favorites!",
         description: "Player added with personalized insights",
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.log("Add favorite mutation error:", error);
       toast({
         title: "Error",
         description: "Failed to add player to favorites",
@@ -121,7 +132,12 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
   const handleToggleFavorite = (player: Player, e: React.MouseEvent) => {
     e.stopPropagation();
     
+    console.log("Heart clicked for player:", player.name, "ID:", player.playerId);
+    console.log("Is authenticated:", isAuthenticated);
+    console.log("Is favorite:", isFavorite(player.playerId));
+    
     if (!isAuthenticated) {
+      console.log("User not authenticated, showing login toast");
       toast({
         title: "Please Log In",
         description: "Log in to save favorite players and get personalized insights",
@@ -131,8 +147,10 @@ export default function PlayerSearch({ onPlayerSelect, onCompareSelect, currentF
     }
 
     if (isFavorite(player.playerId)) {
+      console.log("Removing from favorites");
       removeFavoriteMutation.mutate(player.playerId);
     } else {
+      console.log("Adding to favorites");
       addFavoriteMutation.mutate({
         playerId: player.playerId,
         playerName: player.name,
