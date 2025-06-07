@@ -96,10 +96,6 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
       // Combine data points using actual player data
       const combinedData: ScatterDataPoint[] = [];
       
-      // Filter players by season if specified
-      const filteredPlayers = selectedSeason === "all" ? 
-        players : players.filter(p => p.currentSeason === selectedSeason);
-      
       xData.forEach((xPoint: any) => {
         const yPoint = yData.find((y: any) => 
           y.playerId === xPoint.playerId && y.season === xPoint.season
@@ -128,7 +124,63 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
         }
       });
 
-      setScatterData(combinedData);
+      // Apply intelligent sampling and jittering for large datasets
+      let optimizedData = combinedData;
+      
+      if (combinedData.length > 400) {
+        // Sort by combined stat value to prioritize top performers
+        const sortedData = [...combinedData].sort((a, b) => (b.x + b.y) - (a.x + a.y));
+        
+        // Take top 150 performers
+        const topPerformers = sortedData.slice(0, 150);
+        
+        // Strategic sampling from remaining data with better distribution
+        const remaining = sortedData.slice(150);
+        const sampleSize = Math.min(250, remaining.length);
+        
+        // Use stratified sampling to ensure good distribution across stat ranges
+        const xMin = Math.min(...remaining.map(d => d.x));
+        const xMax = Math.max(...remaining.map(d => d.x));
+        const yMin = Math.min(...remaining.map(d => d.y));
+        const yMax = Math.max(...remaining.map(d => d.y));
+        
+        const gridSize = 10; // 10x10 grid
+        const xStep = (xMax - xMin) / gridSize;
+        const yStep = (yMax - yMin) / gridSize;
+        
+        const strategicSample: ScatterDataPoint[] = [];
+        
+        // Sample from each grid cell to ensure even distribution
+        for (let i = 0; i < gridSize && strategicSample.length < sampleSize; i++) {
+          for (let j = 0; j < gridSize && strategicSample.length < sampleSize; j++) {
+            const xLower = xMin + i * xStep;
+            const xUpper = xMin + (i + 1) * xStep;
+            const yLower = yMin + j * yStep;
+            const yUpper = yMin + (j + 1) * yStep;
+            
+            const cellPlayers = remaining.filter(d => 
+              d.x >= xLower && d.x < xUpper && d.y >= yLower && d.y < yUpper
+            );
+            
+            if (cellPlayers.length > 0) {
+              // Take best performer from this cell
+              const bestInCell = cellPlayers.sort((a, b) => (b.x + b.y) - (a.x + a.y))[0];
+              strategicSample.push(bestInCell);
+            }
+          }
+        }
+        
+        optimizedData = [...topPerformers, ...strategicSample];
+      }
+      
+      // Apply small jitter to prevent perfect overlaps
+      optimizedData = optimizedData.map(point => ({
+        ...point,
+        x: point.x + (Math.random() - 0.5) * 0.01,
+        y: point.y + (Math.random() - 0.5) * 0.01
+      }));
+
+      setScatterData(optimizedData);
     } catch (error) {
       console.error("Error calculating scatter data:", error);
     } finally {
@@ -325,7 +377,7 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
                     {scatterData.length}
                   </div>
                   <div className="text-sm text-slate-600 dark:text-slate-400">
-                    Total Players
+                    Players Displayed (2,771 total)
                   </div>
                 </div>
                 <div>
@@ -418,15 +470,26 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
                           }
                         }}
                       >
-                        {scatterData.map((entry, index) => (
-                          <Cell 
-                            key={`cell-${index}`}
-                            fill={entry.teamColor}
-                            stroke="#ffffff"
-                            strokeWidth={1}
-                            style={{ cursor: 'pointer' }}
-                          />
-                        ))}
+                        {scatterData.map((entry, index) => {
+                          // Dynamic dot sizing based on data density and value
+                          const baseSize = scatterData.length > 300 ? 4 : scatterData.length > 150 ? 6 : 8;
+                          const isTopPerformer = (entry.x + entry.y) > (avgX + avgY) * 1.2;
+                          const dotSize = isTopPerformer ? baseSize + 2 : baseSize;
+                          
+                          return (
+                            <Cell 
+                              key={`cell-${index}`}
+                              fill={entry.teamColor}
+                              stroke="#ffffff"
+                              strokeWidth={0.5}
+                              r={dotSize}
+                              style={{ 
+                                cursor: 'pointer',
+                                opacity: isTopPerformer ? 0.9 : 0.7
+                              }}
+                            />
+                          );
+                        })}
                       </Scatter>
                     </ScatterChart>
                   </ResponsiveContainer>
