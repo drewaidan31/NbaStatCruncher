@@ -732,6 +732,15 @@ function MainApp() {
               >
                 Clear
               </button>
+              <button
+                onClick={() => {
+                  setFormula(prev => prev.slice(0, -1));
+                }}
+                disabled={!formula}
+                className="bg-red-600 hover:bg-red-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white py-2 px-4 rounded-lg transition-colors"
+              >
+                Delete
+              </button>
             </div>
           </div>
 
