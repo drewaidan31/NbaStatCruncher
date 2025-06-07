@@ -5,10 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Cell } from "recharts";
-import { TrendingUp, Zap, Users, ArrowLeft, Award, BarChart3, X } from "lucide-react";
+import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
+import { TrendingUp, Zap, Users, ArrowLeft } from "lucide-react";
 import type { CustomStat, Player } from "@shared/schema";
 
 interface ScatterPlotAnalyzerProps {
@@ -45,8 +43,6 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
   const [selectedSeason, setSelectedSeason] = useState<string>("all");
   const [scatterData, setScatterData] = useState<ScatterDataPoint[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedPlayer, setSelectedPlayer] = useState<ScatterDataPoint | null>(null);
-  const [isPlayerModalOpen, setIsPlayerModalOpen] = useState(false);
 
   // Fetch user's custom stats
   const { data: customStats = [] } = useQuery<CustomStat[]>({
@@ -93,78 +89,31 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
         yResponse.json()
       ]);
 
-      // Combine data points using actual player data
+      // Combine data points
       const combinedData: ScatterDataPoint[] = [];
-      
       xData.forEach((xPoint: any) => {
         const yPoint = yData.find((y: any) => 
-          y.playerId === xPoint.playerId && y.season === xPoint.season
+          y.name === xPoint.name && y.team === xPoint.team
         );
         
         if (yPoint && xPoint.value !== null && yPoint.value !== null && 
             !isNaN(xPoint.value) && !isNaN(yPoint.value) && 
             isFinite(xPoint.value) && isFinite(yPoint.value)) {
-          
-          // Filter by season if specified
-          if (selectedSeason !== "all" && xPoint.season !== selectedSeason) {
-            return;
-          }
-          
           const dataPoint = {
             name: xPoint.name,
             team: xPoint.team,
-            season: xPoint.season,
+            season: xPoint.season || "Unknown",
             x: xPoint.value,
             y: yPoint.value,
             teamColor: teamColors[xPoint.team] || '#666666',
-            playerId: xPoint.playerId
+            playerId: xPoint.name + xPoint.team
           };
           
           combinedData.push(dataPoint);
         }
       });
 
-      // Apply hexagonal binning algorithm to prevent clustering
-      const optimizedData = [];
-      const binSize = 0.1; // Adjust based on data range
-      const bins = new Map();
-      
-      // Group points into hexagonal bins
-      combinedData.forEach(point => {
-        const hexX = Math.floor(point.x / binSize) * binSize;
-        const hexY = Math.floor(point.y / binSize) * binSize;
-        const binKey = `${hexX},${hexY}`;
-        
-        if (!bins.has(binKey)) {
-          bins.set(binKey, []);
-        }
-        bins.get(binKey).push(point);
-      });
-      
-      // For each bin, spread points in a grid pattern to prevent overlap
-      bins.forEach((points, binKey) => {
-        if (points.length === 1) {
-          optimizedData.push(points[0]);
-        } else {
-          // Create micro-grid within each bin
-          const gridSize = Math.ceil(Math.sqrt(points.length));
-          const cellSize = binSize / gridSize;
-          
-          points.forEach((point, index) => {
-            const gridX = index % gridSize;
-            const gridY = Math.floor(index / gridSize);
-            const [baseBinX, baseBinY] = binKey.split(',').map(Number);
-            
-            optimizedData.push({
-              ...point,
-              x: baseBinX + (gridX + 0.5) * cellSize,
-              y: baseBinY + (gridY + 0.5) * cellSize
-            });
-          });
-        }
-      });
-
-      setScatterData(optimizedData);
+      setScatterData(combinedData);
     } catch (error) {
       console.error("Error calculating scatter data:", error);
     } finally {
@@ -361,7 +310,7 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
                     {scatterData.length}
                   </div>
                   <div className="text-sm text-slate-600 dark:text-slate-400">
-                    Players Displayed (2,771 total)
+                    Total Players
                   </div>
                 </div>
                 <div>
@@ -411,8 +360,6 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
                     <ScatterChart
                       data={scatterData}
                       margin={{ top: 20, right: 20, bottom: 40, left: 40 }}
-                      width={800}
-                      height={400}
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
                       <XAxis 
@@ -449,32 +396,18 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
                         name="Players" 
                         dataKey="y" 
                         fill="#F97316"
-                        onClick={(data) => {
-                          if (data && data.payload) {
-                            setSelectedPlayer(data.payload);
-                            setIsPlayerModalOpen(true);
-                          }
-                        }}
                       >
-                        {scatterData.map((entry, index) => {
-                          // Micro dots for maximum density without overlap
-                          const dotSize = scatterData.length > 2000 ? 1 : scatterData.length > 1000 ? 1.5 : 2;
-                          const isTopPerformer = (entry.x + entry.y) > (avgX + avgY) * 1.5;
-                          
-                          return (
-                            <Cell 
-                              key={`cell-${index}`}
-                              fill={entry.teamColor}
-                              stroke="none"
-                              r={dotSize}
-                              style={{ 
-                                cursor: 'pointer',
-                                opacity: isTopPerformer ? 0.9 : 0.4,
-                                transition: 'opacity 0.2s ease'
-                              }}
-                            />
-                          );
-                        })}
+                        {scatterData.map((entry, index) => (
+                          <circle 
+                            key={`scatter-${index}`}
+                            r={4}
+                            fill={entry.teamColor}
+                            stroke="#ffffff"
+                            strokeWidth={1}
+                            opacity={0.8}
+                            style={{ cursor: 'pointer' }}
+                          />
+                        ))}
                       </Scatter>
                     </ScatterChart>
                   </ResponsiveContainer>
@@ -528,168 +461,6 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
             </CardContent>
           </Card>
         )}
-
-        {/* Player Profile Modal */}
-        <Dialog open={isPlayerModalOpen} onOpenChange={setIsPlayerModalOpen}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div>
-                    <h2 className="text-xl font-bold">{selectedPlayer?.name}</h2>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge variant="secondary">{selectedPlayer?.team}</Badge>
-                      <Badge variant="outline">{selectedPlayer?.season}</Badge>
-                    </div>
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsPlayerModalOpen(false)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </DialogTitle>
-            </DialogHeader>
-            
-            {selectedPlayer && (
-              <div className="space-y-6">
-                {/* Performance in Selected Stats */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <BarChart3 className="h-5 w-5 text-blue-500" />
-                      Performance Analysis
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                        <div className="text-2xl font-bold text-blue-600">
-                          {selectedPlayer.x.toFixed(2)}
-                        </div>
-                        <div className="text-sm text-slate-600 dark:text-slate-400">
-                          {xAxisStatName}
-                        </div>
-                      </div>
-                      <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                        <div className="text-2xl font-bold text-green-600">
-                          {selectedPlayer.y.toFixed(2)}
-                        </div>
-                        <div className="text-sm text-slate-600 dark:text-slate-400">
-                          {yAxisStatName}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Quadrant Analysis */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <Award className="h-5 w-5 text-orange-500" />
-                      Quadrant Analysis
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                        <span className="font-medium">
-                          {xAxisStatName} Performance
-                        </span>
-                        <Badge variant={selectedPlayer.x > avgX ? "default" : "secondary"}>
-                          {selectedPlayer.x > avgX ? "Above Average" : "Below Average"}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                        <span className="font-medium">
-                          {yAxisStatName} Performance
-                        </span>
-                        <Badge variant={selectedPlayer.y > avgY ? "default" : "secondary"}>
-                          {selectedPlayer.y > avgY ? "Above Average" : "Below Average"}
-                        </Badge>
-                      </div>
-                      {selectedPlayer.x > avgX && selectedPlayer.y > avgY && (
-                        <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                          <div className="flex items-center gap-2">
-                            <TrendingUp className="h-4 w-4 text-green-600" />
-                            <span className="font-medium text-green-700 dark:text-green-300">
-                              Elite Performer
-                            </span>
-                          </div>
-                          <p className="text-sm text-green-600 dark:text-green-400 mt-1">
-                            This player excels in both selected statistics, placing them in the top-right quadrant.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Team Context */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <Users className="h-5 w-5 text-purple-500" />
-                      Team Context
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-4">
-                      <div 
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
-                        style={{ backgroundColor: selectedPlayer.teamColor }}
-                      >
-                        {selectedPlayer.team}
-                      </div>
-                      <div>
-                        <div className="font-medium">{selectedPlayer.team}</div>
-                        <div className="text-sm text-slate-600 dark:text-slate-400">
-                          Season: {selectedPlayer.season}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Comparison with team average */}
-                    <div className="mt-4">
-                      <h4 className="font-medium mb-2">Team Comparison</h4>
-                      <div className="space-y-2">
-                        {(() => {
-                          const teammates = scatterData.filter(p => 
-                            p.team === selectedPlayer.team && p.season === selectedPlayer.season
-                          );
-                          const teamAvgX = teammates.length > 0 ? 
-                            teammates.reduce((sum, p) => sum + p.x, 0) / teammates.length : 0;
-                          const teamAvgY = teammates.length > 0 ? 
-                            teammates.reduce((sum, p) => sum + p.y, 0) / teammates.length : 0;
-                          
-                          return (
-                            <div className="grid grid-cols-2 gap-3 text-sm">
-                              <div className="flex justify-between">
-                                <span>{xAxisStatName}:</span>
-                                <span className={selectedPlayer.x > teamAvgX ? 'text-green-600' : 'text-red-600'}>
-                                  {selectedPlayer.x > teamAvgX ? '+' : ''}{(selectedPlayer.x - teamAvgX).toFixed(1)}
-                                </span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>{yAxisStatName}:</span>
-                                <span className={selectedPlayer.y > teamAvgY ? 'text-green-600' : 'text-red-600'}>
-                                  {selectedPlayer.y > teamAvgY ? '+' : ''}{(selectedPlayer.y - teamAvgY).toFixed(1)}
-                                </span>
-                              </div>
-                            </div>
-                          );
-                        })()}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   );

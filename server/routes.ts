@@ -306,40 +306,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get specific player data by player ID and season
-  app.get("/api/players/:playerId/:season", async (req, res) => {
-    try {
-      const { playerId, season } = req.params;
-      const player = await storage.getPlayerBySeason(parseInt(playerId), season);
-      
-      if (!player) {
-        return res.status(404).json({ message: "Player not found" });
-      }
-      
-      res.json(player);
-    } catch (error) {
-      console.error("Error fetching player:", error);
-      res.status(500).json({ message: "Failed to fetch player data" });
-    }
-  });
-
-  // Get player career data
-  app.get("/api/players/:playerId/career", async (req, res) => {
-    try {
-      const { playerId } = req.params;
-      const careerData = await storage.getPlayerCareer(parseInt(playerId));
-      
-      if (!careerData) {
-        return res.status(404).json({ message: "Player career data not found" });
-      }
-      
-      res.json(careerData);
-    } catch (error) {
-      console.error("Error fetching player career:", error);
-      res.status(500).json({ message: "Failed to fetch player career data" });
-    }
-  });
-
   // Working calculation endpoint
   app.post("/api/nba/calculate", async (req, res) => {
     try {
@@ -398,7 +364,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const boundedValue = Math.max(-1000, Math.min(1000, customStat));
             results.push({
               rank: 0,
-              playerId: player.playerId,
               name: player.name,
               team: player.team,
               position: player.position,

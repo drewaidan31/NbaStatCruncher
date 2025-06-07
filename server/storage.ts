@@ -48,10 +48,6 @@ export interface IStorage {
   getUserFavoritePlayers(userId: string): Promise<FavoritePlayer[]>;
   addFavoritePlayer(favoritePlayer: InsertFavoritePlayer): Promise<FavoritePlayer>;
   removeFavoritePlayer(userId: string, playerId: number): Promise<boolean>;
-  
-  // Player profile operations
-  getPlayerBySeason(playerId: number, season: string): Promise<Player | undefined>;
-  getPlayerCareer(playerId: number): Promise<{ seasons: Player[]; careerAverages: any } | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -273,45 +269,6 @@ export class DatabaseStorage implements IStorage {
         eq(favoritePlayers.playerId, playerId)
       ));
     return (result.rowCount || 0) > 0;
-  }
-
-  // Player profile operations
-  async getPlayerBySeason(playerId: number, season: string): Promise<Player | undefined> {
-    const [player] = await db
-      .select()
-      .from(nbaPlayers)
-      .where(and(
-        eq(nbaPlayers.playerId, playerId),
-        eq(nbaPlayers.currentSeason, season)
-      ))
-      .limit(1);
-    return player;
-  }
-
-  async getPlayerCareer(playerId: number): Promise<{ seasons: Player[]; careerAverages: any } | undefined> {
-    const seasons = await db
-      .select()
-      .from(nbaPlayers)
-      .where(eq(nbaPlayers.playerId, playerId))
-      .orderBy(nbaPlayers.currentSeason);
-
-    if (seasons.length === 0) {
-      return undefined;
-    }
-
-    // Calculate career averages
-    const totalGames = seasons.reduce((sum, season) => sum + (season.gamesPlayed || 0), 0);
-    const careerAverages = {
-      games: totalGames / seasons.length,
-      points: seasons.reduce((sum, season) => sum + (season.points || 0), 0) / seasons.length,
-      assists: seasons.reduce((sum, season) => sum + (season.assists || 0), 0) / seasons.length,
-      rebounds: seasons.reduce((sum, season) => sum + (season.rebounds || 0), 0) / seasons.length,
-      field_goal_percentage: seasons.reduce((sum, season) => sum + (season.fieldGoalPercentage || 0), 0) / seasons.length,
-      three_point_percentage: seasons.reduce((sum, season) => sum + (season.threePointPercentage || 0), 0) / seasons.length,
-      free_throw_percentage: seasons.reduce((sum, season) => sum + (season.freeThrowPercentage || 0), 0) / seasons.length,
-    };
-
-    return { seasons, careerAverages };
   }
 }
 
