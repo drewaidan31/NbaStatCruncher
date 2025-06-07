@@ -102,7 +102,7 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
           const dataPoint = {
             name: xPoint.name,
             team: xPoint.team,
-            season: "2024-25",
+            season: xPoint.season || "Unknown",
             x: xPoint.value,
             y: yPoint.value,
             teamColor: teamColors[xPoint.team] || '#666666',

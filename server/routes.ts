@@ -367,6 +367,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               name: player.name,
               team: player.team,
               position: player.position,
+              season: player.currentSeason,
               value: Math.round(boundedValue * 100) / 100,
               points: player.points,
               assists: player.assists,
