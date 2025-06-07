@@ -886,7 +886,7 @@ function MainApp() {
                       <td className="py-2">
                         <span className="bg-slate-700 text-orange-400 px-2 py-1 rounded text-xs font-medium transition-all duration-300 ease-in-out group-hover:bg-orange-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">
                           {(() => {
-                            const playerName = result.name.toLowerCase();
+                            const playerName = (result.player?.name || result.name || '').toLowerCase();
                             const pointGuards = ["chris paul", "stephen curry", "russell westbrook", "damian lillard", 
                                                "kyrie irving", "ja morant", "trae young", "luka dončić", "de'aaron fox",
                                                "tyrese haliburton", "fred vanvleet", "mike conley", "kyle lowry", "terry rozier"];
