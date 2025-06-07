@@ -398,6 +398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const boundedValue = Math.max(-1000, Math.min(1000, customStat));
             results.push({
               rank: 0,
+              playerId: player.playerId,
               name: player.name,
               team: player.team,
               position: player.position,

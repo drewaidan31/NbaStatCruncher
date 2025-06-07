@@ -93,24 +93,35 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
         yResponse.json()
       ]);
 
-      // Combine data points
+      // Combine data points using actual player data
       const combinedData: ScatterDataPoint[] = [];
+      
+      // Filter players by season if specified
+      const filteredPlayers = selectedSeason === "all" ? 
+        players : players.filter(p => p.currentSeason === selectedSeason);
+      
       xData.forEach((xPoint: any) => {
         const yPoint = yData.find((y: any) => 
-          y.name === xPoint.name && y.team === xPoint.team
+          y.playerId === xPoint.playerId && y.season === xPoint.season
         );
         
         if (yPoint && xPoint.value !== null && yPoint.value !== null && 
             !isNaN(xPoint.value) && !isNaN(yPoint.value) && 
             isFinite(xPoint.value) && isFinite(yPoint.value)) {
+          
+          // Filter by season if specified
+          if (selectedSeason !== "all" && xPoint.season !== selectedSeason) {
+            return;
+          }
+          
           const dataPoint = {
             name: xPoint.name,
             team: xPoint.team,
-            season: xPoint.season || "Unknown",
+            season: xPoint.season,
             x: xPoint.value,
             y: yPoint.value,
             teamColor: teamColors[xPoint.team] || '#666666',
-            playerId: xPoint.name + xPoint.team
+            playerId: xPoint.playerId
           };
           
           combinedData.push(dataPoint);
