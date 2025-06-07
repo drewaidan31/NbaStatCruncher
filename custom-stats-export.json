@@ -1,0 +1,47 @@
+[
+  {
+    "id": 22,
+    "formula": "FGA + FTA * 0.44 + TOV",
+    "name": "Raw Usage",
+    "description": "Custom stat: Raw Usage",
+    "user_id": "43405474",
+    "created_at": "2025-06-04T05:20:38.916Z",
+    "is_public": 0
+  },
+  {
+    "id": 23,
+    "formula": "(PTS * 1.25 + AST / TOV) * FG_PCT",
+    "name": "offensive efficiency",
+    "description": "Custom stat: offensive efficiency",
+    "user_id": "43405474",
+    "created_at": "2025-06-04T06:05:12.673Z",
+    "is_public": 0
+  },
+  {
+    "id": 26,
+    "formula": "(FGA + FTA * 0.44 + TOV) * ((PTS  * 1.25 + AST  + REB * 0.75 + STL * 0.5 + BLK * 0.5) * PLUS_MINUS / MIN) * W_PCT * GP / 82",
+    "name": "Total Impact",
+    "description": "Custom stat: Total Impact",
+    "user_id": "43405474",
+    "created_at": "2025-06-04T07:10:51.339Z",
+    "is_public": 0
+  },
+  {
+    "id": 32,
+    "formula": "(3PA / FGA) * FG_PCT",
+    "name": "3 point efficiency",
+    "description": "Custom stat: 3 point efficiency",
+    "user_id": "43405474",
+    "created_at": "2025-06-06T17:13:16.580Z",
+    "is_public": 0
+  },
+  {
+    "id": 33,
+    "formula": "(W_PCT + PLUS_MINUS * 1.5) * GP / 82",
+    "name": "team impact",
+    "description": "Custom stat: team impact",
+    "user_id": "43405474",
+    "created_at": "2025-06-06T17:17:47.015Z",
+    "is_public": 0
+  }
+]
