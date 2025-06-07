@@ -45,6 +45,8 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
   const [selectedSeason, setSelectedSeason] = useState<string>("all");
   const [scatterData, setScatterData] = useState<ScatterDataPoint[]>([]);
   const [loading, setLoading] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState<ScatterDataPoint | null>(null);
+  const [isPlayerModalOpen, setIsPlayerModalOpen] = useState(false);
 
   // Fetch user's custom stats
   const { data: customStats = [] } = useQuery<CustomStat[]>({
@@ -398,15 +400,19 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
                         name="Players" 
                         dataKey="y" 
                         fill="#F97316"
+                        onClick={(data) => {
+                          if (data && data.payload) {
+                            setSelectedPlayer(data.payload);
+                            setIsPlayerModalOpen(true);
+                          }
+                        }}
                       >
                         {scatterData.map((entry, index) => (
-                          <circle 
-                            key={`scatter-${index}`}
-                            r={4}
+                          <Cell 
+                            key={`cell-${index}`}
                             fill={entry.teamColor}
                             stroke="#ffffff"
                             strokeWidth={1}
-                            opacity={0.8}
                             style={{ cursor: 'pointer' }}
                           />
                         ))}
@@ -463,6 +469,168 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
             </CardContent>
           </Card>
         )}
+
+        {/* Player Profile Modal */}
+        <Dialog open={isPlayerModalOpen} onOpenChange={setIsPlayerModalOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div>
+                    <h2 className="text-xl font-bold">{selectedPlayer?.name}</h2>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge variant="secondary">{selectedPlayer?.team}</Badge>
+                      <Badge variant="outline">{selectedPlayer?.season}</Badge>
+                    </div>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsPlayerModalOpen(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </DialogTitle>
+            </DialogHeader>
+            
+            {selectedPlayer && (
+              <div className="space-y-6">
+                {/* Performance in Selected Stats */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <BarChart3 className="h-5 w-5 text-blue-500" />
+                      Performance Analysis
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {selectedPlayer.x.toFixed(2)}
+                        </div>
+                        <div className="text-sm text-slate-600 dark:text-slate-400">
+                          {xAxisStatName}
+                        </div>
+                      </div>
+                      <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">
+                          {selectedPlayer.y.toFixed(2)}
+                        </div>
+                        <div className="text-sm text-slate-600 dark:text-slate-400">
+                          {yAxisStatName}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Quadrant Analysis */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Award className="h-5 w-5 text-orange-500" />
+                      Quadrant Analysis
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                        <span className="font-medium">
+                          {xAxisStatName} Performance
+                        </span>
+                        <Badge variant={selectedPlayer.x > avgX ? "default" : "secondary"}>
+                          {selectedPlayer.x > avgX ? "Above Average" : "Below Average"}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                        <span className="font-medium">
+                          {yAxisStatName} Performance
+                        </span>
+                        <Badge variant={selectedPlayer.y > avgY ? "default" : "secondary"}>
+                          {selectedPlayer.y > avgY ? "Above Average" : "Below Average"}
+                        </Badge>
+                      </div>
+                      {selectedPlayer.x > avgX && selectedPlayer.y > avgY && (
+                        <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <TrendingUp className="h-4 w-4 text-green-600" />
+                            <span className="font-medium text-green-700 dark:text-green-300">
+                              Elite Performer
+                            </span>
+                          </div>
+                          <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                            This player excels in both selected statistics, placing them in the top-right quadrant.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Team Context */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Users className="h-5 w-5 text-purple-500" />
+                      Team Context
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center gap-4">
+                      <div 
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
+                        style={{ backgroundColor: selectedPlayer.teamColor }}
+                      >
+                        {selectedPlayer.team}
+                      </div>
+                      <div>
+                        <div className="font-medium">{selectedPlayer.team}</div>
+                        <div className="text-sm text-slate-600 dark:text-slate-400">
+                          Season: {selectedPlayer.season}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Comparison with team average */}
+                    <div className="mt-4">
+                      <h4 className="font-medium mb-2">Team Comparison</h4>
+                      <div className="space-y-2">
+                        {(() => {
+                          const teammates = scatterData.filter(p => 
+                            p.team === selectedPlayer.team && p.season === selectedPlayer.season
+                          );
+                          const teamAvgX = teammates.length > 0 ? 
+                            teammates.reduce((sum, p) => sum + p.x, 0) / teammates.length : 0;
+                          const teamAvgY = teammates.length > 0 ? 
+                            teammates.reduce((sum, p) => sum + p.y, 0) / teammates.length : 0;
+                          
+                          return (
+                            <div className="grid grid-cols-2 gap-3 text-sm">
+                              <div className="flex justify-between">
+                                <span>{xAxisStatName}:</span>
+                                <span className={selectedPlayer.x > teamAvgX ? 'text-green-600' : 'text-red-600'}>
+                                  {selectedPlayer.x > teamAvgX ? '+' : ''}{(selectedPlayer.x - teamAvgX).toFixed(1)}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>{yAxisStatName}:</span>
+                                <span className={selectedPlayer.y > teamAvgY ? 'text-green-600' : 'text-red-600'}>
+                                  {selectedPlayer.y > teamAvgY ? '+' : ''}{(selectedPlayer.y - teamAvgY).toFixed(1)}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
