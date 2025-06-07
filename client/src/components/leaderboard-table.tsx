@@ -391,7 +391,7 @@ export default function LeaderboardTable({
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-orange-400">
-                          {result.bestSeason || player.currentSeason || '2024-25'}
+                          {player.currentSeason}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300 hidden sm:table-cell">
