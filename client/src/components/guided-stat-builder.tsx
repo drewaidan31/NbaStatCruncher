@@ -82,79 +82,105 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
     let efficiencyMultipliers: string[] = [];
     let archetypeComponents: string[] = [];
 
-    // Core stat components with proper weighting
+    // Helper function to format multipliers to one decimal place
+    const formatMultiplier = (value: number): string => {
+      return (Math.round(value * 10) / 10).toFixed(1);
+    };
+
+    // Core stat components with proper weighting (one decimal place)
     if (weights.points > 1) {
       const multiplier = weights.points * 0.4;
-      components.push(`PTS * ${multiplier}`);
+      components.push(`PTS * ${formatMultiplier(multiplier)}`);
     }
 
     if (weights.assists > 1) {
       const multiplier = weights.assists * 0.6;
-      components.push(`AST * ${multiplier}`);
+      components.push(`AST * ${formatMultiplier(multiplier)}`);
     }
 
     if (weights.rebounds > 1) {
       const multiplier = weights.rebounds * 0.5;
-      components.push(`REB * ${multiplier}`);
+      components.push(`REB * ${formatMultiplier(multiplier)}`);
     }
 
     if (weights.steals > 1) {
       const multiplier = weights.steals * 0.8;
-      components.push(`STL * ${multiplier}`);
+      components.push(`STL * ${formatMultiplier(multiplier)}`);
     }
 
     if (weights.blocks > 1) {
       const multiplier = weights.blocks * 0.9;
-      components.push(`BLK * ${multiplier}`);
+      components.push(`BLK * ${formatMultiplier(multiplier)}`);
     }
 
-    // Archetype-specific advanced metrics (simplified)
+    // Archetype-specific mechanics with specific formulas for each type
     if (preferences.playstyles.includes("outside-shooter")) {
-      // Three-point shooting emphasis
+      // Three-point shooting emphasis with 3PA/FGA rate
       if (weights.threePointPct >= 3) {
-        archetypeComponents.push(`3PA * ${weights.threePointPct * 0.3}`);
-        archetypeComponents.push(`3P_PCT * ${weights.threePointPct}`);
+        archetypeComponents.push(`3PA * ${formatMultiplier(weights.threePointPct * 0.3)}`);
+        archetypeComponents.push(`3P_PCT * ${formatMultiplier(weights.threePointPct)}`);
       }
-      archetypeComponents.push("(3PA / FGA) * 3"); // Reward 3P attempt rate
+      archetypeComponents.push("(3PA / FGA) * 3.0"); // Reward 3P attempt rate
     }
     
     if (preferences.playstyles.includes("slasher")) {
-      // Reward attacking the rim
+      // Reward attacking the rim with inside shots
       archetypeComponents.push("(FGA - 3PA) * 0.8"); // Inside attempts
       if (weights.freeThrowPct >= 3) {
-        archetypeComponents.push(`FTA * ${weights.freeThrowPct * 0.4}`);
+        archetypeComponents.push(`FTA * ${formatMultiplier(weights.freeThrowPct * 0.4)}`);
       }
     }
 
     if (preferences.playstyles.includes("post-player")) {
-      // Inside game emphasis
+      // Inside game emphasis with non-3P shots
       archetypeComponents.push("(FGA - 3PA) * 1.2"); // Inside shot reward
       if (weights.rebounds >= 4) {
-        archetypeComponents.push(`REB * ${weights.rebounds * 0.4}`);
+        archetypeComponents.push(`REB * ${formatMultiplier(weights.rebounds * 0.4)}`);
       }
     }
 
     if (preferences.playstyles.includes("playmaker")) {
-      // Advanced playmaking
+      // Advanced playmaking with assist ratios
       if (weights.assists >= 3) {
-        archetypeComponents.push(`AST * ${weights.assists * 0.8}`);
+        archetypeComponents.push(`AST * ${formatMultiplier(weights.assists * 0.8)}`);
       }
-      archetypeComponents.push("(AST / (TOV + 1)) * 2"); // AST/TO ratio
+      archetypeComponents.push("(AST / (TOV + 1)) * 2.0"); // AST/TO ratio
     }
 
     if (preferences.playstyles.includes("defensive-anchor")) {
-      // Defensive impact
+      // Defensive impact with steal/block emphasis
       if (weights.steals >= 3) {
-        archetypeComponents.push(`STL * ${weights.steals * 1.5}`);
+        archetypeComponents.push(`STL * ${formatMultiplier(weights.steals * 1.5)}`);
       }
       if (weights.blocks >= 3) {
-        archetypeComponents.push(`BLK * ${weights.blocks * 1.8}`);
+        archetypeComponents.push(`BLK * ${formatMultiplier(weights.blocks * 1.8)}`);
       }
     }
 
+    if (preferences.playstyles.includes("midrange-shooter")) {
+      // Mid-range shooting with non-3P field goals
+      if (weights.fieldGoalPct >= 3) {
+        archetypeComponents.push(`FG_PCT * ${formatMultiplier(weights.fieldGoalPct * 2)}`);
+      }
+      archetypeComponents.push("(FGA - 3PA) * 0.6"); // Non-3P attempts
+    }
+
     if (preferences.playstyles.includes("two-way-player")) {
-      // Balanced contributions
+      // Balanced offensive and defensive impact
       archetypeComponents.push("(STL + BLK) * 1.5");
+      archetypeComponents.push("(PTS + AST) * 0.3");
+    }
+
+    if (preferences.playstyles.includes("energy")) {
+      // High-energy hustle stats
+      archetypeComponents.push("(STL + BLK + REB) * 0.4");
+      archetypeComponents.push("(MIN / 36) * 2.0"); // Minutes played factor
+    }
+
+    if (preferences.playstyles.includes("floor-general")) {
+      // Leadership and game management
+      archetypeComponents.push("(AST * 2.0 - TOV) * 0.8");
+      archetypeComponents.push("(W_PCT * 10)"); // Team success factor
     }
 
     // Build base formula
@@ -176,16 +202,16 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
       formula = `(${formula}) * (0.9 + FT_PCT * 0.1)`;
     }
 
-    // Penalties
+    // Penalties with one decimal place formatting
     let penalties: string[] = [];
     if (weights.turnovers >= 4) {
-      penalties.push(`TOV * ${weights.turnovers * 0.5}`);
+      penalties.push(`TOV * ${formatMultiplier(weights.turnovers * 0.5)}`);
     } else if (weights.turnovers >= 2) {
       penalties.push("TOV * 0.8");
     }
 
     if (weights.fouls >= 4) {
-      penalties.push(`PF * ${weights.fouls * 0.4}`);
+      penalties.push(`PF * ${formatMultiplier(weights.fouls * 0.4)}`);
     } else if (weights.fouls >= 2) {
       penalties.push("PF * 0.5");
     }
