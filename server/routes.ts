@@ -364,15 +364,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const boundedValue = Math.max(-1000, Math.min(1000, customStat));
             results.push({
               rank: 0,
-              name: player.name,
-              team: player.team,
-              position: player.position,
-              season: player.currentSeason,
-              value: Math.round(boundedValue * 100) / 100,
-              points: player.points,
-              assists: player.assists,
-              rebounds: player.rebounds,
-              gamesPlayed: player.gamesPlayed
+              player: {
+                id: player.playerId,
+                name: player.name,
+                team: player.team,
+                position: player.position,
+                currentSeason: player.currentSeason,
+                points: player.points,
+                assists: player.assists,
+                rebounds: player.rebounds,
+                steals: player.steals,
+                blocks: player.blocks,
+                turnovers: player.turnovers,
+                fieldGoalPercentage: player.fieldGoalPercentage,
+                fieldGoalAttempts: player.fieldGoalAttempts,
+                threePointPercentage: player.threePointPercentage,
+                threePointAttempts: player.threePointAttempts,
+                freeThrowPercentage: player.freeThrowPercentage,
+                freeThrowAttempts: player.freeThrowAttempts,
+                gamesPlayed: player.gamesPlayed,
+                minutesPerGame: player.minutesPerGame,
+                plusMinus: player.plusMinus,
+                winPercentage: player.winPercentage
+              },
+              customStat: Math.round(boundedValue * 100) / 100,
+              formula: formula,
+              bestSeason: player.currentSeason
             });
           }
         } catch (err) {
@@ -380,7 +397,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      results.sort((a, b) => b.value - a.value);
+      results.sort((a, b) => b.customStat - a.customStat);
       results.forEach((result, index) => {
         result.rank = index + 1;
       });
