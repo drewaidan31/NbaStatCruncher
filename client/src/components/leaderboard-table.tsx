@@ -106,20 +106,24 @@ export default function LeaderboardTable({
     if (!results || !Array.isArray(results)) return [];
 
     let filtered = results.filter((result: PlayerResult) => {
-      const player = result.player;
+      // Handle both old and new data structures
+      const player = result.player || result;
+      const playerName = player.name || result.name;
+      const playerTeam = player.team || result.team;
+      const playerPosition = player.position || result.position;
       
       // Search filter
-      if (searchTerm && !player.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+      if (searchTerm && playerName && !playerName.toLowerCase().includes(searchTerm.toLowerCase())) {
         return false;
       }
       
       // Team filter
-      if (selectedTeam !== "all" && player.team !== selectedTeam) {
+      if (selectedTeam !== "all" && playerTeam !== selectedTeam) {
         return false;
       }
       
       // Position filter (simplified matching)
-      if (selectedPosition !== "all" && !player.position.includes(selectedPosition)) {
+      if (selectedPosition !== "all" && playerPosition && !playerPosition.includes(selectedPosition)) {
         return false;
       }
       
