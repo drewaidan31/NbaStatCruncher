@@ -124,60 +124,11 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
         }
       });
 
-      // Apply intelligent sampling and jittering for large datasets
-      let optimizedData = combinedData;
-      
-      if (combinedData.length > 400) {
-        // Sort by combined stat value to prioritize top performers
-        const sortedData = [...combinedData].sort((a, b) => (b.x + b.y) - (a.x + a.y));
-        
-        // Take top 150 performers
-        const topPerformers = sortedData.slice(0, 150);
-        
-        // Strategic sampling from remaining data with better distribution
-        const remaining = sortedData.slice(150);
-        const sampleSize = Math.min(250, remaining.length);
-        
-        // Use stratified sampling to ensure good distribution across stat ranges
-        const xMin = Math.min(...remaining.map(d => d.x));
-        const xMax = Math.max(...remaining.map(d => d.x));
-        const yMin = Math.min(...remaining.map(d => d.y));
-        const yMax = Math.max(...remaining.map(d => d.y));
-        
-        const gridSize = 10; // 10x10 grid
-        const xStep = (xMax - xMin) / gridSize;
-        const yStep = (yMax - yMin) / gridSize;
-        
-        const strategicSample: ScatterDataPoint[] = [];
-        
-        // Sample from each grid cell to ensure even distribution
-        for (let i = 0; i < gridSize && strategicSample.length < sampleSize; i++) {
-          for (let j = 0; j < gridSize && strategicSample.length < sampleSize; j++) {
-            const xLower = xMin + i * xStep;
-            const xUpper = xMin + (i + 1) * xStep;
-            const yLower = yMin + j * yStep;
-            const yUpper = yMin + (j + 1) * yStep;
-            
-            const cellPlayers = remaining.filter(d => 
-              d.x >= xLower && d.x < xUpper && d.y >= yLower && d.y < yUpper
-            );
-            
-            if (cellPlayers.length > 0) {
-              // Take best performer from this cell
-              const bestInCell = cellPlayers.sort((a, b) => (b.x + b.y) - (a.x + a.y))[0];
-              strategicSample.push(bestInCell);
-            }
-          }
-        }
-        
-        optimizedData = [...topPerformers, ...strategicSample];
-      }
-      
-      // Apply small jitter to prevent perfect overlaps
-      optimizedData = optimizedData.map(point => ({
+      // Apply minimal jitter to prevent overlaps while keeping ALL data
+      const optimizedData = combinedData.map(point => ({
         ...point,
-        x: point.x + (Math.random() - 0.5) * 0.01,
-        y: point.y + (Math.random() - 0.5) * 0.01
+        x: point.x + (Math.random() - 0.5) * 0.001,
+        y: point.y + (Math.random() - 0.5) * 0.001
       }));
 
       setScatterData(optimizedData);
@@ -471,21 +422,21 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
                         }}
                       >
                         {scatterData.map((entry, index) => {
-                          // Dynamic dot sizing based on data density and value
-                          const baseSize = scatterData.length > 300 ? 4 : scatterData.length > 150 ? 6 : 8;
+                          // Ultra-small dots for large datasets to prevent clustering
+                          const baseSize = scatterData.length > 1000 ? 2 : scatterData.length > 500 ? 3 : 4;
                           const isTopPerformer = (entry.x + entry.y) > (avgX + avgY) * 1.2;
-                          const dotSize = isTopPerformer ? baseSize + 2 : baseSize;
+                          const dotSize = isTopPerformer ? baseSize + 1 : baseSize;
                           
                           return (
                             <Cell 
                               key={`cell-${index}`}
                               fill={entry.teamColor}
                               stroke="#ffffff"
-                              strokeWidth={0.5}
+                              strokeWidth={0.2}
                               r={dotSize}
                               style={{ 
                                 cursor: 'pointer',
-                                opacity: isTopPerformer ? 0.9 : 0.7
+                                opacity: isTopPerformer ? 0.95 : 0.6
                               }}
                             />
                           );
