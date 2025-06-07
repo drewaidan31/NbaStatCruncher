@@ -74,30 +74,32 @@ export default function LeaderboardTable({
 
 
 
-  // Calculate custom stats mutation
-  const calculateMutation = useMutation({
-    mutationFn: async ({ formula, season }: { formula: string; season?: string }) => {
-      const response = await apiRequest("POST", "/api/nba/calculate", { formula, season });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to calculate custom statistics");
+  const [results, setResults] = useState<PlayerResult[]>([]);
+  const [isCalculating, setIsCalculating] = useState(false);
+
+  const handleCalculate = async () => {
+    if (!formula.trim()) return;
+    
+    setIsCalculating(true);
+    try {
+      const response = await fetch("/api/nba/calculate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ formula, season: selectedSeason }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setResults(data);
+      } else {
+        console.error("Failed to calculate stats");
+        setResults([]);
       }
-      return response.json();
-    },
-    onSuccess: (data) => {
-      queryClient.setQueryData(["/api/nba/calculate", formula], data);
-    },
-  });
-
-  // Get calculated results
-  const { data: results, isLoading: resultsLoading } = useQuery({
-    queryKey: ["/api/nba/calculate", formula],
-    enabled: false, // Only run when explicitly called
-  });
-
-  const handleCalculate = () => {
-    if (formula.trim()) {
-      calculateMutation.mutate({ formula, season: selectedSeason });
+    } catch (error) {
+      console.error("Error calculating stats:", error);
+      setResults([]);
+    } finally {
+      setIsCalculating(false);
     }
   };
 
@@ -216,10 +218,10 @@ export default function LeaderboardTable({
           </div>
           <Button 
             onClick={handleCalculate}
-            disabled={!formula.trim() || calculateMutation.isPending}
+            disabled={!formula.trim() || isCalculating}
             className="bg-orange-600 hover:bg-orange-700 text-white"
           >
-            {calculateMutation.isPending ? "Calculating..." : "Calculate Custom Stats"}
+            {isCalculating ? "Calculating..." : "Calculate Custom Stats"}
           </Button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -253,10 +255,10 @@ export default function LeaderboardTable({
             )}
             <Button
               onClick={handleCalculate}
-              disabled={!formula.trim() || calculateMutation.isPending}
+              disabled={!formula.trim() || isCalculating}
               className="bg-orange-600 hover:bg-orange-700 text-white"
             >
-              {calculateMutation.isPending ? (
+              {isCalculating ? (
                 <div className="flex items-center space-x-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                   <span>Calculating...</span>
