@@ -779,8 +779,14 @@ function MainApp() {
 
         {/* My Custom Stats Section */}
         <MyCustomStats onStatSelect={(formula, name) => {
-          setFormula(formula);
-          setCustomStatName(name);
+          console.log('Inserting saved custom stat:', name, 'formula:', formula);
+          console.log('Current formula before insert:', formula);
+          const insertion = `(${formula})`;
+          setFormula(prev => {
+            const newFormula = prev + insertion;
+            console.log('New formula after insert:', newFormula);
+            return newFormula;
+          });
         }} />
 
         <FormulaExamples onFormulaSelect={(selectedFormula) => {

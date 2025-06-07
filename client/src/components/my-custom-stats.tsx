@@ -63,7 +63,7 @@ export function MyCustomStats({ onStatSelect }: MyCustomStatsProps) {
                 {stat.formula}
               </code>
               <div className="text-xs text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300">
-                Click to use this formula
+                Click to insert into formula
               </div>
             </CardContent>
           </Card>
