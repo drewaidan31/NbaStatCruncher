@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: nba-analytics
+    env: node
+    buildCommand: |
+      cd client && npm install && npm run build
+      mkdir -p ../dist/public && cp -r dist/* ../dist/public/
+    startCommand: node server/simple.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true
+  - type: pserv
+    name: nba-postgres
+    env: docker
+    dockerfilePath: ./Dockerfile.postgres
+    disk:
+      name: postgres-data
+      mountPath: /var/lib/postgresql/data
+      sizeGB: 10
