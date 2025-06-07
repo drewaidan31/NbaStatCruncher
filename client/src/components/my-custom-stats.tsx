@@ -60,7 +60,7 @@ export function MyCustomStats({ onStatSelect }: MyCustomStatsProps) {
     return null;
   }
 
-  if (userCustomStats.length === 0 && !isLoading) {
+  if (!userCustomStats || (userCustomStats.length === 0 && !isLoading)) {
     console.log("MyCustomStats - No custom stats found, hiding component");
     return null;
   }
@@ -71,11 +71,11 @@ export function MyCustomStats({ onStatSelect }: MyCustomStatsProps) {
         <Calculator className="w-6 h-6 text-blue-600" />
         <h3 className="text-xl font-bold text-blue-900 dark:text-blue-200">My Custom Stats</h3>
         <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-          {userCustomStats.length}
+          {userCustomStats?.length || 0}
         </Badge>
       </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {userCustomStats.map((stat) => (
+        {userCustomStats?.map((stat) => (
           <Card
             key={stat.id}
             className="bg-white dark:bg-blue-900/30 border-blue-200 dark:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-800/50 transition-colors group relative"
