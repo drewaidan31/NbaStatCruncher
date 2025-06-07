@@ -167,8 +167,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if we already have cached player data
       const existingPlayers = await storage.getAllPlayers();
       
-      // Use existing data if we have sufficient players
-      if (existingPlayers.length >= 100) {
+      // Force refresh if we have fewer than expected players (should be 553+ with historical data)
+      if (existingPlayers.length >= 550) {
         console.log(`Using cached player data: ${existingPlayers.length} players`);
         return res.json(existingPlayers);
       }
@@ -306,107 +306,258 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Working calculation endpoint
+  // Helper function to recursively resolve saved stat names in formulas
+  const resolveSavedStatsInFormula = async (formula: string): Promise<string> => {
+    let resolvedFormula = formula;
+    const savedStats = await storage.getCustomStats();
+    
+    // Keep resolving until no more saved stat names are found
+    let hasChanges = true;
+    while (hasChanges) {
+      hasChanges = false;
+      
+      for (const stat of savedStats) {
+        // Check if the stat name appears in the formula (case-insensitive)
+        const regex = new RegExp(`\\b${stat.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+        if (regex.test(resolvedFormula)) {
+          // Replace the stat name with its formula wrapped in parentheses
+          resolvedFormula = resolvedFormula.replace(regex, `(${stat.formula})`);
+          hasChanges = true;
+        }
+      }
+    }
+    
+    return resolvedFormula;
+  };
+
+  // Calculate custom stats for formula
   app.post("/api/nba/calculate", async (req, res) => {
     try {
-      const { formula } = req.body;
+      const { formula, season } = req.body;
       
-      if (!formula) {
-        return res.status(400).json({ message: "Formula is required" });
+      // First, resolve any saved stat names in the formula
+      const resolvedFormula = await resolveSavedStatsInFormula(formula);
+      console.log('Original formula:', formula);
+      console.log('Resolved formula:', resolvedFormula);
+      
+      let players;
+      if (season && season !== "all-time") {
+        // Get players for specific season
+        const allPlayers = await storage.getAllPlayers();
+        players = allPlayers.filter(player => {
+          if (player.seasons && Array.isArray(player.seasons)) {
+            return player.seasons.some(s => s.season === season);
+          }
+          return player.currentSeason === season;
+        }).map(player => {
+          // Use season-specific stats
+          if (player.seasons && Array.isArray(player.seasons)) {
+            const seasonData = player.seasons.find(s => s.season === season);
+            if (seasonData) {
+              return {
+                ...player,
+                points: seasonData.points,
+                assists: seasonData.assists,
+                rebounds: seasonData.rebounds,
+                steals: seasonData.steals,
+                blocks: seasonData.blocks,
+                turnovers: seasonData.turnovers,
+                fieldGoalPercentage: seasonData.fieldGoalPercentage,
+                fieldGoalAttempts: seasonData.fieldGoalAttempts,
+                threePointPercentage: seasonData.threePointPercentage,
+                threePointAttempts: seasonData.threePointAttempts,
+                freeThrowPercentage: seasonData.freeThrowPercentage,
+                freeThrowAttempts: seasonData.freeThrowAttempts,
+                gamesPlayed: seasonData.gamesPlayed,
+                minutesPerGame: seasonData.minutesPerGame,
+                plusMinus: seasonData.plusMinus,
+                team: seasonData.team,
+                currentSeason: season
+              };
+            }
+          }
+          return player;
+        });
+      } else {
+        players = await storage.getAllPlayers();
+      }
+      
+      if (players.length === 0) {
+        return res.status(400).json({ 
+          message: "No player data available. Please fetch NBA data first." 
+        });
       }
 
-      const allPlayers = await storage.getAllPlayers();
+      // Validate resolved formula contains valid NBA stats
+      const formulaUpper = resolvedFormula.toUpperCase();
+      const availableStats = Object.keys(NBA_STAT_MAPPINGS);
+      const usedStats = availableStats.filter(stat => formulaUpper.includes(stat));
+      
+      if (usedStats.length === 0) {
+        return res.status(400).json({ 
+          message: `Formula must contain at least one valid NBA stat: ${availableStats.join(", ")}` 
+        });
+      }
+
+      // Calculate custom stat for each player (or each season for all-time)
       const results: any[] = [];
-
-      for (const player of allPlayers) {
+      
+      for (const player of players) {
         try {
-          // Fix problematic variable names for mathjs
-          let cleanFormula = formula
-            .replace(/3P_PCT/g, 'THREE_PCT')
-            .replace(/3PA/g, 'THREE_PA')
-            .replace(/3P/g, 'THREE_P');
-          
-          // Calculate realistic values to prevent extreme clustering
-          const pts = Number(player.points) || 0;
-          const fgPct = Number(player.fieldGoalPercentage) || 0.45;
-          const plusMinus = Number(player.plusMinus) || 0;
-          
-          // Estimate FGA from points and shooting percentage
-          const estimatedFGA = fgPct > 0 ? Math.max(Math.round(pts / (fgPct * 2)), 1) : Math.max(Math.round(pts / 0.9), 1);
-          
-          // Calculate realistic win percentage from plus/minus
-          const estimatedWinPct = Math.max(0.2, Math.min(0.8, 0.5 + (plusMinus / 20)));
-          
-          const context: any = {
-            PTS: pts,
-            AST: Number(player.assists) || 0,
-            REB: Number(player.rebounds) || 0,
-            TOV: Math.max(Number(player.turnovers) || 0, 0.1),
-            PLUS_MINUS: plusMinus,
-            FG_PCT: fgPct,
-            FGA: estimatedFGA,
-            FT_PCT: Number(player.freeThrowPercentage) || 0.75,
-            FTA: Math.max(Number(player.freeThrowAttempts) || 0, 1),
-            THREE_PCT: Number(player.threePointPercentage) || 0.35,
-            THREE_PA: Math.max(Number(player.threePointAttempts) || 0, 1),
-            THREE_P: Math.max(Number(player.threePointAttempts) || 0, 1),
-            MIN: Math.max(Number(player.minutesPerGame) || 0, 1),
-            STL: Number(player.steals) || 0,
-            BLK: Number(player.blocks) || 0,
-            GP: Math.max(Number(player.gamesPlayed) || 0, 1),
-            W_PCT: estimatedWinPct
-          };
-
-          const customStat = evaluate(cleanFormula, context);
-          
-          if (typeof customStat === 'number' && !isNaN(customStat) && isFinite(customStat)) {
-            // Use the actual calculated value without artificial bounds
-            const boundedValue = customStat;
-            results.push({
-              rank: 0,
-              player: {
-                id: player.playerId,
-                name: player.name,
-                team: player.team,
-                position: player.position,
-                currentSeason: player.currentSeason,
-                points: player.points,
-                assists: player.assists,
-                rebounds: player.rebounds,
-                steals: player.steals,
-                blocks: player.blocks,
-                turnovers: player.turnovers,
-                fieldGoalPercentage: player.fieldGoalPercentage,
-                fieldGoalAttempts: player.fieldGoalAttempts,
-                threePointPercentage: player.threePointPercentage,
-                threePointAttempts: player.threePointAttempts,
-                freeThrowPercentage: player.freeThrowPercentage,
-                freeThrowAttempts: player.freeThrowAttempts,
-                gamesPlayed: player.gamesPlayed,
-                minutesPerGame: player.minutesPerGame,
-                plusMinus: player.plusMinus,
-                winPercentage: player.winPercentage
-              },
-              customStat: Math.round(boundedValue * 100) / 100,
-              formula: formula,
-              bestSeason: player.currentSeason
-            });
+          if (season && season !== "all-time") {
+            // For specific season, use only that season's data
+            if (player.seasons && Array.isArray(player.seasons)) {
+              const targetSeason = player.seasons.find(s => s.season === season);
+              if (!targetSeason) {
+                // Player didn't play in this season, skip them
+                continue;
+              }
+              
+              // Check if formula uses percentage stats and apply minimum games filter
+              const formulaUpper = resolvedFormula.toUpperCase();
+              const percentageStats = ['W_PCT', 'FG_PCT', 'FG%', '3P_PCT', '3P%', 'FT_PCT', 'FT%'];
+              const usesPercentageStats = percentageStats.some(stat => formulaUpper.includes(stat));
+              
+              // Skip players with fewer than 10 games if formula uses percentage stats
+              if (usesPercentageStats && targetSeason.gamesPlayed < 10) {
+                continue;
+              }
+              
+              // Calculate custom stat using the specific season's data
+              let evaluationFormula = resolvedFormula.toUpperCase();
+              
+              for (const [abbrev, field] of Object.entries(NBA_STAT_MAPPINGS)) {
+                const value = targetSeason[field] as number || 0;
+                evaluationFormula = evaluationFormula.replace(
+                  new RegExp(`\\b${abbrev}\\b`, 'g'), 
+                  value.toString()
+                );
+              }
+              
+              const customStat = evaluate(evaluationFormula);
+              
+              // Only include results with valid, finite numbers
+              if (typeof customStat === 'number' && isFinite(customStat) && customStat !== 0) {
+                results.push({
+                  player: {
+                    ...player,
+                    team: targetSeason.team
+                  },
+                  customStat: Number(customStat.toFixed(2)),
+                  bestSeason: targetSeason.season,
+                  formula: resolvedFormula
+                });
+              }
+            }
+          } else {
+            // For all-time, include ALL seasons for each player
+            if (player.seasons && Array.isArray(player.seasons)) {
+              for (const seasonData of player.seasons) {
+                // Check if formula uses percentage stats and apply minimum games filter
+                const formulaUpper = resolvedFormula.toUpperCase();
+                const percentageStats = ['W_PCT', 'FG_PCT', 'FG%', '3P_PCT', '3P%', 'FT_PCT', 'FT%'];
+                const usesPercentageStats = percentageStats.some(stat => formulaUpper.includes(stat));
+                
+                // Skip seasons with fewer than 10 games if formula uses percentage stats
+                if (usesPercentageStats && seasonData.gamesPlayed < 10) {
+                  continue;
+                }
+                
+                let evaluationFormula = resolvedFormula.toUpperCase();
+                
+                // Replace NBA stat abbreviations with season values
+                for (const [abbrev, field] of Object.entries(NBA_STAT_MAPPINGS)) {
+                  const value = seasonData[field] as number || 0;
+                  evaluationFormula = evaluationFormula.replace(
+                    new RegExp(`\\b${abbrev}\\b`, 'g'), 
+                    value.toString()
+                  );
+                }
+                
+                try {
+                  const seasonCustomStat = evaluate(evaluationFormula);
+                  // Only include results with valid, finite numbers
+                  if (typeof seasonCustomStat === 'number' && isFinite(seasonCustomStat) && seasonCustomStat !== 0) {
+                    results.push({
+                      player: {
+                        ...player,
+                        team: seasonData.team
+                      },
+                      customStat: Number(seasonCustomStat.toFixed(2)),
+                      bestSeason: seasonData.season,
+                      formula: resolvedFormula
+                    });
+                  }
+                } catch (seasonError) {
+                  continue;
+                }
+              }
+            } else {
+              // Fallback to career averages if no seasons data
+              // Check if formula uses percentage stats and apply minimum games filter
+              const formulaUpper = resolvedFormula.toUpperCase();
+              const percentageStats = ['W_PCT', 'FG_PCT', 'FG%', '3P_PCT', '3P%', 'FT_PCT', 'FT%'];
+              const usesPercentageStats = percentageStats.some(stat => formulaUpper.includes(stat));
+              
+              // Skip players with fewer than 10 career games if formula uses percentage stats
+              if (usesPercentageStats && player.gamesPlayed < 10) {
+                continue;
+              }
+              
+              let evaluationFormula = resolvedFormula.toUpperCase();
+              
+              for (const [abbrev, field] of Object.entries(NBA_STAT_MAPPINGS)) {
+                const value = player[field as keyof Player] as number;
+                evaluationFormula = evaluationFormula.replace(
+                  new RegExp(`\\b${abbrev}\\b`, 'g'), 
+                  value.toString()
+                );
+              }
+              
+              const customStat = evaluate(evaluationFormula);
+              
+              // Only include results with valid, finite numbers
+              if (typeof customStat === 'number' && isFinite(customStat) && customStat !== 0) {
+                results.push({
+                  player: {
+                    ...player,
+                    team: player.team
+                  },
+                  customStat: Number(customStat.toFixed(2)),
+                  bestSeason: player.currentSeason || '2024-25',
+                  formula: resolvedFormula
+                });
+              }
+            }
           }
-        } catch (err) {
-          continue;
+        } catch (error) {
+          console.error(`Error calculating stat for ${player.name}:`, error);
         }
       }
 
+      // Sort by custom stat value (highest first)
       results.sort((a, b) => b.customStat - a.customStat);
-      results.forEach((result, index) => {
-        result.rank = index + 1;
-      });
+      
+      // Add rank
+      const rankedResults = results.map((result, index) => ({
+        ...result,
+        rank: index + 1
+      }));
 
-      console.log(`Returning ${results.length} results`);
-      res.json(results);
+      res.json(rankedResults);
+
     } catch (error) {
-      console.error("Calculation error:", error);
-      res.status(500).json({ message: "Calculation failed" });
+      console.error("Error calculating custom stats:", error);
+      
+      if (error instanceof Error && error.message.includes("Unexpected")) {
+        return res.status(400).json({ 
+          message: "Invalid formula syntax. Please check your mathematical expression." 
+        });
+      }
+      
+      res.status(500).json({ 
+        message: "Failed to calculate custom statistics. Please verify your formula and try again." 
+      });
     }
   });
 
@@ -465,74 +616,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Fixed calculation endpoint
+  // Calculate custom stat for all players
   app.post("/api/custom-stats/calculate", async (req, res) => {
     try {
-      const { formula } = req.body;
+      const { formula, season } = req.body;
       
       if (!formula) {
         return res.status(400).json({ message: "Formula is required" });
       }
 
+      console.log("Original formula:", formula);
+      
+      // Resolve any saved stat names in the formula
+      const resolvedFormula = await resolveSavedStatsInFormula(formula);
+      console.log("Resolved formula:", resolvedFormula);
+      
+      // Get all players
       const allPlayers = await storage.getAllPlayers();
       const results: any[] = [];
 
       for (const player of allPlayers) {
         try {
-          // Replace ALL problematic variable names before evaluation
-          let cleanFormula = formula
-            .replace(/3P_PCT/g, 'THREE_PCT')
-            .replace(/3PA/g, 'THREE_PA')
-            .replace(/3P/g, 'THREE_P');
+          // Create a context with player stats using NBA_STAT_MAPPINGS
+          const context: any = {};
           
-          const context: any = {
-            PTS: Number(player.points) || 0,
-            AST: Number(player.assists) || 0,
-            REB: Number(player.rebounds) || 0,
-            TOV: Number(player.turnovers) || 0,
-            PLUS_MINUS: Number(player.plusMinus) || 0,
-            FG_PCT: Number(player.fieldGoalPercentage) || 0,
-            FGA: Math.max(Number(player.fieldGoalAttempts) || 0, 0.1),
-            FT_PCT: Number(player.freeThrowPercentage) || 0,
-            FTA: Number(player.freeThrowAttempts) || 0,
-            THREE_PCT: Number(player.threePointPercentage) || 0,
-            THREE_PA: Number(player.threePointAttempts) || 0,
-            THREE_P: Number(player.threePointAttempts) || 0,
-            MIN: Math.max(Number(player.minutesPerGame) || 0, 0.1),
-            STL: Number(player.steals) || 0,
-            BLK: Number(player.blocks) || 0,
-            GP: Math.max(Number(player.gamesPlayed) || 0, 1),
-            W_PCT: Number(player.winPercentage) || 0
-          };
+          // Map player stats to formula variables
+          Object.entries(NBA_STAT_MAPPINGS).forEach(([key, value]) => {
+            if (typeof value === 'string') {
+              const playerValue = (player as any)[value];
+              context[key] = typeof playerValue === 'number' ? playerValue : 0;
+            } else if (typeof value === 'function') {
+              try {
+                context[key] = value(player);
+              } catch {
+                context[key] = 0;
+              }
+            }
+          });
 
-          const customStat = evaluate(cleanFormula, context);
+          // Calculate the custom stat value
+          const customStat = evaluate(resolvedFormula, context);
           
           if (typeof customStat === 'number' && !isNaN(customStat) && isFinite(customStat)) {
             results.push({
               playerId: player.playerId,
               name: player.name,
               team: player.team,
-              customStat: Math.round(customStat * 100) / 100,
+              customStat: Number(customStat.toFixed(2)),
               points: player.points,
               assists: player.assists,
-              rebounds: player.rebounds,
-              rank: 0
+              rebounds: player.rebounds
             });
           }
-        } catch (err) {
+        } catch (evalError) {
+          // Skip players that cause evaluation errors
           continue;
         }
       }
 
+      // Sort by custom stat value (highest first)
       results.sort((a, b) => b.customStat - a.customStat);
-      results.forEach((result, index) => {
-        result.rank = index + 1;
-      });
+      
+      // Add rank and limit to top 100
+      const rankedResults = results.slice(0, 100).map((result, index) => ({
+        ...result,
+        rank: index + 1
+      }));
 
-      res.json(results.slice(0, 100));
+      res.json(rankedResults);
     } catch (error) {
-      console.error("Calculation error:", error);
-      res.status(500).json({ message: "Calculation failed" });
+      console.error("Error calculating custom stats:", error);
+      
+      if (error instanceof Error && error.message.includes("Unexpected")) {
+        return res.status(400).json({ 
+          message: "Invalid formula syntax. Please check your mathematical expression." 
+        });
+      }
+      
+      res.status(500).json({ 
+        message: "Failed to calculate custom statistics. Please verify your formula and try again." 
+      });
     }
   });
 

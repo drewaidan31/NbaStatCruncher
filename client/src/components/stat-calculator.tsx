@@ -84,39 +84,6 @@ export default function StatCalculator({ onFormulaChange, onCalculate, formula =
     }
   };
 
-  const handleDelete = () => {
-    const textarea = document.querySelector('textarea[data-formula-input]') as HTMLTextAreaElement;
-    if (textarea) {
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      
-      if (start !== end) {
-        // Delete selected text
-        const newValue = display.slice(0, start) + display.slice(end);
-        setDisplay(newValue);
-        onFormulaChange(newValue);
-        setTimeout(() => {
-          textarea.focus();
-          textarea.setSelectionRange(start, start);
-        }, 0);
-      } else if (start > 0) {
-        // Delete character before cursor
-        const newValue = display.slice(0, start - 1) + display.slice(start);
-        setDisplay(newValue);
-        onFormulaChange(newValue);
-        setTimeout(() => {
-          textarea.focus();
-          textarea.setSelectionRange(start - 1, start - 1);
-        }, 0);
-      }
-    } else {
-      // Fallback - remove last character
-      const newValue = display.slice(0, -1);
-      setDisplay(newValue);
-      onFormulaChange(newValue);
-    }
-  };
-
   const handleCalculate = () => {
     onCalculate();
   };
@@ -182,13 +149,6 @@ export default function StatCalculator({ onFormulaChange, onCalculate, formula =
                 {num}
               </button>
             ))}
-            <button
-              onClick={handleDelete}
-              className="bg-yellow-600 hover:bg-yellow-700 text-white text-sm py-2 px-3 rounded transition-colors flex items-center justify-center"
-              title="Delete"
-            >
-              ⌫
-            </button>
           </div>
         </div>
 
