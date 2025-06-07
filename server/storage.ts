@@ -57,7 +57,9 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   // Player operations
   async getAllPlayers(): Promise<Player[]> {
-    return await db.select().from(nbaPlayers);
+    const players = await db.select().from(nbaPlayers);
+    console.log('Sample player data structure:', players[0] ? Object.keys(players[0]) : 'No players found');
+    return players;
   }
 
   async getPlayerById(id: number): Promise<Player | undefined> {
