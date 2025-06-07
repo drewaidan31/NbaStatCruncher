@@ -53,6 +53,40 @@ export default function StatCalculator({ onFormulaChange, onCalculate, formula =
   ];
 
   const numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "."];
+  
+  const handleDelete = () => {
+    const textarea = document.querySelector('textarea[data-formula-input]') as HTMLTextAreaElement;
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      let newValue;
+      
+      if (start !== end) {
+        // If text is selected, delete the selection
+        newValue = display.slice(0, start) + display.slice(end);
+      } else if (start > 0) {
+        // Delete the character before the cursor
+        newValue = display.slice(0, start - 1) + display.slice(start);
+      } else {
+        // Nothing to delete
+        return;
+      }
+      
+      setDisplay(newValue);
+      onFormulaChange(newValue);
+      
+      // Set cursor position
+      const newCursorPos = start !== end ? start : start - 1;
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(newCursorPos, newCursorPos);
+      }, 0);
+    } else {
+      // Fallback if textarea not found
+      setDisplay(display.slice(0, -1));
+      onFormulaChange(display.slice(0, -1));
+    }
+  };
 
   const handleClick = (value: string) => {
     const textarea = document.querySelector('textarea[data-formula-input]') as HTMLTextAreaElement;
@@ -149,6 +183,14 @@ export default function StatCalculator({ onFormulaChange, onCalculate, formula =
                 {num}
               </button>
             ))}
+            <button
+              onClick={handleDelete}
+              disabled={!display}
+              className="bg-red-600 hover:bg-red-700 disabled:bg-slate-400 dark:disabled:bg-slate-600 disabled:cursor-not-allowed text-white text-lg py-2 px-3 rounded transition-colors"
+              title="Delete last character"
+            >
+              ⌫
+            </button>
           </div>
         </div>
 
