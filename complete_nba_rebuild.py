@@ -76,9 +76,7 @@ def rebuild_authentic_database():
             for _, player_row in season_df.iterrows():
                 try:
                     # Insert player with authentic data
-                    # Map NBA API column names correctly
-                    team_abbrev = str(player_row.get('TEAM_ABBREVIATION', player_row.get('TEAM', 'UNK')))
-                    
+                    # Use correct NBA API column names
                     cursor.execute("""
                         INSERT INTO nba_players (
                             player_id, name, team, position, games_played, minutes_per_game,
@@ -91,22 +89,22 @@ def rebuild_authentic_database():
                     """, (
                         int(player_row['PLAYER_ID']),
                         str(player_row['PLAYER']),
-                        team_abbrev,
+                        str(player_row['TEAM']),
                         'F',  # Default position
-                        int(player_row['GP']) if player_row['GP'] else 0,
-                        float(player_row['MIN']) if player_row['MIN'] else 0.0,
-                        float(player_row['PTS']) if player_row['PTS'] else 0.0,
-                        float(player_row['AST']) if player_row['AST'] else 0.0,
-                        float(player_row['REB']) if player_row['REB'] else 0.0,
-                        float(player_row['STL']) if player_row['STL'] else 0.0,
-                        float(player_row['BLK']) if player_row['BLK'] else 0.0,
-                        float(player_row['TOV']) if player_row['TOV'] else 0.0,
-                        float(player_row['FG_PCT']) if player_row['FG_PCT'] else 0.0,
-                        int(player_row['FGA']) if player_row['FGA'] else 0,
-                        float(player_row['FG3_PCT']) if player_row['FG3_PCT'] else 0.0,
-                        int(player_row['FG3A']) if player_row['FG3A'] else 0,
-                        float(player_row['FT_PCT']) if player_row['FT_PCT'] else 0.0,
-                        int(player_row['FTA']) if player_row['FTA'] else 0,
+                        int(player_row['GP']),
+                        float(player_row['MIN']),
+                        float(player_row['PTS']),
+                        float(player_row['AST']),
+                        float(player_row['REB']),
+                        float(player_row['STL']),
+                        float(player_row['BLK']),
+                        float(player_row['TOV']),
+                        float(player_row['FG_PCT']),
+                        int(player_row['FGA']),
+                        float(player_row['FG3_PCT']),
+                        int(player_row['FG3A']),
+                        float(player_row['FT_PCT']),
+                        int(player_row['FTA']),
                         0.0,  # plus_minus placeholder
                         0.5,  # win_percentage placeholder
                         season
