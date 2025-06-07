@@ -167,8 +167,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if we already have cached player data
       const existingPlayers = await storage.getAllPlayers();
       
-      // Force refresh if we have fewer than expected players (should be 553+ with historical data)
-      if (existingPlayers.length >= 550) {
+      // Use existing data if we have sufficient players
+      if (existingPlayers.length >= 100) {
         console.log(`Using cached player data: ${existingPlayers.length} players`);
         return res.json(existingPlayers);
       }
