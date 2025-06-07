@@ -1,141 +1,120 @@
 # NBA Analytics Platform
 
-A comprehensive NBA analytics platform that transforms complex player statistics into engaging, user-friendly visualizations and insights.
+A comprehensive NBA analytics platform that transforms complex player statistics into engaging, user-friendly visualizations and insights, covering multiple seasons with advanced data processing capabilities.
 
 ## Features
 
-- **Player Search & Statistics**: Search and analyze NBA player performance data
-- **Custom Stat Calculator**: Build custom formulas using basketball statistics
-- **Guided Stat Builder**: AI-powered formula generation based on player archetypes
-- **Career Progression Charts**: Visualize player development over multiple seasons
-- **Scatter Plot Analysis**: Interactive data visualization and correlation analysis
-- **Favorite Players**: Save and track preferred players
-- **My Custom Stats**: Save and manage custom statistical formulas
+- **Player Statistics Analysis**: Comprehensive NBA player data with multi-season tracking
+- **Custom Statistics Builder**: Create and save personalized player evaluation formulas
+- **Interactive Leaderboards**: Dynamic rankings with filtering and sorting options
+- **Player Comparison Tools**: Side-by-side statistical comparisons
+- **Favorites System**: Save and track preferred players
+- **Historical Data**: Access to player statistics from 1996-2025
+- **Real-time Calculations**: Live formula evaluation and ranking updates
 
 ## Tech Stack
 
-- **Frontend**: React 18 with TypeScript, Tailwind CSS, Vite
-- **Backend**: Node.js, Express, TypeScript
+- **Frontend**: React with TypeScript, Tailwind CSS, shadcn/ui components
+- **Backend**: Node.js with Express
 - **Database**: PostgreSQL with Drizzle ORM
-- **UI Components**: Radix UI, Lucide React Icons
-- **Data Visualization**: Recharts, Framer Motion
-- **Authentication**: Passport.js with session management
+- **Authentication**: Replit Auth integration
+- **Data Source**: NBA API integration
+- **Build Tool**: Vite
 
 ## Setup Instructions
 
-### For GitHub/Local Development
+### Prerequisites
 
-1. **Clone the repository**
-   ```bash
-   git clone <your-repo-url>
-   cd nba-analytics-platform
-   ```
+- Node.js 20.x or higher
+- PostgreSQL database
+- Git
 
-2. **Install dependencies**
-   ```bash
-   # Remove Replit-specific package.json and use GitHub version
-   mv package.json package.replit.json
-   mv package.github.json package.json
-   
-   # Remove Replit-specific vite config and use GitHub version
-   mv vite.config.ts vite.config.replit.ts
-   mv vite.config.github.ts vite.config.ts
-   
-   npm install
-   ```
+### Installation
 
-3. **Environment Setup**
-   Create a `.env` file with the following variables:
-   ```env
-   DATABASE_URL=your_postgresql_connection_string
-   SESSION_SECRET=your_session_secret_key
-   NODE_ENV=development
-   ```
+1. Clone the repository:
+```bash
+git clone <your-repo-url>
+cd nba-analytics
+```
 
-4. **Database Setup**
-   ```bash
-   # Push database schema
-   npm run db:push
-   ```
+2. Install dependencies:
+```bash
+npm install
+```
 
-5. **Run the application**
-   ```bash
-   # Development mode
-   npm run dev
-   
-   # Production build
-   npm run build
-   npm start
-   ```
+3. Set up environment variables:
+```bash
+cp .env.example .env
+```
 
-### For Replit
+Edit `.env` with your configuration:
+```
+DATABASE_URL=postgresql://username:password@host:port/database?sslmode=require
+NODE_ENV=development
+PORT=5000
+```
 
-The application is pre-configured for Replit with:
-- Automatic PostgreSQL database provisioning
-- Replit-specific plugins and configurations
-- Session management with connect-pg-simple
-- Authentication via Replit's OIDC
+4. Set up the database:
+```bash
+npm run db:push
+```
 
-Simply run:
+5. Start the development server:
 ```bash
 npm run dev
 ```
 
+The application will be available at `http://localhost:5000`
+
+## Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run db:push` - Push database schema changes
+- `npm run db:studio` - Open Drizzle Studio for database management
+
 ## Project Structure
 
 ```
-├── client/                 # React frontend
+├── client/                 # Frontend React application
 │   ├── src/
-│   │   ├── components/     # React components
-│   │   ├── pages/         # Page components
-│   │   ├── lib/           # Utilities and configurations
-│   │   └── hooks/         # Custom React hooks
-├── server/                # Express backend
-│   ├── routes.ts          # API routes
-│   ├── storage.ts         # Database operations
-│   └── index.ts           # Server entry point
-├── shared/                # Shared types and schemas
-│   └── schema.ts          # Database schema definitions
-└── attached_assets/       # Static assets
+│   │   ├── components/     # Reusable UI components
+│   │   ├── pages/          # Application pages
+│   │   └── lib/            # Utility functions and configurations
+├── server/                 # Backend Express application
+│   ├── routes.ts           # API routes
+│   ├── storage.ts          # Database operations
+│   └── index.ts            # Server entry point
+├── shared/                 # Shared types and schemas
+│   └── schema.ts           # Database schema definitions
+└── scripts/                # Data processing scripts
 ```
-
-## Key Components
-
-### Custom Stats Calculator
-Interactive calculator for building basketball formulas with:
-- Player statistics buttons (PTS, AST, REB, etc.)
-- Mathematical operations (+, -, ×, ÷)
-- Number pad with decimal support
-- Delete button for precise editing
-- Clear functionality
-
-### Guided Stat Builder
-AI-powered formula generation featuring:
-- Player archetype selection (shooter, playmaker, defender, etc.)
-- Priority weighting system
-- Simple/Advanced mode options
-- Contextually intelligent basketball formulas
-
-### Data Visualization
-- Career progression charts showing player development
-- Interactive scatter plots for statistical correlation analysis
-- Responsive design with dark/light mode support
 
 ## Database Schema
 
 The application uses PostgreSQL with the following main tables:
-- `users` - User authentication and profiles
 - `players` - NBA player information and statistics
 - `custom_stats` - User-created statistical formulas
-- `favorite_players` - User's saved favorite players
+- `favorite_players` - User favorite player relationships
+- `users` - User authentication and profile data
+
+## Deployment
+
+For production deployment:
+
+1. Set `NODE_ENV=production` in your environment
+2. Configure your production database URL
+3. Run `npm run build` to create production assets
+4. Start the server with `npm start`
 
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Submit a pull request
+4. Add tests if applicable
+5. Submit a pull request
 
 ## License
 
-MIT License
+This project is licensed under the MIT License.
