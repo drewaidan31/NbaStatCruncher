@@ -47,16 +47,23 @@ npm install
 cp .env.example .env
 ```
 
-Edit `.env` with your configuration:
+Edit `.env` with your Neon database configuration:
 ```
-DATABASE_URL=postgresql://username:password@host:port/database?sslmode=require
+DATABASE_URL=postgresql://username:password@ep-xxxxx-xxxxx.us-east-2.aws.neon.tech/neondb?sslmode=require
+SESSION_SECRET=your-random-secret-key-here
 NODE_ENV=development
 PORT=5000
 ```
 
 4. Set up the database:
 ```bash
+node setup-complete-database.js
+```
+
+Or manually:
+```bash
 npm run db:push
+python3 scripts/nba_data.py
 ```
 
 5. Start the development server:
