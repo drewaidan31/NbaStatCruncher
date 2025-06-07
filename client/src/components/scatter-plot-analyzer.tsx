@@ -124,12 +124,45 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
         }
       });
 
-      // Apply minimal jitter to prevent overlaps while keeping ALL data
-      const optimizedData = combinedData.map(point => ({
-        ...point,
-        x: point.x + (Math.random() - 0.5) * 0.001,
-        y: point.y + (Math.random() - 0.5) * 0.001
-      }));
+      // Apply hexagonal binning algorithm to prevent clustering
+      const optimizedData = [];
+      const binSize = 0.1; // Adjust based on data range
+      const bins = new Map();
+      
+      // Group points into hexagonal bins
+      combinedData.forEach(point => {
+        const hexX = Math.floor(point.x / binSize) * binSize;
+        const hexY = Math.floor(point.y / binSize) * binSize;
+        const binKey = `${hexX},${hexY}`;
+        
+        if (!bins.has(binKey)) {
+          bins.set(binKey, []);
+        }
+        bins.get(binKey).push(point);
+      });
+      
+      // For each bin, spread points in a grid pattern to prevent overlap
+      bins.forEach((points, binKey) => {
+        if (points.length === 1) {
+          optimizedData.push(points[0]);
+        } else {
+          // Create micro-grid within each bin
+          const gridSize = Math.ceil(Math.sqrt(points.length));
+          const cellSize = binSize / gridSize;
+          
+          points.forEach((point, index) => {
+            const gridX = index % gridSize;
+            const gridY = Math.floor(index / gridSize);
+            const [baseBinX, baseBinY] = binKey.split(',').map(Number);
+            
+            optimizedData.push({
+              ...point,
+              x: baseBinX + (gridX + 0.5) * cellSize,
+              y: baseBinY + (gridY + 0.5) * cellSize
+            });
+          });
+        }
+      });
 
       setScatterData(optimizedData);
     } catch (error) {
@@ -378,6 +411,8 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
                     <ScatterChart
                       data={scatterData}
                       margin={{ top: 20, right: 20, bottom: 40, left: 40 }}
+                      width={800}
+                      height={400}
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
                       <XAxis 
@@ -422,21 +457,20 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
                         }}
                       >
                         {scatterData.map((entry, index) => {
-                          // Ultra-small dots for large datasets to prevent clustering
-                          const baseSize = scatterData.length > 1000 ? 2 : scatterData.length > 500 ? 3 : 4;
-                          const isTopPerformer = (entry.x + entry.y) > (avgX + avgY) * 1.2;
-                          const dotSize = isTopPerformer ? baseSize + 1 : baseSize;
+                          // Micro dots for maximum density without overlap
+                          const dotSize = scatterData.length > 2000 ? 1 : scatterData.length > 1000 ? 1.5 : 2;
+                          const isTopPerformer = (entry.x + entry.y) > (avgX + avgY) * 1.5;
                           
                           return (
                             <Cell 
                               key={`cell-${index}`}
                               fill={entry.teamColor}
-                              stroke="#ffffff"
-                              strokeWidth={0.2}
+                              stroke="none"
                               r={dotSize}
                               style={{ 
                                 cursor: 'pointer',
-                                opacity: isTopPerformer ? 0.95 : 0.6
+                                opacity: isTopPerformer ? 0.9 : 0.4,
+                                transition: 'opacity 0.2s ease'
                               }}
                             />
                           );
