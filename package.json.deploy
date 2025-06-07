@@ -1,0 +1,29 @@
+{
+  "name": "nba-analytics-platform",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "cd client && npm run build",
+    "build:server": "esbuild server/simple.js --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "start": "node dist/simple.js",
+    "dev": "node server/simple.js"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4",
+    "express": "^4.21.2",
+    "cors": "^2.8.5",
+    "drizzle-orm": "^0.39.1",
+    "connect-pg-simple": "^10.0.0",
+    "express-session": "^1.18.1",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "openid-client": "^6.5.0",
+    "zod": "^3.24.2",
+    "mathjs": "^14.5.2",
+    "memoizee": "^0.4.17"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}
