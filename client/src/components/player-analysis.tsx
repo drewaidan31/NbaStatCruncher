@@ -258,6 +258,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
     'FG_PCT': currentPlayerData.fieldGoalPercentage,
     'FG%': currentPlayerData.fieldGoalPercentage,
     'FGA': currentPlayerData.fieldGoalAttempts || 0,
+    'THREE_PCT': currentPlayerData.threePointPercentage,
     '3P_PCT': currentPlayerData.threePointPercentage,
     '3P%': currentPlayerData.threePointPercentage,
     '3PA': currentPlayerData.threePointAttempts || 0,
@@ -288,6 +289,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
       'FG_PCT': seasonData.fieldGoalPercentage,
       'FG%': seasonData.fieldGoalPercentage, // Support both formats
       'FGA': seasonData.fieldGoalAttempts || 0,
+      'THREE_PCT': seasonData.threePointPercentage,
       '3P_PCT': seasonData.threePointPercentage,
       '3P%': seasonData.threePointPercentage, // Support both formats
       '3PA': seasonData.threePointAttempts || 0,
@@ -364,14 +366,29 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
       
       // Replace stat abbreviations with actual values
       // First handle percentage stats specifically
+      if (expression.includes('FG_PCT')) {
+        expression = expression.replace(/FG_PCT/g, extendedMappings['FG_PCT'].toString());
+      }
       if (expression.includes('FG%')) {
         expression = expression.replace(/FG%/g, extendedMappings['FG%'].toString());
+      }
+      if (expression.includes('THREE_PCT')) {
+        expression = expression.replace(/THREE_PCT/g, extendedMappings['THREE_PCT'].toString());
       }
       if (expression.includes('3P%')) {
         expression = expression.replace(/3P%/g, extendedMappings['3P%'].toString());
       }
+      if (expression.includes('FT_PCT')) {
+        expression = expression.replace(/FT_PCT/g, extendedMappings['FT_PCT'].toString());
+      }
       if (expression.includes('FT%')) {
         expression = expression.replace(/FT%/g, extendedMappings['FT%'].toString());
+      }
+      if (expression.includes('PLUS_MINUS')) {
+        expression = expression.replace(/PLUS_MINUS/g, extendedMappings['PLUS_MINUS'].toString());
+      }
+      if (expression.includes('W_PCT')) {
+        expression = expression.replace(/W_PCT/g, extendedMappings['W_PCT'].toString());
       }
       
       // Then handle other stats
@@ -826,36 +843,49 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
             </button>
           </div>
 
-          {/* Quick Calculator */}
+          {/* Interactive Calculator Interface */}
           <div className="bg-slate-800 rounded-lg p-6 border border-slate-700 mb-6">
-            <h3 className="text-lg font-medium text-white mb-4">Quick Calculator</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <h3 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
+              <Calculator className="w-5 h-5 text-orange-400" />
+              Formula Builder
+            </h3>
+            
+            {/* Formula Display */}
+            <div className="bg-slate-900 rounded-lg p-4 border border-slate-600 mb-4">
+              <div className="text-slate-400 text-sm mb-1">Current Formula:</div>
+              <div className="text-white text-lg font-mono min-h-[2rem] break-all">
+                {formula || "Click stats and operations to build your formula"}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Player Stats */}
               <div>
                 <h4 className="text-sm font-medium text-slate-400 mb-3">Player Stats</h4>
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    { name: "PTS", value: "PTS" },
-                    { name: "AST", value: "AST" },
-                    { name: "REB", value: "REB" },
-                    { name: "STL", value: "STL" },
-                    { name: "BLK", value: "BLK" },
-                    { name: "TOV", value: "TOV" },
-                    { name: "FG%", value: "FG%" },
-                    { name: "3P%", value: "3P%" },
-                    { name: "FT%", value: "FT%" },
-                    { name: "+/-", value: "+/-" },
+                    { name: "PPG", value: "PTS" },
+                    { name: "APG", value: "AST" },
+                    { name: "RPG", value: "REB" },
+                    { name: "SPG", value: "STL" },
+                    { name: "BPG", value: "BLK" },
+                    { name: "TPG", value: "TOV" },
+                    { name: "FG%", value: "FG_PCT" },
+                    { name: "FGA", value: "FGA" },
+                    { name: "3P%", value: "THREE_PCT" },
+                    { name: "3PA", value: "3PA" },
+                    { name: "FT%", value: "FT_PCT" },
+                    { name: "FTA", value: "FTA" },
+                    { name: "+/-", value: "PLUS_MINUS" },
+                    { name: "W%", value: "W_PCT" },
                     { name: "GP", value: "GP" },
                     { name: "MIN", value: "MIN" }
                   ].map((stat) => (
                     <button
                       key={stat.value}
-                      onClick={() => {
-                        const newFormula = formula + stat.value;
-                        setFormula(newFormula);
-                        handleFormulaChange(newFormula);
-                      }}
-                      className="bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 px-3 rounded transition-colors"
+                      onClick={() => insertAtCursor(stat.value)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 px-3 rounded transition-colors font-medium"
+                      title={`Insert ${stat.name}`}
                     >
                       {stat.name}
                     </button>
@@ -868,35 +898,61 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
                 <h4 className="text-sm font-medium text-slate-400 mb-3">Operations</h4>
                 <div className="grid grid-cols-3 gap-2">
                   {[
-                    { symbol: "+", value: " + " },
-                    { symbol: "-", value: " - " },
-                    { symbol: "×", value: " * " },
-                    { symbol: "÷", value: " / " },
-                    { symbol: "(", value: "(" },
-                    { symbol: ")", value: ")" }
+                    { symbol: "+", value: " + ", desc: "Add" },
+                    { symbol: "−", value: " - ", desc: "Subtract" },
+                    { symbol: "×", value: " * ", desc: "Multiply" },
+                    { symbol: "÷", value: " / ", desc: "Divide" },
+                    { symbol: "(", value: "(", desc: "Open parenthesis" },
+                    { symbol: ")", value: ")", desc: "Close parenthesis" }
                   ].map((op) => (
                     <button
                       key={op.symbol}
                       onClick={() => insertAtCursor(op.value)}
-                      className="bg-green-600 hover:bg-green-700 text-white text-sm py-2 px-3 rounded transition-colors"
+                      className="bg-green-600 hover:bg-green-700 text-white text-sm py-2 px-3 rounded transition-colors font-medium"
+                      title={op.desc}
                     >
                       {op.symbol}
                     </button>
                   ))}
                 </div>
+                
+                {/* Additional Controls */}
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setFormula("")}
+                    className="bg-red-600 hover:bg-red-700 text-white text-xs py-1 px-2 rounded transition-colors"
+                  >
+                    Clear All
+                  </button>
+                  <button
+                    onClick={() => {
+                      const newFormula = formula.slice(0, -1);
+                      setFormula(newFormula);
+                      handleFormulaChange(newFormula);
+                    }}
+                    className="bg-yellow-600 hover:bg-yellow-700 text-white text-xs py-1 px-2 rounded transition-colors"
+                  >
+                    Backspace
+                  </button>
+                </div>
               </div>
 
-              {/* Numbers */}
+              {/* Numbers & Decimals */}
               <div>
-                <h4 className="text-sm font-medium text-slate-400 mb-3">Numbers</h4>
+                <h4 className="text-sm font-medium text-slate-400 mb-3">Numbers & Decimals</h4>
                 <div className="grid grid-cols-3 gap-2">
-                  {["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "."].map((num) => (
+                  {[
+                    { num: "7", val: "7" }, { num: "8", val: "8" }, { num: "9", val: "9" },
+                    { num: "4", val: "4" }, { num: "5", val: "5" }, { num: "6", val: "6" },
+                    { num: "1", val: "1" }, { num: "2", val: "2" }, { num: "3", val: "3" },
+                    { num: "0", val: "0" }, { num: ".", val: "." }, { num: "00", val: "00" }
+                  ].map((item) => (
                     <button
-                      key={num}
-                      onClick={() => insertAtCursor(num)}
-                      className="bg-slate-600 hover:bg-slate-500 text-white text-sm py-2 px-3 rounded transition-colors"
+                      key={item.num}
+                      onClick={() => insertAtCursor(item.val)}
+                      className="bg-slate-600 hover:bg-slate-500 text-white text-sm py-2 px-3 rounded transition-colors font-medium"
                     >
-                      {num}
+                      {item.num}
                     </button>
                   ))}
                 </div>
