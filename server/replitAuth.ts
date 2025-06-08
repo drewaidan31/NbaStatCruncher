@@ -30,10 +30,25 @@ const getOidcConfig = memoize(
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
+  
+  // Use memory store for external environments to avoid session table issues
+  if (!isReplitEnvironment) {
+    return session({
+      secret: process.env.SESSION_SECRET || "external-session-secret",
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        httpOnly: true,
+        secure: false,
+        maxAge: sessionTtl,
+      },
+    });
+  }
+
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
-    createTableIfMissing: false,
+    createTableIfMissing: true,
     ttl: sessionTtl,
     tableName: "sessions",
   });
@@ -73,13 +88,27 @@ async function upsertUser(
 }
 
 export async function setupAuth(app: Express) {
+  // Always setup session middleware
+  app.set("trust proxy", 1);
+  app.use(getSession());
+  
   if (!isReplitEnvironment) {
     console.log("Skipping Replit authentication setup - not in Replit environment");
+    // Create external user if it doesn't exist
+    try {
+      await storage.upsertUser({
+        id: "external-user",
+        email: "user@external.com",
+        firstName: "External",
+        lastName: "User",
+        profileImageUrl: null,
+      });
+    } catch (error) {
+      console.error("Error creating external user:", error);
+    }
     return;
   }
 
-  app.set("trust proxy", 1);
-  app.use(getSession());
   app.use(passport.initialize());
   app.use(passport.session());
 
