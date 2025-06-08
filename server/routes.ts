@@ -161,93 +161,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
-  // Fetch NBA players data from official NBA API
+  // Fetch NBA players data from database
   app.get("/api/nba/players", async (req, res) => {
     try {
-      // Check if we already have cached player data
-      const existingPlayers = await storage.getAllPlayers();
-      
-      // Force refresh if we have fewer than expected players (should be 553+ with historical data)
-      if (existingPlayers.length >= 550) {
-        console.log(`Using cached player data: ${existingPlayers.length} players`);
-        return res.json(existingPlayers);
-      }
-      
-      console.log(`Player count: ${existingPlayers.length}, refreshing to include historical players`);
-      
-      // Clear existing data to force refresh
-      try {
-        await storage.clearAllPlayers();
-      } catch (error) {
-        console.log("Could not clear existing players, continuing...");
-      }
-
-      console.log(`Loading unified NBA player profiles from official NBA API`);
-      
-      // Use Python script to fetch unified player data with all seasons
-      const python = spawn("python3", ["server/nba_data.py", "unified"]);
-      
-      let pythonData = "";
-      let pythonError = "";
-      
-      python.stdout.on("data", (data: any) => {
-        pythonData += data.toString();
-      });
-      
-      python.stderr.on("data", (data: any) => {
-        pythonError += data.toString();
-      });
-      
-      await new Promise((resolve, reject) => {
-        python.on("close", (code: number) => {
-          if (code === 0) {
-            resolve(code);
-          } else {
-            console.log("Python script error:", pythonError);
-            reject(new Error(`NBA API script failed: ${pythonError}`));
-          }
-        });
-      });
-
-      if (!pythonData.trim()) {
-        console.log("No data from Python script, using fallback");
-        return res.status(500).json({ 
-          message: "Unable to load NBA player data" 
-        });
-      }
-
-      const allPlayers = JSON.parse(pythonData);
-
-      console.log("NBA API Data received:", allPlayers.length, "players");
-
-      if (allPlayers.length === 0) {
-        return res.status(500).json({ 
-          message: "No NBA player data received from the official NBA API" 
-        });
-      }
-
-      // The NBA API library already provides structured data
-      const players = allPlayers;
-
-      // Store players in database (skip duplicates)
-      for (const playerData of players) {
-        try {
-          await storage.createPlayer(playerData);
-        } catch (error: any) {
-          // Skip duplicate players (player_id already exists)
-          if (error.code !== '23505') {
-            console.error(`Error inserting player ${playerData.name}:`, error);
-          }
-        }
-      }
-
-      const storedPlayers = await storage.getAllPlayers();
-      res.json(storedPlayers);
-
+      // Simply return all players from database
+      const players = await storage.getAllPlayers();
+      console.log(`Returning ${players.length} players from database`);
+      res.json(players);
     } catch (error) {
       console.error("Error fetching NBA data:", error);
       res.status(500).json({ 
-        message: "Failed to fetch NBA player data. Please check your API configuration and try again." 
+        message: "Failed to fetch NBA player data from database." 
       });
     }
   });
