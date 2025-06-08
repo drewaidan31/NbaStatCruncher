@@ -22,7 +22,7 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-semibold text-slate-50 mb-4">About</h3>
             <p className="text-sm text-slate-400">
-              Create custom NBA statistics using mathematical formulas and compare players across unique metrics for the 2024-25 season.
+              Box+ lets you create custom NBA statistics using mathematical formulas and compare players across unique metrics for the 2024-25 season.
             </p>
           </div>
           <div>
@@ -37,7 +37,7 @@ export default function Footer() {
         </div>
         <div className="border-t border-slate-700 mt-8 pt-6 text-center">
           <p className="text-sm text-slate-400">
-            © 2024 NBA Custom Stats. Built with React, Node.js, and RapidAPI.
+            © 2024 Box+. Built with React, Node.js, and NBA API.
           </p>
         </div>
       </div>
