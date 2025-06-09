@@ -317,7 +317,7 @@ export default function AboutSection() {
                   <ul className="text-sm text-slate-600 dark:text-slate-300 space-y-1">
                     <li>• Turnovers: -1.0 to -2.0</li>
                     <li>• Missed shots: Usually handled via percentages</li>
-                    <li>• Fouls: -0.3 to -0.8 (if included)</li>
+
                   </ul>
                 </div>
               </div>

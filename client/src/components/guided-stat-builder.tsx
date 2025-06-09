@@ -25,7 +25,6 @@ interface StatWeights {
   threePointPct: number;
   freeThrowPct: number;
   turnovers: number;
-  fouls: number;
 }
 
 interface PlayerPreferences {
@@ -37,7 +36,6 @@ interface PlayerPreferences {
   minimizeTO: boolean;
   rewardMinutes: boolean;
   emphasizeDefense: boolean;
-  penalizeFouls: boolean;
 }
 
 export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatBuilderProps) {
@@ -248,9 +246,7 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
       formula = `(${formula}) + (STL + BLK) * 2`;
     }
 
-    if (preferences.penalizeFouls) {
-      advancedPenalties.push("PF * 1.0");
-    }
+
 
     // Apply one multiplier at a time to prevent overflow
     if (advancedMultipliers.length > 0) {
