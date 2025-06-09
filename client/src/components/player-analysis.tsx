@@ -239,12 +239,40 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
           threePointAttempts: seasonData.threePointAttempts,
           freeThrowPercentage: seasonData.freeThrowPercentage,
           freeThrowAttempts: seasonData.freeThrowAttempts,
-          plusMinus: seasonData.plusMinus
+          plusMinus: seasonData.plusMinus,
+          winPercentage: seasonData.winPercentage
         };
         setCurrentPlayerData(updatedPlayerData);
       }
     } else if (selectedSeason === player.currentSeason) {
-      setCurrentPlayerData(player);
+      // For current season, also use season-specific data to ensure consistency
+      const currentSeasonData = player.seasons?.find(s => s.season === player.currentSeason);
+      if (currentSeasonData) {
+        const updatedPlayerData = {
+          ...player,
+          team: currentSeasonData.team,
+          position: currentSeasonData.position,
+          gamesPlayed: currentSeasonData.gamesPlayed,
+          minutesPerGame: currentSeasonData.minutesPerGame,
+          points: currentSeasonData.points,
+          assists: currentSeasonData.assists,
+          rebounds: currentSeasonData.rebounds,
+          steals: currentSeasonData.steals,
+          blocks: currentSeasonData.blocks,
+          turnovers: currentSeasonData.turnovers,
+          fieldGoalPercentage: currentSeasonData.fieldGoalPercentage,
+          fieldGoalAttempts: currentSeasonData.fieldGoalAttempts,
+          threePointPercentage: currentSeasonData.threePointPercentage,
+          threePointAttempts: currentSeasonData.threePointAttempts,
+          freeThrowPercentage: currentSeasonData.freeThrowPercentage,
+          freeThrowAttempts: currentSeasonData.freeThrowAttempts,
+          plusMinus: currentSeasonData.plusMinus,
+          winPercentage: currentSeasonData.winPercentage
+        };
+        setCurrentPlayerData(updatedPlayerData);
+      } else {
+        setCurrentPlayerData(player);
+      }
     }
   }, [selectedSeason, player]);
 
