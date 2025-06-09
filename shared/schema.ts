@@ -43,7 +43,8 @@ export const sessions = pgTable(
 // User storage table for accounts
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),
-  email: varchar("email").unique(),
+  email: varchar("email").unique().notNull(),
+  password: varchar("password").notNull(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
@@ -122,7 +123,23 @@ export const insertCustomStatSchema = createInsertSchema(customStats).omit({
   createdAt: true,
 });
 
-export const upsertUserSchema = createInsertSchema(users);
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const loginUserSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+});
+
+export const registerUserSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+  firstName: z.string().min(1).optional(),
+  lastName: z.string().min(1).optional(),
+});
 export const saveCustomStatSchema = createInsertSchema(customStats).omit({
   id: true,
   createdAt: true,
@@ -139,7 +156,9 @@ export type Player = typeof nbaPlayers.$inferSelect;
 export type InsertCustomStat = z.infer<typeof insertCustomStatSchema>;
 export type CustomStat = typeof customStats.$inferSelect;
 export type FormulaCalculation = z.infer<typeof formulaCalculationSchema>;
-export type UpsertUser = z.infer<typeof upsertUserSchema>;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type LoginUser = z.infer<typeof loginUserSchema>;
+export type RegisterUser = z.infer<typeof registerUserSchema>;
 export type User = typeof users.$inferSelect;
 export type SaveCustomStat = z.infer<typeof saveCustomStatSchema>;
 export type FavoritePlayer = typeof favoritePlayers.$inferSelect;
