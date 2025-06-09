@@ -50,6 +50,7 @@ interface Player {
     freeThrowPercentage: number;
     freeThrowAttempts?: number;
     plusMinus: number;
+    winPercentage?: number;
   }>;
   availableSeasons?: string[];
 }
@@ -240,7 +241,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
           freeThrowPercentage: seasonData.freeThrowPercentage,
           freeThrowAttempts: seasonData.freeThrowAttempts,
           plusMinus: seasonData.plusMinus,
-          winPercentage: seasonData.winPercentage
+          winPercentage: (seasonData as any).winPercentage
         };
         setCurrentPlayerData(updatedPlayerData);
       }
@@ -267,7 +268,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
           freeThrowPercentage: currentSeasonData.freeThrowPercentage,
           freeThrowAttempts: currentSeasonData.freeThrowAttempts,
           plusMinus: currentSeasonData.plusMinus,
-          winPercentage: currentSeasonData.winPercentage
+          winPercentage: (currentSeasonData as any).winPercentage
         };
         setCurrentPlayerData(updatedPlayerData);
       } else {
