@@ -52,8 +52,7 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
     clutchPerformance: false,
     minimizeTO: false,
     rewardMinutes: false,
-    emphasizeDefense: false,
-    penalizeFouls: false
+    emphasizeDefense: false
   });
   
   const [weights, setWeights] = useState<StatWeights>({
@@ -65,8 +64,7 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
     fieldGoalPct: 3,
     threePointPct: 3,
     freeThrowPct: 3,
-    turnovers: 3,
-    fouls: 3
+    turnovers: 3
   });
 
   const [generatedFormula, setGeneratedFormula] = useState("");
@@ -208,11 +206,7 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
       penalties.push("TOV * 0.8");
     }
 
-    if (weights.fouls >= 4) {
-      penalties.push(`PF * ${formatMultiplier(weights.fouls * 0.4)}`);
-    } else if (weights.fouls >= 2) {
-      penalties.push("PF * 0.5");
-    }
+
 
     if (penalties.length > 0) {
       formula = `(${formula}) - (${penalties.join(" + ")})`;
@@ -572,11 +566,6 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
                     id: "emphasizeDefense",
                     label: "Defensive Impact",
                     desc: "Boost steals and blocks significantly"
-                  },
-                  {
-                    id: "penalizeFouls",
-                    label: "Discipline",
-                    desc: "Reduce value for players with excessive fouling"
                   }
                 ].map((factor) => (
                   <div key={factor.id} className="flex items-start space-x-3 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
@@ -706,7 +695,7 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
                   {preferences.minimizeTO && <p>• Penalizes turnovers heavily</p>}
                   {preferences.rewardMinutes && <p>• Favors high usage players</p>}
                   {preferences.emphasizeDefense && <p>• Boosts defensive stats</p>}
-                  {preferences.penalizeFouls && <p>• Reduces value for fouling</p>}
+
                 </div>
               </div>
 
