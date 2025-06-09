@@ -21,17 +21,71 @@ import GuidedStatBuilder from "./components/guided-stat-builder";
 import { ColorfulFavoriteButton } from "./components/colorful-favorites";
 import { UserProfileDropdown } from "./components/user-profile-dropdown";
 import { MyCustomStats } from "./components/my-custom-stats";
-import { AuthProvider, useAuth } from "./hooks/useAuth";
-import { AuthForms } from "./components/auth-forms";
+import AuthPage from "./pages/auth-page";
 import { generatePersonalizedGraph, generateCareerProgressionData } from "./utils/personalized-graphs";
-import type { CustomStat, FavoritePlayer } from "../../../shared/schema.ts";
+import Header from "./components/header";
+// Define needed types locally
+interface Player {
+  playerId: number;
+  name: string;
+  team: string;
+  position: string;
+  gamesPlayed: number;
+  minutesPerGame?: number;
+  points: number;
+  assists: number;
+  rebounds: number;
+  steals: number;
+  blocks: number;
+  turnovers: number;
+  fieldGoalPercentage: number;
+  fieldGoalAttempts?: number;
+  threePointPercentage: number;
+  threePointAttempts?: number;
+  freeThrowPercentage: number;
+  freeThrowAttempts?: number;
+  plusMinus: number;
+  currentSeason?: string | null;
+  seasons?: unknown;
+  availableSeasons?: string[] | null;
+}
+
+interface CustomStat {
+  id: number;
+  name: string;
+  formula: string;
+  description: string | null;
+  userId: string | null;
+  isPublic: number | null;
+  createdAt: Date | null;
+}
+
+interface FavoritePlayer {
+  id: number;
+  userId: string;
+  playerId: number;
+  playerName: string;
+  createdAt: Date | null;
+}
 
 import { BarChart3, Search, Calculator, TrendingUp, Sparkles, RefreshCw, ChevronDown, Filter, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { evaluate } from "mathjs";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      queryFn: async ({ queryKey }) => {
+        const response = await fetch(queryKey[0] as string);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      },
+    },
+  },
+});
 
 interface Player {
   playerId: number;
@@ -1113,10 +1167,55 @@ function MainApp() {
   );
 }
 
+function AppWithAuth() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const [showAuthForms, setShowAuthForms] = useState(false);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-900">
+        <div className="text-center">
+          <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <div className="text-white">Loading Box+...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated && !showAuthForms) {
+    return (
+      <div className="min-h-screen bg-slate-900">
+        <Header onAuthClick={() => setShowAuthForms(true)} />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-white mb-4">Welcome to Box+</h1>
+            <p className="text-xl text-slate-300 mb-8">Advanced NBA Analytics Platform</p>
+            <p className="text-slate-400 mb-8">Sign in to access custom statistics, save favorite players, and unlock advanced analytics.</p>
+            <Button 
+              onClick={() => setShowAuthForms(true)}
+              className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 text-lg"
+            >
+              Get Started
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated && showAuthForms) {
+    return <AuthForms />;
+  }
+
+  return <MainApp />;
+}
+
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <MainApp />
+      <AuthProvider>
+        <AppWithAuth />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
