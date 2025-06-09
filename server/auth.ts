@@ -9,8 +9,6 @@ import { db } from "./db";
 import { users } from "@shared/schema";
 import type { User } from "@shared/schema";
 import { v4 as uuidv4 } from "uuid";
-import connectPg from "connect-pg-simple";
-
 declare global {
   namespace Express {
     interface User {
@@ -49,16 +47,10 @@ async function comparePasswords(supplied: string, stored: string): Promise<boole
 }
 
 export function setupAuth(app: Express) {
-  const PostgresSessionStore = connectPg(session);
-  
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "box-plus-secret-key-12345",
     resave: false,
     saveUninitialized: false,
-    store: new PostgresSessionStore({
-      conString: process.env.DATABASE_URL,
-      createTableIfMissing: true,
-    }),
     cookie: {
       secure: false, // Set to true in production with HTTPS
       httpOnly: true,
