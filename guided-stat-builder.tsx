@@ -25,7 +25,6 @@ interface StatWeights {
   threePointPct: number;
   freeThrowPct: number;
   turnovers: number;
-  fouls: number;
 }
 
 interface PlayerPreferences {
@@ -37,7 +36,6 @@ interface PlayerPreferences {
   minimizeTO: boolean;
   rewardMinutes: boolean;
   emphasizeDefense: boolean;
-  penalizeFouls: boolean;
 }
 
 export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatBuilderProps) {
@@ -54,8 +52,7 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
     clutchPerformance: false,
     minimizeTO: false,
     rewardMinutes: false,
-    emphasizeDefense: false,
-    penalizeFouls: false
+    emphasizeDefense: false
   });
   
   const [weights, setWeights] = useState<StatWeights>({
@@ -67,8 +64,7 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
     fieldGoalPct: 3,
     threePointPct: 3,
     freeThrowPct: 3,
-    turnovers: 3,
-    fouls: 3
+    turnovers: 3
   });
 
   const [generatedFormula, setGeneratedFormula] = useState("");
@@ -210,11 +206,7 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
       penalties.push("TOV * 0.8");
     }
 
-    if (weights.fouls >= 4) {
-      penalties.push(`PF * ${formatMultiplier(weights.fouls * 0.4)}`);
-    } else if (weights.fouls >= 2) {
-      penalties.push("PF * 0.5");
-    }
+
 
     if (penalties.length > 0) {
       formula = `(${formula}) - (${penalties.join(" + ")})`;
@@ -248,9 +240,7 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
       formula = `(${formula}) + (STL + BLK) * 2`;
     }
 
-    if (preferences.penalizeFouls) {
-      advancedPenalties.push("PF * 1.0");
-    }
+
 
     // Apply one multiplier at a time to prevent overflow
     if (advancedMultipliers.length > 0) {
@@ -710,7 +700,7 @@ export default function GuidedStatBuilder({ onBack, onStatCreated }: GuidedStatB
                   {preferences.minimizeTO && <p>• Penalizes turnovers heavily</p>}
                   {preferences.rewardMinutes && <p>• Favors high usage players</p>}
                   {preferences.emphasizeDefense && <p>• Boosts defensive stats</p>}
-                  {preferences.penalizeFouls && <p>• Reduces value for fouling</p>}
+
                 </div>
               </div>
 

@@ -661,7 +661,7 @@ function MainApp() {
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">NBA Custom Stats Calculator</h2>
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">NBA Formula Builder</h2>
               <p className="text-slate-600 dark:text-slate-300 mt-2">Build your own basketball analytics formulas using real NBA player data. Create custom stats, compare players, and discover new insights.</p>
             </div>
             <Button
@@ -948,7 +948,7 @@ function MainApp() {
         <div className="flex justify-between items-start mb-8">
           <div className="text-center flex-1">
             <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
-              NBA Custom Stats Calculator
+              NBA Formula Builder
             </h1>
             <p className="text-xl text-slate-600 dark:text-slate-300">
               Create custom basketball statistics with authentic NBA player data

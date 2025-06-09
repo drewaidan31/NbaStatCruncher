@@ -717,7 +717,7 @@ function MainApp({ user, onLogout }: { user?: any; onLogout?: () => void }) {
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">NBA Custom Stats Calculator</h2>
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Nba Formula Builder</h2>
               <p className="text-slate-600 dark:text-slate-300 mt-2">Build your own basketball analytics formulas using real NBA player data. Create custom stats, compare players, and discover new insights.</p>
             </div>
             <Button
@@ -1004,7 +1004,7 @@ function MainApp({ user, onLogout }: { user?: any; onLogout?: () => void }) {
         <div className="flex justify-between items-start mb-8">
           <div className="text-center flex-1">
             <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
-              NBA Custom Stats Calculator
+              NBA Formula Builder
             </h1>
             <p className="text-xl text-slate-600 dark:text-slate-300">
               Create custom basketball statistics with authentic NBA player data
@@ -1212,7 +1212,7 @@ function AppWithAuth() {
       <div className="min-h-screen flex items-center justify-center bg-slate-900">
         <div className="text-center">
           <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <div className="text-white">Loading Box+...</div>
+          <div className="text-white">Loading NBA Formula Builder...</div>
         </div>
       </div>
     );
@@ -1231,7 +1231,7 @@ function AppWithAuth() {
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
                   <div className="text-2xl">🏀</div>
-                  <h1 className="text-xl font-bold text-slate-50">Box+</h1>
+                  <h1 className="text-xl font-bold text-slate-50">NBA Formula Builder</h1>
                 </div>
                 <span className="text-sm text-slate-400 hidden sm:block">2024-25 Season Analytics</span>
               </div>
@@ -1246,7 +1246,7 @@ function AppWithAuth() {
         </header>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-white mb-4">Welcome to Box+</h1>
+            <h1 className="text-4xl font-bold text-white mb-4">Welcome to NBA Formula Builder</h1>
             <p className="text-xl text-slate-300 mb-8">Advanced NBA Analytics Platform</p>
             <p className="text-slate-400 mb-8">Sign in to access custom statistics, save favorite players, and unlock advanced analytics.</p>
             <Button 
