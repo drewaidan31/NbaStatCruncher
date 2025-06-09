@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginUserSchema, registerUserSchema, type LoginUser, type RegisterUser } from "@shared/schema";
+import { loginUserSchema, registerUserSchema, type LoginUser, type RegisterUser } from "../../../shared/schema.ts";
 import { useAuth } from "@/hooks/useAuth";
 import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 

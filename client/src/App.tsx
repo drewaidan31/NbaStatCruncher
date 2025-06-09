@@ -21,8 +21,10 @@ import GuidedStatBuilder from "./components/guided-stat-builder";
 import { ColorfulFavoriteButton } from "./components/colorful-favorites";
 import { UserProfileDropdown } from "./components/user-profile-dropdown";
 import { MyCustomStats } from "./components/my-custom-stats";
+import { AuthProvider, useAuth } from "./hooks/useAuth";
+import { AuthForms } from "./components/auth-forms";
 import { generatePersonalizedGraph, generateCareerProgressionData } from "./utils/personalized-graphs";
-import type { CustomStat, FavoritePlayer } from "@shared/schema";
+import type { CustomStat, FavoritePlayer } from "../../../shared/schema.ts";
 
 import { BarChart3, Search, Calculator, TrendingUp, Sparkles, RefreshCw, ChevronDown, Filter, User } from "lucide-react";
 import { Button } from "@/components/ui/button";

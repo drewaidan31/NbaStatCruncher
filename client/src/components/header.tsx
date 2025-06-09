@@ -6,8 +6,13 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
-export default function Header() {
+interface HeaderProps {
+  onAuthClick?: () => void;
+}
+
+export default function Header({ onAuthClick }: HeaderProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const { user, isAuthenticated, logoutMutation } = useAuth();
 
   // Check API connection by attempting to fetch players
   const { isError, error } = useQuery({
@@ -72,6 +77,33 @@ export default function Header() {
                 <Settings className="w-4 h-4" />
               )}
             </Button>
+
+            {/* Authentication Controls */}
+            {isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="text-slate-400 hover:text-slate-50">
+                    <User className="w-4 h-4 mr-2" />
+                    {user?.firstName || user?.email}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => logoutMutation.mutate()}>
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button
+                variant="default"
+                size="sm"
+                onClick={onAuthClick}
+                className="bg-orange-600 hover:bg-orange-700 text-white"
+              >
+                Sign In
+              </Button>
+            )}
           </div>
         </div>
       </div>
