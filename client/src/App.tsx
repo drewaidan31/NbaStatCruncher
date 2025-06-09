@@ -113,7 +113,7 @@ interface Player {
 
 type ViewMode = 'leaderboard' | 'search' | 'analysis' | 'comparison' | 'usage-rate' | 'about' | 'stats-library' | 'profile' | 'scatter-plot' | 'guided-builder';
 
-function MainApp() {
+function MainApp({ user, onLogout }: { user?: any; onLogout?: () => void }) {
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -1168,8 +1168,44 @@ function MainApp() {
 }
 
 function AppWithAuth() {
-  const { isAuthenticated, isLoading } = useAuth();
-  const [showAuthForms, setShowAuthForms] = useState(false);
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showAuthPage, setShowAuthPage] = useState(false);
+
+  // Check authentication status on load
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch("/api/auth/user");
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData);
+        }
+      } catch (error) {
+        console.log("No active session");
+      }
+      setIsLoading(false);
+    };
+    checkAuth();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      setUser(null);
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
+  const handleAuthSuccess = () => {
+    setShowAuthPage(false);
+    // Refresh user data
+    fetch("/api/auth/user")
+      .then(res => res.json())
+      .then(userData => setUser(userData))
+      .catch(err => console.error("Failed to refresh user data:", err));
+  };
 
   if (isLoading) {
     return (
@@ -1182,17 +1218,39 @@ function AppWithAuth() {
     );
   }
 
-  if (!isAuthenticated && !showAuthForms) {
+  if (!user && showAuthPage) {
+    return <AuthPage onAuthSuccess={handleAuthSuccess} />;
+  }
+
+  if (!user) {
     return (
       <div className="min-h-screen bg-slate-900">
-        <Header onAuthClick={() => setShowAuthForms(true)} />
+        <header className="bg-slate-800 border-b border-slate-700 sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <div className="text-2xl">🏀</div>
+                  <h1 className="text-xl font-bold text-slate-50">Box+</h1>
+                </div>
+                <span className="text-sm text-slate-400 hidden sm:block">2024-25 Season Analytics</span>
+              </div>
+              <Button
+                onClick={() => setShowAuthPage(true)}
+                className="bg-orange-600 hover:bg-orange-700 text-white"
+              >
+                Sign In
+              </Button>
+            </div>
+          </div>
+        </header>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
             <h1 className="text-4xl font-bold text-white mb-4">Welcome to Box+</h1>
             <p className="text-xl text-slate-300 mb-8">Advanced NBA Analytics Platform</p>
             <p className="text-slate-400 mb-8">Sign in to access custom statistics, save favorite players, and unlock advanced analytics.</p>
             <Button 
-              onClick={() => setShowAuthForms(true)}
+              onClick={() => setShowAuthPage(true)}
               className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 text-lg"
             >
               Get Started
@@ -1203,19 +1261,13 @@ function AppWithAuth() {
     );
   }
 
-  if (!isAuthenticated && showAuthForms) {
-    return <AuthForms />;
-  }
-
   return <MainApp />;
 }
 
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <AppWithAuth />
-      </AuthProvider>
+      <AppWithAuth />
     </QueryClientProvider>
   );
 }
