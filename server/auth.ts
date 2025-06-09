@@ -51,10 +51,12 @@ export function setupAuth(app: Express) {
     secret: process.env.SESSION_SECRET || "box-plus-secret-key-12345",
     resave: false,
     saveUninitialized: false,
+    rolling: true, // Reset session expiry on each request
     cookie: {
       secure: false, // Set to true in production with HTTPS
       httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      sameSite: 'lax', // Better browser compatibility
     },
   };
 
