@@ -36,9 +36,9 @@ export default function AboutSection() {
       content: (
         <div className="space-y-6">
           <div>
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">What is Box+?</h3>
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">What is NBA Formula Builder?</h3>
             <p className="text-slate-600 dark:text-slate-300 mb-4">
-              Box+ is an advanced NBA analytics platform that lets you create custom metrics by combining basic NBA stats 
+              NBA Formula Builder is an advanced NBA analytics platform that lets you create custom metrics by combining basic NBA stats 
               (points, rebounds, assists, etc.) using mathematical formulas. This allows you to measure specific aspects of 
               player performance that traditional stats might not capture.
             </p>

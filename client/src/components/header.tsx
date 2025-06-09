@@ -40,7 +40,7 @@ export default function Header({ onAuthClick }: HeaderProps) {
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <div className="text-2xl">🏀</div>
-              <h1 className="text-xl font-bold text-slate-50">Box+</h1>
+              <h1 className="text-xl font-bold text-slate-50">NBA Formula Builder</h1>
             </div>
             <span className="text-sm text-slate-400 hidden sm:block">2024-25 Season Analytics</span>
           </div>

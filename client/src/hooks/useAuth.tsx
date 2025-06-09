@@ -96,7 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('boxplus_auth_check', Date.now().toString());
       localStorage.setItem('boxplus_user_authenticated', 'true');
       toast({
-        title: "Welcome to Box+",
+        title: "Welcome to NBA Formula Builder",
         description: "Successfully signed in!",
       });
     },
@@ -121,7 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('boxplus_auth_check', Date.now().toString());
       localStorage.setItem('boxplus_user_authenticated', 'true');
       toast({
-        title: "Welcome to Box+",
+        title: "Welcome to NBA Formula Builder",
         description: "Account created successfully!",
       });
     },

@@ -130,7 +130,7 @@ export function AuthForms() {
               <CardHeader>
                 <CardTitle>Create Account</CardTitle>
                 <CardDescription>
-                  Join Box+ to create custom statistics and save your favorite players
+                  Join NBA Formula Builder to create custom statistics and save your favorite players
                 </CardDescription>
               </CardHeader>
               <CardContent>

@@ -102,7 +102,7 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Box+</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">NBA Formula Builder</h1>
           <p className="text-gray-600 dark:text-gray-300 mt-2">Advanced NBA Analytics Platform</p>
         </div>
 
@@ -182,7 +182,7 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
               <CardHeader>
                 <CardTitle>Create Account</CardTitle>
                 <CardDescription>
-                  Join Box+ to create custom statistics and save your favorite players
+                  Join NBA Formula Builder to create custom statistics and save your favorite players
                 </CardDescription>
               </CardHeader>
               <CardContent>
