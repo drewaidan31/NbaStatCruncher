@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { Settings, Wifi, WifiOff } from "lucide-react";
+import { Settings, Wifi, WifiOff, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Header() {
   const [isRefreshing, setIsRefreshing] = useState(false);

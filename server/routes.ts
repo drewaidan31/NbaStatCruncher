@@ -14,24 +14,12 @@ import { getTeamPossessionData } from "./team-stats-service";
 export async function registerRoutes(app: Express): Promise<Server> {
   
   // Setup authentication
-  await setupAuth(app);
-
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
+  setupAuth(app);
 
   // User custom stats routes
   app.post('/api/custom-stats', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const { name, formula, description, isPublic } = req.body;
       
       if (!name || !formula) {
@@ -55,7 +43,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/custom-stats', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const customStats = await storage.getUserCustomStats(userId);
       res.json(customStats);
     } catch (error) {
@@ -66,7 +54,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/custom-stats/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const statId = parseInt(req.params.id);
       
       if (isNaN(statId)) {
@@ -88,7 +76,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/custom-stats/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const statId = parseInt(req.params.id);
       const { name, formula, description } = req.body;
       
@@ -127,7 +115,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/custom-stats/:id/toggle-visibility', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const statId = parseInt(req.params.id);
       const { isPublic } = req.body;
 
@@ -488,7 +476,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Save custom stat with name (requires authentication)
   app.post("/api/custom-stats/save", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const validatedData = saveCustomStatSchema.parse({
         ...req.body,
         userId
@@ -618,7 +606,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get user's saved custom stats (requires authentication)
   app.get("/api/custom-stats/my", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       console.log("Fetching stats for user ID:", userId, "type:", typeof userId);
       console.log("User claims:", req.user.claims);
       
@@ -639,7 +627,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Delete a saved custom stat (requires authentication)
   app.delete("/api/custom-stats/:id", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const statId = parseInt(req.params.id);
       
       const success = await storage.deleteCustomStat(statId, userId);
@@ -657,7 +645,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update a saved custom stat (requires authentication)
   app.put("/api/custom-stats/:id", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const statId = parseInt(req.params.id);
       const { name, formula, description } = req.body;
       
@@ -776,7 +764,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Clean up duplicate custom stats (requires authentication)
   app.post("/api/custom-stats/cleanup-duplicates", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const duplicatesRemoved = await storage.removeDuplicateCustomStats(userId);
       res.json({ message: `Removed ${duplicatesRemoved} duplicate stats` });
     } catch (error) {
@@ -948,7 +936,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Favorite players routes (requires authentication)
   app.get("/api/favorite-players", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const favorites = await storage.getUserFavoritePlayers(userId);
       res.json(favorites);
     } catch (error) {
@@ -959,7 +947,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/favorite-players", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const { playerId, playerName } = req.body;
       
       if (!playerId || !playerName) {
@@ -990,7 +978,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/favorite-players/:playerId", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const playerId = parseInt(req.params.playerId);
       
       if (isNaN(playerId)) {
