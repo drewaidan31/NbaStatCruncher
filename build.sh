@@ -11,6 +11,10 @@ npm install
 echo "Building application..."
 npm run build
 
+# Build the production server
+echo "Building production server..."
+npx esbuild server/production.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --external:@shared/schema
+
 # Run database migrations if DATABASE_URL is available
 if [ -n "$DATABASE_URL" ]; then
     echo "Running database migrations..."
