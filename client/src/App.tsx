@@ -1207,7 +1207,7 @@ function AppWithAuth() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showAuthPage, setShowAuthPage] = useState(false);
-  const [guestMode, setGuestMode] = useState(false);
+  const [guestMode, setGuestMode] = useState(true);
 
   // Check authentication status on load
   useEffect(() => {
@@ -1220,10 +1220,11 @@ function AppWithAuth() {
           const userData = await response.json().catch(() => null);
           if (userData && userData.authenticated) {
             setUser(userData.user);
+            setGuestMode(false); // Disable guest mode if user is authenticated
           }
         }
       } catch (error) {
-        console.log("No active session");
+        console.log("No active session - continuing in guest mode");
       }
       setIsLoading(false);
     };
