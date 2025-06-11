@@ -1176,10 +1176,14 @@ function AppWithAuth() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch("/api/auth/user");
+        const response = await fetch("/api/auth/user", {
+          credentials: "include"
+        });
         if (response.ok) {
-          const userData = await response.json();
-          setUser(userData);
+          const userData = await response.json().catch(() => null);
+          if (userData && userData.authenticated) {
+            setUser(userData.user);
+          }
         }
       } catch (error) {
         console.log("No active session");
@@ -1191,19 +1195,30 @@ function AppWithAuth() {
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      await fetch("/api/auth/logout", { 
+        method: "POST",
+        credentials: "include"
+      });
       setUser(null);
     } catch (error) {
       console.error("Logout failed:", error);
+      // Force logout on client side even if server request fails
+      setUser(null);
     }
   };
 
   const handleAuthSuccess = () => {
     setShowAuthPage(false);
     // Refresh user data
-    fetch("/api/auth/user")
-      .then(res => res.json())
-      .then(userData => setUser(userData))
+    fetch("/api/auth/user", {
+      credentials: "include"
+    })
+      .then(res => res.json().catch(() => null))
+      .then(userData => {
+        if (userData && userData.authenticated) {
+          setUser(userData.user);
+        }
+      })
       .catch(err => console.error("Failed to refresh user data:", err));
   };
 
