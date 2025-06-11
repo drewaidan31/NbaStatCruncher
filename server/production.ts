@@ -93,9 +93,28 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     console.log('API routes registered');
     
     // Serve static files from the build directory
-    const distPath = path.resolve(__dirname, 'public');
+    const distPath = path.resolve(process.cwd(), 'dist/public');
     console.log('Serving static files from:', distPath);
-    app.use(express.static(distPath));
+    
+    // Check if dist directory exists
+    try {
+      const fs = await import('fs');
+      if (fs.existsSync(distPath)) {
+        console.log('Static files directory found');
+        app.use(express.static(distPath));
+      } else {
+        console.log('Static files directory not found, trying alternative path');
+        const altPath = path.resolve(process.cwd(), 'public');
+        if (fs.existsSync(altPath)) {
+          app.use(express.static(altPath));
+          console.log('Using alternative static path:', altPath);
+        } else {
+          console.error('No static files directory found');
+        }
+      }
+    } catch (error) {
+      console.error('Error setting up static files:', error);
+    }
     
     // Handle client-side routing - serve index.html for non-API routes
     app.get('*', (req, res) => {

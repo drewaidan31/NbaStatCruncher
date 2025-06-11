@@ -11,9 +11,14 @@ npm install
 echo "Building application..."
 npm run build
 
+# Copy built frontend files to correct location
+echo "Organizing build files..."
+mkdir -p dist/public
+cp -r dist/client/* dist/public/ 2>/dev/null || echo "No client files to copy"
+
 # Build the production server
 echo "Building production server..."
-npx esbuild server/production.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+npx esbuild server/production.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --external:pg-native --external:cpu-features
 
 # Run database migrations if DATABASE_URL is available
 if [ -n "$DATABASE_URL" ]; then

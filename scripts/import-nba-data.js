@@ -1,8 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { storage } from "../server/storage.js";
-
 // Generate comprehensive NBA player dataset
 async function generateNBAPlayers() {
   const teams = [
@@ -143,6 +141,17 @@ async function importNBAData() {
   console.log("Starting NBA data import...");
   
   try {
+    // Import storage dynamically
+    let storage;
+    try {
+      const storageModule = await import("../server/storage.js");
+      storage = storageModule.storage;
+    } catch (error) {
+      console.log("Fallback: importing from dist directory");
+      const storageModule = await import("../dist/storage.js");
+      storage = storageModule.storage;
+    }
+    
     // Check if data already exists
     const existingPlayers = await storage.getAllPlayers();
     console.log(`Found ${existingPlayers.length} existing players in database`);
