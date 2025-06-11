@@ -761,24 +761,37 @@ function MainApp({ user, onLogout, isGuest, onSignIn }: { user?: any; onLogout?:
               >
                 Calculate
               </button>
-              <button
-                onClick={handleSaveStat}
-                disabled={!formula.trim() || !customStatName.trim()}
-                className="bg-green-600 hover:bg-green-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors"
-              >
-                Save Stat
-              </button>
-              <button
-                onClick={() => {
-                  setShowSavedStats(!showSavedStats);
-                  if (!showSavedStats) {
-                    fetchSavedStats();
-                  }
-                }}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-              >
-                Saved Stats
-              </button>
+              {isGuest ? (
+                <button
+                  onClick={onSignIn}
+                  disabled={!formula.trim() || !customStatName.trim()}
+                  className="bg-green-600 hover:bg-green-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                  title="Sign in to save custom stats"
+                >
+                  Sign In to Save
+                </button>
+              ) : (
+                <button
+                  onClick={handleSaveStat}
+                  disabled={!formula.trim() || !customStatName.trim()}
+                  className="bg-green-600 hover:bg-green-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                >
+                  Save Stat
+                </button>
+              )}
+              {!isGuest && (
+                <button
+                  onClick={() => {
+                    setShowSavedStats(!showSavedStats);
+                    if (!showSavedStats) {
+                      fetchSavedStats();
+                    }
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                >
+                  Saved Stats
+                </button>
+              )}
               <button
                 onClick={() => {
                   setFormula("");
@@ -1011,18 +1024,43 @@ function MainApp({ user, onLogout, isGuest, onSignIn }: { user?: any; onLogout?:
             </p>
           </div>
           <div className="ml-8 flex items-center gap-3">
-            <Button
-              variant="ghost"
-              onClick={() => setViewMode('profile')}
-              className="flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800"
-            >
-              <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-red-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                D
+            {isGuest ? (
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-slate-500 dark:text-slate-400">
+                  Guest Mode
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onSignIn}
+                  className="border-orange-500 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                >
+                  Sign In to Save Stats
+                </Button>
               </div>
-              <span className="hidden md:block text-slate-700 dark:text-slate-300">
-                Profile
-              </span>
-            </Button>
+            ) : user ? (
+              <Button
+                variant="ghost"
+                onClick={() => setViewMode('profile')}
+                className="flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-red-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                  {user.firstName?.[0] || user.email?.[0] || 'U'}
+                </div>
+                <span className="hidden md:block text-slate-700 dark:text-slate-300">
+                  Profile
+                </span>
+              </Button>
+            ) : (
+              <Button
+                variant="default"
+                size="sm"
+                onClick={onSignIn}
+                className="bg-orange-600 hover:bg-orange-700 text-white"
+              >
+                Sign In
+              </Button>
+            )}
           </div>
         </div>
 
