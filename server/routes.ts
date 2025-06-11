@@ -33,6 +33,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // Debug endpoint for authentication troubleshooting
+  app.get('/api/debug/auth', (req, res) => {
+    res.json({
+      isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : false,
+      session: req.session ? {
+        id: req.session.id,
+        cookie: req.session.cookie
+      } : null,
+      user: req.user || null,
+      environment: process.env.NODE_ENV,
+      sessionSecret: process.env.SESSION_SECRET ? 'SET' : 'NOT SET'
+    });
+  });
+
+  // Test login endpoint that bypasses passport for debugging
+  app.post('/api/debug/test-login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      console.log('Debug login attempt:', { email, passwordProvided: !!password });
+      
+      res.json({ 
+        message: 'Debug endpoint working',
+        received: { email, passwordProvided: !!password },
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Debug login error:', error);
+      res.status(500).json({ 
+        error: 'Debug endpoint failed',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
   
   // Setup authentication
   setupAuth(app);

@@ -7,18 +7,9 @@ import { setupVite, serveStatic, log } from "./vite";
 
 const app = express();
 
-// Configure CORS for production deployment
+// Configure CORS for all environments
 app.use((req, res, next) => {
-  const isProduction = process.env.NODE_ENV === 'production';
-  const allowedOrigins = isProduction 
-    ? [process.env.FRONTEND_URL, process.env.RENDER_EXTERNAL_URL].filter(Boolean)
-    : ['*'];
-  
-  const origin = req.headers.origin;
-  if (!isProduction || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin || '*');
-  }
-  
+  res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   res.header('Access-Control-Allow-Credentials', 'true');
@@ -38,7 +29,14 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   const message = err.message || "Internal Server Error";
 
   log(`Error ${status}: ${message}`);
-  res.status(status).json({ message });
+  console.error("Full error details:", err);
+  
+  // Ensure we always send valid JSON
+  try {
+    res.status(status).json({ error: message, status });
+  } catch (jsonError) {
+    res.status(500).send("Internal Server Error");
+  }
 });
 
 (async () => {

@@ -55,10 +55,10 @@ export function setupAuth(app: Express) {
     saveUninitialized: false,
     rolling: true, // Reset session expiry on each request
     cookie: {
-      secure: isProduction, // Use secure cookies in production (HTTPS)
+      secure: false, // Set to false for now to fix deployment issues
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      sameSite: isProduction ? 'none' : 'lax', // Cross-site compatibility for production
+      sameSite: 'lax', // Use lax for better compatibility
     },
   };
 
@@ -166,21 +166,30 @@ export function setupAuth(app: Express) {
 
   // Login endpoint
   app.post("/api/auth/login", (req, res, next) => {
-    passport.authenticate("local", (err: any, user: any, info: any) => {
-      if (err) {
-        return res.status(500).json({ error: "Authentication failed" });
-      }
-      if (!user) {
-        return res.status(401).json({ error: info?.message || "Invalid credentials" });
-      }
-
-      req.login(user, (err) => {
+    try {
+      passport.authenticate("local", (err: any, user: any, info: any) => {
         if (err) {
-          return res.status(500).json({ error: "Login failed" });
+          console.error("Authentication error:", err);
+          return res.status(500).json({ error: "Authentication failed", details: err.message });
         }
-        res.json(user);
-      });
-    })(req, res, next);
+        if (!user) {
+          console.log("Authentication failed:", info?.message);
+          return res.status(401).json({ error: info?.message || "Invalid credentials" });
+        }
+
+        req.login(user, (loginErr) => {
+          if (loginErr) {
+            console.error("Login error:", loginErr);
+            return res.status(500).json({ error: "Login failed", details: loginErr.message });
+          }
+          console.log("User logged in successfully:", user.email);
+          res.json({ success: true, user });
+        });
+      })(req, res, next);
+    } catch (error) {
+      console.error("Login endpoint error:", error);
+      res.status(500).json({ error: "Server error during login", details: error instanceof Error ? error.message : "Unknown error" });
+    }
   });
 
   // Logout endpoint
