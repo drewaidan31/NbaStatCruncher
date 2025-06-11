@@ -28,15 +28,27 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: { email: string; password: string }) => {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(credentials),
-      });
-      if (!res.ok) {
-        throw new Error("Invalid email or password");
+      try {
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(credentials),
+        });
+        
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({ error: "Network error" }));
+          throw new Error(errorData.error || "Login failed");
+        }
+        
+        const data = await res.json();
+        return data;
+      } catch (error) {
+        if (error instanceof Error) {
+          throw error;
+        }
+        throw new Error("Network error during login");
       }
-      return res.json();
     },
     onSuccess: (user) => {
       queryClient.setQueryData(["/api/auth/user"], user);

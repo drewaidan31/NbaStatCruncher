@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { formulaCalculationSchema, saveCustomStatSchema, NBA_STAT_MAPPINGS, type Player, playerAwards, allStarSelections, endOfSeasonTeams } from "@shared/schema";
 import { evaluate } from "mathjs";
 import { spawn } from "child_process";
-import { setupAuth, isAuthenticated } from "./auth";
+import { isAuthenticated } from "./auth";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
 
@@ -67,9 +67,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-  
-  // Setup authentication BEFORE other routes that depend on it
-  setupAuth(app);
 
   // User custom stats routes
   app.post('/api/custom-stats', isAuthenticated, async (req: any, res) => {

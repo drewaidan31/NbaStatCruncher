@@ -40,6 +40,10 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 (async () => {
+  // Setup authentication middleware FIRST
+  const { setupAuth } = await import("./auth");
+  setupAuth(app);
+  
   const server = await registerRoutes(app);
   
   // Important: setup vite middleware after registering routes
