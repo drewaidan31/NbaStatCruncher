@@ -25,7 +25,6 @@ async function comparePasswords(supplied: string, stored: string): Promise<boole
   return timingSafeEqual(hashedBuf, suppliedBuf);
 }
 
-// Configure passport
 passport.use(
   new LocalStrategy(
     { usernameField: "email" },
@@ -38,24 +37,32 @@ passport.use(
           .limit(1);
 
         if (user.length === 0) {
-          return done(null, false, { message: "Invalid email or password" });
+          return done(null, false, { message: "Invalid credentials" });
         }
 
-        const isValid = await comparePasswords(password, user[0].password);
-        if (!isValid) {
-          return done(null, false, { message: "Invalid email or password" });
+        const isValidPassword = await comparePasswords(password, user[0].password);
+        if (!isValidPassword) {
+          return done(null, false, { message: "Invalid credentials" });
         }
 
-        const { password: _, ...userWithoutPassword } = user[0];
-        return done(null, userWithoutPassword);
+        const userWithoutPassword = {
+          id: user[0].id,
+          email: user[0].email,
+          firstName: user[0].firstName,
+          lastName: user[0].lastName,
+          profileImageUrl: user[0].profileImageUrl
+        };
+        done(null, userWithoutPassword);
       } catch (error) {
-        return done(error);
+        done(error);
       }
     }
   )
 );
 
-passport.serializeUser((user, done) => done(null, user.id));
+passport.serializeUser((user: any, done) => {
+  done(null, user.id);
+});
 
 passport.deserializeUser(async (id: string, done) => {
   try {
@@ -69,56 +76,47 @@ passport.deserializeUser(async (id: string, done) => {
       return done(null, false);
     }
 
-    const { password: _, ...userWithoutPassword } = user[0];
+    const userWithoutPassword = {
+      id: user[0].id,
+      email: user[0].email,
+      firstName: user[0].firstName,
+      lastName: user[0].lastName,
+      profileImageUrl: user[0].profileImageUrl
+    };
     done(null, userWithoutPassword);
   } catch (error) {
     done(error);
   }
 });
 
-// Authentication routes
 router.get("/user", (req, res) => {
-  try {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ error: "Not authenticated", authenticated: false });
-    }
+  if (req.isAuthenticated()) {
     res.json({ authenticated: true, user: req.user });
-  } catch (error) {
-    console.error("User fetch failed:", error);
-    res.status(500).json({ error: "Server error", authenticated: false });
+  } else {
+    res.status(401).json({ authenticated: false });
   }
 });
 
-router.post("/login", (req, res, next) => {
-  try {
-    passport.authenticate("local", (err: any, user: any, info: any) => {
-      if (err) {
-        console.error("Authentication error:", err);
-        return res.status(500).json({ error: "Authentication failed", details: err.message });
-      }
-      if (!user) {
-        console.log("Authentication failed:", info?.message);
-        return res.status(401).json({ error: info?.message || "Invalid credentials" });
-      }
-
-      req.login(user, (loginErr) => {
-        if (loginErr) {
-          console.error("Login error:", loginErr);
-          return res.status(500).json({ error: "Login failed", details: loginErr.message });
-        }
-        console.log("User logged in successfully:", user.email);
-        res.json({ success: true, user });
-      });
-    })(req, res, next);
-  } catch (error) {
-    console.error("Login endpoint error:", error);
-    res.status(500).json({ error: "Server error during login", details: error instanceof Error ? error.message : "Unknown error" });
-  }
+router.post("/login", passport.authenticate("local"), (req, res) => {
+  res.json({ authenticated: true, user: req.user });
 });
 
-router.post("/register", async (req, res, next) => {
+router.post("/logout", (req, res) => {
+  req.logout((err) => {
+    if (err) {
+      return res.status(500).json({ error: "Logout failed" });
+    }
+    res.json({ success: true });
+  });
+});
+
+router.post("/register", async (req, res) => {
   try {
     const { email, password, firstName, lastName } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
 
     const existingUser = await db
       .select()
@@ -127,40 +125,39 @@ router.post("/register", async (req, res, next) => {
       .limit(1);
 
     if (existingUser.length > 0) {
-      return res.status(400).json({ error: "Email already registered" });
+      return res.status(400).json({ error: "User already exists" });
     }
 
     const hashedPassword = await hashPassword(password);
-    const userId = uuidv4();
+    const newUser = {
+      id: uuidv4(),
+      email,
+      password: hashedPassword,
+      firstName: firstName || null,
+      lastName: lastName || null,
+      profileImageUrl: null
+    };
 
-    const newUser = await db
-      .insert(users)
-      .values({
-        id: userId,
-        email,
-        password: hashedPassword,
-        firstName: firstName || null,
-        lastName: lastName || null,
-      })
-      .returning();
+    await db.insert(users).values(newUser);
 
-    const { password: _, ...userWithoutPassword } = newUser[0];
+    const userWithoutPassword = {
+      id: newUser.id,
+      email: newUser.email,
+      firstName: newUser.firstName,
+      lastName: newUser.lastName,
+      profileImageUrl: newUser.profileImageUrl
+    };
 
     req.login(userWithoutPassword, (err) => {
-      if (err) return next(err);
-      res.status(201).json({ success: true, user: userWithoutPassword });
+      if (err) {
+        return res.status(500).json({ error: "Login after registration failed" });
+      }
+      res.json({ authenticated: true, user: userWithoutPassword });
     });
   } catch (error) {
     console.error("Registration error:", error);
     res.status(500).json({ error: "Registration failed" });
   }
-});
-
-router.post("/logout", (req, res, next) => {
-  req.logout((err) => {
-    if (err) return next(err);
-    res.json({ success: true, message: "Logged out successfully" });
-  });
 });
 
 export default router;
