@@ -113,7 +113,7 @@ interface Player {
 
 type ViewMode = 'leaderboard' | 'search' | 'analysis' | 'comparison' | 'usage-rate' | 'about' | 'stats-library' | 'profile' | 'scatter-plot' | 'guided-builder';
 
-function MainApp({ user, onLogout }: { user?: any; onLogout?: () => void }) {
+function MainApp({ user, onLogout, isGuest, onSignIn }: { user?: any; onLogout?: () => void; isGuest?: boolean; onSignIn?: () => void }) {
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -1171,6 +1171,7 @@ function AppWithAuth() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showAuthPage, setShowAuthPage] = useState(false);
+  const [guestMode, setGuestMode] = useState(false);
 
   // Check authentication status on load
   useEffect(() => {
@@ -1237,7 +1238,7 @@ function AppWithAuth() {
     return <AuthPage onAuthSuccess={handleAuthSuccess} />;
   }
 
-  if (!user) {
+  if (!user && !guestMode) {
     return (
       <div className="min-h-screen bg-slate-900">
         <header className="bg-slate-800 border-b border-slate-700 sticky top-0 z-50">
@@ -1250,12 +1251,21 @@ function AppWithAuth() {
                 </div>
                 <span className="text-sm text-slate-400 hidden sm:block">2024-25 Season Analytics</span>
               </div>
-              <Button
-                onClick={() => setShowAuthPage(true)}
-                className="bg-orange-600 hover:bg-orange-700 text-white"
-              >
-                Sign In
-              </Button>
+              <div className="flex items-center space-x-3">
+                <Button
+                  onClick={() => setGuestMode(true)}
+                  variant="outline"
+                  className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                >
+                  Try as Guest
+                </Button>
+                <Button
+                  onClick={() => setShowAuthPage(true)}
+                  className="bg-orange-600 hover:bg-orange-700 text-white"
+                >
+                  Sign In
+                </Button>
+              </div>
             </div>
           </div>
         </header>
@@ -1263,20 +1273,34 @@ function AppWithAuth() {
           <div className="text-center">
             <h1 className="text-4xl font-bold text-white mb-4">Welcome to NBA Formula Builder</h1>
             <p className="text-xl text-slate-300 mb-8">Advanced NBA Analytics Platform</p>
-            <p className="text-slate-400 mb-8">Sign in to access custom statistics, save favorite players, and unlock advanced analytics.</p>
-            <Button 
-              onClick={() => setShowAuthPage(true)}
-              className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 text-lg"
-            >
-              Get Started
-            </Button>
+            <p className="text-slate-400 mb-8">Create custom NBA statistics, analyze player performance, and explore advanced basketball analytics.</p>
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button 
+                  onClick={() => setGuestMode(true)}
+                  variant="outline"
+                  className="border-slate-600 text-slate-300 hover:bg-slate-700 text-lg px-8 py-3"
+                >
+                  Explore as Guest
+                </Button>
+                <Button 
+                  onClick={() => setShowAuthPage(true)}
+                  className="bg-orange-600 hover:bg-orange-700 text-white text-lg px-8 py-3"
+                >
+                  Create Account
+                </Button>
+              </div>
+              <p className="text-sm text-slate-500">
+                Guest mode: Full access to analytics • Account: Save custom stats & favorites
+              </p>
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
-  return <MainApp />;
+  return <MainApp user={user} isGuest={guestMode} onSignIn={() => setShowAuthPage(true)} />;
 }
 
 export default function App() {
