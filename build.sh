@@ -1,24 +1,24 @@
 #!/bin/bash
 
-# Simplified build script for Render deployment
-echo "Starting NBA Analytics build process..."
+# Render deployment build script
+echo "Building NBA Analytics for production..."
 
 # Install dependencies
 npm install
 
-# Build the frontend application
+# Build frontend only (skip complex server bundling)
 echo "Building frontend..."
-npm run build
+npx vite build
 
-# Setup database if DATABASE_URL is available
+# Database setup
 if [ -n "$DATABASE_URL" ]; then
     echo "Setting up database..."
-    npm run db:push
+    npx drizzle-kit push
     
-    echo "Setting up NBA database..."
+    echo "Importing NBA data..."
     tsx server/setup-production-db.js
 else
-    echo "Warning: DATABASE_URL not found, skipping database setup"
+    echo "Warning: No DATABASE_URL - skipping database setup"
 fi
 
-echo "Build completed successfully"
+echo "Build complete"
