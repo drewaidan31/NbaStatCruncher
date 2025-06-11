@@ -1005,11 +1005,9 @@ function MainApp({ user, onLogout, isGuest, onSignIn }: { user?: any; onLogout?:
             </div>
           </div>
         )}
-
-
       </div>
     );
-  };
+  }
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition-colors">
