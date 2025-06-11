@@ -2,20 +2,21 @@ services:
   - type: web
     name: nba-analytics
     env: node
-    buildCommand: |
-      cd client && npm install && npm run build
-      mkdir -p ../dist/public && cp -r dist/* ../dist/public/
-    startCommand: node server/simple.js
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: nba-analytics-db
+          property: connectionString
       - key: SESSION_SECRET
         generateValue: true
-  - type: pserv
-    name: nba-postgres
-    env: docker
-    dockerfilePath: ./Dockerfile.postgres
-    disk:
-      name: postgres-data
-      mountPath: /var/lib/postgresql/data
-      sizeGB: 10
+    autoDeploy: false
+
+databases:
+  - name: nba-analytics-db
+    databaseName: nba_analytics
+    user: nba_user

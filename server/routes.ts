@@ -13,6 +13,27 @@ import { getTeamPossessionData } from "./team-stats-service";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
+  // Health check endpoint for Render deployment
+  app.get('/api/health', async (req, res) => {
+    try {
+      // Test database connection
+      const players = await storage.getAllPlayers();
+      res.status(200).json({ 
+        status: 'healthy', 
+        database: 'connected',
+        players: players.length,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(503).json({ 
+        status: 'unhealthy', 
+        database: 'disconnected',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+  
   // Setup authentication
   setupAuth(app);
 
