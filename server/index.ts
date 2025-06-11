@@ -40,9 +40,31 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 (async () => {
-  // Setup authentication middleware FIRST
-  const { setupAuth } = await import("./auth");
-  setupAuth(app);
+  // Setup session middleware and passport
+  const session = (await import("express-session")).default;
+  const passport = (await import("passport")).default;
+  
+  const sessionSettings = {
+    secret: process.env.SESSION_SECRET || "nba-analytics-default-secret-2025",
+    resave: false,
+    saveUninitialized: false,
+    rolling: true,
+    cookie: {
+      secure: false,
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      sameSite: 'lax' as const,
+    },
+  };
+
+  app.set("trust proxy", 1);
+  app.use(session(sessionSettings));
+  app.use(passport.initialize());
+  app.use(passport.session());
+  
+  // Mount authentication routes
+  const authRoutes = (await import("./auth-routes")).default;
+  app.use("/api/auth", authRoutes);
   
   const server = await registerRoutes(app);
   
