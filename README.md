@@ -1,127 +1,127 @@
 # NBA Analytics Platform
 
-A comprehensive NBA analytics platform that transforms complex player statistics into engaging, user-friendly visualizations and insights, covering multiple seasons with advanced data processing capabilities.
+A comprehensive NBA analytics platform that transforms complex player statistics into engaging, user-friendly visualizations and insights.
 
 ## Features
 
-- **Player Statistics Analysis**: Comprehensive NBA player data with multi-season tracking
-- **Custom Statistics Builder**: Create and save personalized player evaluation formulas
-- **Interactive Leaderboards**: Dynamic rankings with filtering and sorting options
-- **Player Comparison Tools**: Side-by-side statistical comparisons
-- **Favorites System**: Save and track preferred players
-- **Historical Data**: Access to player statistics from 1996-2025
-- **Real-time Calculations**: Live formula evaluation and ranking updates
+- **Custom Stat Formulas**: Create and test your own basketball statistics formulas
+- **Player Analysis**: Deep dive into individual player performance across seasons
+- **Team Analytics**: Advanced team statistics and possession-based metrics
+- **Leaderboards**: Rank players using custom or traditional statistics
+- **Favorites System**: Save and track your favorite players
+- **Historical Data**: Access to NBA data from 1996-2025
 
 ## Tech Stack
 
-- **Frontend**: React with TypeScript, Tailwind CSS, shadcn/ui components
-- **Backend**: Node.js with Express
+- **Frontend**: React + TypeScript + Tailwind CSS
+- **Backend**: Node.js + Express
 - **Database**: PostgreSQL with Drizzle ORM
-- **Authentication**: Replit Auth integration
-- **Data Source**: NBA API integration
-- **Build Tool**: Vite
+- **Deployment**: Optimized for Render
 
-## Setup Instructions
+## Quick Start
 
-### Prerequisites
+### Environment Variables
 
-- Node.js 20.x or higher
-- PostgreSQL database
-- Git
+Create a `.env` file with:
 
-### Installation
-
-1. Clone the repository:
 ```bash
-git clone <your-repo-url>
-cd nba-analytics
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Set up environment variables:
-```bash
-cp .env.example .env
-```
-
-Edit `.env` with your Neon database configuration:
-```
-DATABASE_URL=postgresql://username:password@ep-xxxxx-xxxxx.us-east-2.aws.neon.tech/neondb?sslmode=require
-SESSION_SECRET=your-random-secret-key-here
-NODE_ENV=development
+DATABASE_URL=postgresql://username:password@hostname:port/database
+NODE_ENV=production
 PORT=5000
+SESSION_SECRET=your-secure-random-session-secret
 ```
 
-4. Set up the database:
-```bash
-node setup-complete-database.js
-```
+### Local Development
 
-Or manually:
-```bash
-npm run db:push
-python3 scripts/nba_data.py
-```
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-5. Start the development server:
-```bash
-npm run dev
-```
+2. Set up database:
+   ```bash
+   npm run db:push
+   ```
 
-The application will be available at `http://localhost:5000`
+3. Start development server:
+   ```bash
+   npm run dev
+   ```
 
-## Available Scripts
+## Deployment on Render
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run db:push` - Push database schema changes
-- `npm run db:studio` - Open Drizzle Studio for database management
+### Option 1: Using render.yaml (Recommended)
 
-## Project Structure
+1. **Push to GitHub**: Commit all changes to your GitHub repository
+2. **Connect to Render**: Go to [render.com](https://render.com) and connect your GitHub repo
+3. **Automatic Setup**: Render will use the `render.yaml` file for configuration
+4. **Environment Variables**: Render automatically provides DATABASE_URL and generates SESSION_SECRET
 
-```
-├── client/                 # Frontend React application
-│   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   ├── pages/          # Application pages
-│   │   └── lib/            # Utility functions and configurations
-├── server/                 # Backend Express application
-│   ├── routes.ts           # API routes
-│   ├── storage.ts          # Database operations
-│   └── index.ts            # Server entry point
-├── shared/                 # Shared types and schemas
-│   └── schema.ts           # Database schema definitions
-└── scripts/                # Data processing scripts
-```
+### Option 2: Manual Setup
+
+1. **Create Web Service** on Render dashboard
+2. **Build Command**: `./build.sh`
+3. **Start Command**: `npm start`
+4. **Add PostgreSQL Database** from Render dashboard
+5. **Environment Variables**:
+   - `NODE_ENV`: `production`
+   - `SESSION_SECRET`: Generate a random string
+   - `DATABASE_URL`: Automatically provided by Render PostgreSQL
+
+### Health Check
+
+The application includes a health check endpoint at `/api/health` that verifies:
+- Server status
+- Database connectivity
+- Player data availability
 
 ## Database Schema
 
-The application uses PostgreSQL with the following main tables:
-- `players` - NBA player information and statistics
-- `custom_stats` - User-created statistical formulas
-- `favorite_players` - User favorite player relationships
-- `users` - User authentication and profile data
+The application automatically creates all necessary tables on first deployment. Key tables include:
+- `players`: NBA player statistics and career data
+- `customStats`: User-created statistical formulas
+- `favoritePlayers`: User favorite player lists
+- `users`: Authentication and user management
 
-## Deployment
+## API Endpoints
 
-For production deployment:
+### Core Features
+- `GET /api/nba/players` - Get all NBA players
+- `POST /api/nba/calculate` - Calculate custom statistics
+- `GET /api/health` - Health check endpoint
 
-1. Set `NODE_ENV=production` in your environment
-2. Configure your production database URL
-3. Run `npm run build` to create production assets
-4. Start the server with `npm start`
+### User Features (Authentication Required)
+- `POST /api/custom-stats` - Save custom stat formulas
+- `GET /api/custom-stats/my` - Get user's saved stats
+- `POST /api/favorite-players` - Add favorite players
 
-## Contributing
+## Production Considerations
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+- **SSL Configuration**: Automatically handles SSL for PostgreSQL connections
+- **Connection Pooling**: Optimized database connection management
+- **Error Handling**: Comprehensive error logging and user feedback
+- **Performance**: Chunked builds and optimized asset loading
 
-## License
+## Troubleshooting
 
-This project is licensed under the MIT License.
+### Database Connection Issues
+- Verify DATABASE_URL format: `postgresql://user:pass@host:port/db`
+- Ensure database allows external connections
+- Check SSL requirements (most cloud databases require SSL)
+
+### Build Failures
+- Ensure all environment variables are set
+- Check build logs for specific error messages
+- Verify PostgreSQL database is accessible during build
+
+### Performance Issues
+- Monitor database connection pool usage
+- Check for long-running queries in application logs
+- Consider upgrading Render service tier for higher traffic
+
+## Support
+
+For deployment issues:
+1. Check the health endpoint: `/api/health`
+2. Review application logs in Render dashboard
+3. Verify all environment variables are set correctly

@@ -47,16 +47,18 @@ async function comparePasswords(supplied: string, stored: string): Promise<boole
 }
 
 export function setupAuth(app: Express) {
+  const isProduction = process.env.NODE_ENV === 'production';
+  
   const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET || "box-plus-secret-key-12345",
+    secret: process.env.SESSION_SECRET || "nba-analytics-default-secret-2025",
     resave: false,
     saveUninitialized: false,
     rolling: true, // Reset session expiry on each request
     cookie: {
-      secure: false, // Set to true in production with HTTPS
+      secure: isProduction, // Use secure cookies in production (HTTPS)
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      sameSite: 'lax', // Better browser compatibility
+      sameSite: isProduction ? 'none' : 'lax', // Cross-site compatibility for production
     },
   };
 
