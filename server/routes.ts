@@ -16,20 +16,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint for Render deployment
   app.get('/api/health', async (req, res) => {
     try {
-      // Test database connection
+      console.log('Health check: Testing database connection...');
       const players = await storage.getAllPlayers();
+      console.log(`Health check: Found ${players.length} players in database`);
       res.status(200).json({ 
         status: 'healthy', 
         database: 'connected',
         players: players.length,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV,
+        databaseUrl: process.env.DATABASE_URL ? 'SET' : 'NOT SET'
       });
     } catch (error) {
+      console.error('Health check failed:', error);
       res.status(503).json({ 
         status: 'unhealthy', 
         database: 'disconnected',
         error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV,
+        databaseUrl: process.env.DATABASE_URL ? 'SET' : 'NOT SET'
       });
     }
   });
@@ -204,14 +210,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Fetch NBA players data from database
   app.get("/api/nba/players", async (req, res) => {
     try {
+      console.log('NBA Players API called - Environment:', process.env.NODE_ENV);
+      console.log('Database URL configured:', !!process.env.DATABASE_URL);
+      
       // Simply return all players from database
       const players = await storage.getAllPlayers();
       console.log(`Returning ${players.length} players from database`);
-      res.json(players);
+      
+      res.status(200).json(players);
     } catch (error) {
       console.error("Error fetching NBA data:", error);
+      console.error("Error details:", {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+        name: error instanceof Error ? error.name : 'Unknown error type'
+      });
+      
       res.status(500).json({ 
-        message: "Failed to fetch NBA player data from database." 
+        message: "Failed to fetch NBA player data from database.",
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
       });
     }
   });
