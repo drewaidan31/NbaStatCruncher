@@ -59,7 +59,14 @@ export function setupAuth(app: Express) {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       sameSite: 'lax', // Use lax for better compatibility
-    },
+    app.get("/api/auth/user", (req, res) => {
+      if (req.isAuthenticated()) {
+        res.json(req.user);
+      } else {
+        res.status(401).json({ error: "Not authenticated" });
+      }
+    });
+},
   };
 
   app.set("trust proxy", 1);
