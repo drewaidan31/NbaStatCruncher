@@ -6,6 +6,9 @@ import { registerRoutes } from "./routes";
 import path from "path";
 import { fileURLToPath } from "url";
 
+// Initialize database connection early
+import "./db";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -74,6 +77,16 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const authRoutes = (await import("./auth-routes")).default;
     app.use("/api/auth", authRoutes);
     console.log('Auth routes mounted at /api/auth');
+    
+    // Test database connection before registering routes
+    try {
+      const { storage } = await import("./storage");
+      const players = await storage.getAllPlayers();
+      console.log(`Database connection verified: ${players.length} players found`);
+    } catch (dbError) {
+      console.error('Database connection failed:', dbError);
+      console.error('DATABASE_URL present:', !!process.env.DATABASE_URL);
+    }
     
     // Register all API routes
     const server = await registerRoutes(app);
