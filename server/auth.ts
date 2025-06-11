@@ -196,16 +196,16 @@ export function setupAuth(app: Express) {
   app.post("/api/auth/logout", (req, res, next) => {
     req.logout((err) => {
       if (err) return next(err);
-      res.sendStatus(200);
+      res.json({ success: true, message: "Logged out successfully" });
     });
   });
 
   // Get current user endpoint
   app.get("/api/auth/user", (req, res) => {
     if (!req.isAuthenticated()) {
-      return res.sendStatus(401);
+      return res.status(401).json({ error: "Not authenticated", authenticated: false });
     }
-    res.json(req.user);
+    res.json({ authenticated: true, user: req.user });
   });
 }
 

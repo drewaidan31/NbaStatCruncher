@@ -68,7 +68,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Setup authentication
+  // Setup authentication BEFORE other routes that depend on it
   setupAuth(app);
 
   // User custom stats routes
