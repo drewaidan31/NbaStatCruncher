@@ -1,4 +1,7 @@
-// Simplified production server for Render
+// Production server for Render deployment
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -7,11 +10,21 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+console.log('Starting production server...');
+console.log('Environment:', process.env.NODE_ENV);
+console.log('Database URL configured:', !!process.env.DATABASE_URL);
+
 const app = express();
 
 // Basic middleware
 app.use(cors());
 app.use(express.json());
+
+// Request logging
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
+});
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -54,6 +67,17 @@ try {
   }
 } catch (error) {
   console.error('Failed to register routes:', error);
+}
+
+// Import auth routes
+try {
+  const authModule = await import('./auth-routes.js');
+  if (authModule.default) {
+    app.use('/api/auth', authModule.default);
+    console.log('Auth routes registered');
+  }
+} catch (error) {
+  console.error('Failed to register auth routes:', error);
 }
 
 // Serve static files

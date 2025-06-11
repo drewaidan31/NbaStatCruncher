@@ -15,8 +15,8 @@ if [ -n "$DATABASE_URL" ]; then
     echo "Setting up database..."
     npm run db:push
     
-    echo "Importing NBA data..."
-    node scripts/import-nba-data.js
+    echo "Setting up NBA database..."
+    tsx server/setup-production-db.js
 else
     echo "Warning: DATABASE_URL not found, skipping database setup"
 fi
