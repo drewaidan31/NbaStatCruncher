@@ -3,7 +3,7 @@ services:
     name: nba-analytics
     env: node
     buildCommand: ./build.sh
-    startCommand: node server/render-start.js
+    startCommand: node server/render-production.js
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
