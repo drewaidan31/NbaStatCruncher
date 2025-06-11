@@ -49,16 +49,19 @@ async function comparePasswords(supplied: string, stored: string): Promise<boole
 export function setupAuth(app: Express) {
   const isProduction = process.env.NODE_ENV === 'production';
   
-  const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET || "nba-analytics-default-secret-2025",
-    resave: false,
-    saveUninitialized: false,
-    rolling: true, // Reset session expiry on each request
-    cookie: {
-      secure: false, // Set to false for now to fix deployment issues
-      httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      sameSite: 'lax', // Use lax for better compatibility
+      const sessionSettings: session.SessionOptions = {
+        secret: process.env.SESSION_SECRET || "nba-analytics-default-secret-2025",
+        resave: false,
+        saveUninitialized: false,
+        rolling: true,
+        cookie: {
+          secure: false, 
+          httpOnly: true,
+          maxAge: 7 * 24 * 60 * 60 * 1000, 
+          sameSite: 'lax',
+        } 
+      };
+ // Use lax for better compatibility
     app.get("/api/auth/user", (req, res) => {
       if (req.isAuthenticated()) {
         res.json(req.user);
