@@ -9,6 +9,7 @@ import { db } from "./db";
 import { users } from "@shared/schema";
 import type { User } from "@shared/schema";
 import { v4 as uuidv4 } from "uuid";
+
 declare global {
   namespace Express {
     interface User {
@@ -39,7 +40,10 @@ async function hashPassword(password: string): Promise<string> {
   return `${buf.toString("hex")}.${salt}`;
 }
 
-async function comparePasswords(supplied: string, stored: string): Promise<boolean> {
+async function comparePasswords(
+  supplied: string,
+  stored: string,
+): Promise<boolean> {
   const [hashed, salt] = stored.split(".");
   const hashedBuf = Buffer.from(hashed, "hex");
   const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
@@ -47,29 +51,19 @@ async function comparePasswords(supplied: string, stored: string): Promise<boole
 }
 
 export function setupAuth(app: Express) {
-  const isProduction = process.env.NODE_ENV === 'production';
-  
-      const sessionSettings: session.SessionOptions = {
-        secret: process.env.SESSION_SECRET || "nba-analytics-default-secret-2025",
-        resave: false,
-        saveUninitialized: false,
-        rolling: true,
-        cookie: {
-          secure: false, 
-          httpOnly: true,
-          maxAge: 7 * 24 * 60 * 60 * 1000, 
-          sameSite: 'lax',
-        } 
-      };
- // Use lax for better compatibility
-    app.get("/api/auth/user", (req, res) => {
-      if (req.isAuthenticated()) {
-        res.json(req.user);
-      } else {
-        res.status(401).json({ error: "Not authenticated" });
-      }
-    });
-},
+  const isProduction = process.env.NODE_ENV === "production";
+
+  const sessionSettings: session.SessionOptions = {
+    secret: process.env.SESSION_SECRET || "nba-analytics-default-secret-2025",
+    resave: false,
+    saveUninitialized: false,
+    rolling: true,
+    cookie: {
+      secure: false,
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      sameSite: "lax",
+    },
   };
 
   app.set("trust proxy", 1);
@@ -97,14 +91,13 @@ export function setupAuth(app: Express) {
             return done(null, false, { message: "Invalid email or password" });
           }
 
-          // Remove password from user object before returning
           const { password: _, ...userWithoutPassword } = user[0];
           return done(null, userWithoutPassword);
         } catch (error) {
           return done(error);
         }
-      }
-    )
+      },
+    ),
   );
 
   passport.serializeUser((user, done) => done(null, user.id));
@@ -121,7 +114,6 @@ export function setupAuth(app: Express) {
         return done(null, false);
       }
 
-      // Remove password from user object
       const { password: _, ...userWithoutPassword } = user[0];
       done(null, userWithoutPassword);
     } catch (error) {
@@ -134,7 +126,6 @@ export function setupAuth(app: Express) {
     try {
       const { email, password, firstName, lastName } = req.body;
 
-      // Check if user already exists
       const existingUser = await db
         .select()
         .from(users)
@@ -145,7 +136,6 @@ export function setupAuth(app: Express) {
         return res.status(400).json({ error: "Email already registered" });
       }
 
-      // Hash password and create user
       const hashedPassword = await hashPassword(password);
       const userId = uuidv4();
 
@@ -160,10 +150,8 @@ export function setupAuth(app: Express) {
         })
         .returning();
 
-      // Remove password from response
       const { password: _, ...userWithoutPassword } = newUser[0];
 
-      // Log user in automatically
       req.login(userWithoutPassword, (err) => {
         if (err) return next(err);
         res.status(201).json(userWithoutPassword);
@@ -180,17 +168,23 @@ export function setupAuth(app: Express) {
       passport.authenticate("local", (err: any, user: any, info: any) => {
         if (err) {
           console.error("Authentication error:", err);
-          return res.status(500).json({ error: "Authentication failed", details: err.message });
+          return res
+            .status(500)
+            .json({ error: "Authentication failed", details: err.message });
         }
         if (!user) {
           console.log("Authentication failed:", info?.message);
-          return res.status(401).json({ error: info?.message || "Invalid credentials" });
+          return res
+            .status(401)
+            .json({ error: info?.message || "Invalid credentials" });
         }
 
         req.login(user, (loginErr) => {
           if (loginErr) {
             console.error("Login error:", loginErr);
-            return res.status(500).json({ error: "Login failed", details: loginErr.message });
+            return res
+              .status(500)
+              .json({ error: "Login failed", details: loginErr.message });
           }
           console.log("User logged in successfully:", user.email);
           res.json({ success: true, user });
@@ -198,7 +192,12 @@ export function setupAuth(app: Express) {
       })(req, res, next);
     } catch (error) {
       console.error("Login endpoint error:", error);
-      res.status(500).json({ error: "Server error during login", details: error instanceof Error ? error.message : "Unknown error" });
+      res
+        .status(500)
+        .json({
+          error: "Server error during login",
+          details: error instanceof Error ? error.message : "Unknown error",
+        });
     }
   });
 
@@ -213,7 +212,9 @@ export function setupAuth(app: Express) {
   // Get current user endpoint
   app.get("/api/auth/user", (req, res) => {
     if (!req.isAuthenticated()) {
-      return res.status(401).json({ error: "Not authenticated", authenticated: false });
+      return res
+        .status(401)
+        .json({ error: "Not authenticated", authenticated: false });
     }
     res.json({ authenticated: true, user: req.user });
   });
