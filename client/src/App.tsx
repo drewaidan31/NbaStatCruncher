@@ -1037,27 +1037,55 @@ function MainApp({ user, onLogout, isGuest, onSignIn }: { user?: any; onLogout?:
                 </Button>
               </div>
             ) : user ? (
-              <Button
-                variant="ghost"
-                onClick={() => setViewMode('profile')}
-                className="flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800"
-              >
-                <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-red-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                  {user.firstName?.[0] || user.email?.[0] || 'U'}
-                </div>
-                <span className="hidden md:block text-slate-700 dark:text-slate-300">
-                  Profile
-                </span>
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => setViewMode('profile')}
+                  className="flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-red-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    {user.firstName?.[0] || user.email?.[0] || 'U'}
+                  </div>
+                  <span className="hidden md:block text-slate-700 dark:text-slate-300">
+                    {user.firstName || 'Profile'}
+                  </span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    await fetch("/api/auth/logout", { 
+                      method: "POST",
+                      credentials: "include"
+                    });
+                    setUser(null);
+                    setGuestMode(true);
+                  }}
+                  className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+                >
+                  Sign Out
+                </Button>
+              </div>
             ) : (
-              <Button
-                variant="default"
-                size="sm"
-                onClick={onSignIn}
-                className="bg-orange-600 hover:bg-orange-700 text-white"
-              >
-                Sign In
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={onSignIn}
+                  className="bg-orange-600 hover:bg-orange-700 text-white"
+                >
+                  Sign In
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={checkAuth}
+                  className="text-slate-600 dark:text-slate-400"
+                  title="Refresh authentication status"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                </Button>
+              </div>
             )}
           </div>
         </div>
