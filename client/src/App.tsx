@@ -1209,26 +1209,42 @@ function AppWithAuth() {
   const [showAuthPage, setShowAuthPage] = useState(false);
   const [guestMode, setGuestMode] = useState(true);
 
-  // Check authentication status on load
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await fetch("/api/auth/user", {
-          credentials: "include"
-        });
-        if (response.ok) {
-          const userData = await response.json().catch(() => null);
-          if (userData && userData.authenticated) {
-            setUser(userData.user);
-            setGuestMode(false); // Disable guest mode if user is authenticated
-          }
+  // Check authentication status on load and periodically
+  const checkAuth = async () => {
+    try {
+      const response = await fetch("/api/auth/user", {
+        credentials: "include"
+      });
+      if (response.ok) {
+        const userData = await response.json().catch(() => null);
+        if (userData && userData.authenticated) {
+          setUser(userData.user);
+          setGuestMode(false); // Disable guest mode if user is authenticated
+          console.log("User authenticated:", userData.user.firstName, userData.user.email);
+        } else {
+          setUser(null);
+          setGuestMode(true);
         }
-      } catch (error) {
-        console.log("No active session - continuing in guest mode");
+      } else {
+        setUser(null);
+        setGuestMode(true);
       }
-      setIsLoading(false);
-    };
+    } catch (error) {
+      console.log("No active session - continuing in guest mode");
+      setUser(null);
+      setGuestMode(true);
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
     checkAuth();
+  }, []);
+
+  // Also check auth every 30 seconds to catch login state changes
+  useEffect(() => {
+    const interval = setInterval(checkAuth, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleLogout = async () => {
@@ -1247,17 +1263,8 @@ function AppWithAuth() {
 
   const handleAuthSuccess = () => {
     setShowAuthPage(false);
-    // Refresh user data
-    fetch("/api/auth/user", {
-      credentials: "include"
-    })
-      .then(res => res.json().catch(() => null))
-      .then(userData => {
-        if (userData && userData.authenticated) {
-          setUser(userData.user);
-        }
-      })
-      .catch(err => console.error("Failed to refresh user data:", err));
+    // Immediately check auth status after successful login
+    checkAuth();
   };
 
   if (isLoading) {
