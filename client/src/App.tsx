@@ -923,9 +923,13 @@ function MainApp({ user, onLogout, isGuest, onSignIn }: { user?: any; onLogout?:
                     className="bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 pr-8 text-sm appearance-none cursor-pointer hover:bg-slate-600 transition-colors"
                   >
                     <option value="all">All Positions</option>
-                    <option value="G">Guards</option>
-                    <option value="F">Forwards</option>
+                    <option value="PG">Point Guards</option>
+                    <option value="SG">Shooting Guards</option>
+                    <option value="SF">Small Forwards</option>
+                    <option value="PF">Power Forwards</option>
                     <option value="C">Centers</option>
+                    <option value="G">Guards (All)</option>
+                    <option value="F">Forwards (All)</option>
                   </select>
                   <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" />
                 </div>
@@ -950,18 +954,29 @@ function MainApp({ user, onLogout, isGuest, onSignIn }: { user?: any; onLogout?:
                       return false;
                     }
                     
-                    // Position filter - using actual database position data
+                    // Position filter - using accurate position data
                     if (selectedPosition === "all") return true;
                     
-                    const playerPosition = result.player.position;
+                    // Get accurate position for this player
+                    const getAccuratePosition = (playerName: string): string => {
+                      const positions: { [key: string]: string } = {
+                        "Patrick Ewing": "C", "Hakeem Olajuwon": "C", "David Robinson": "C", "Shaquille O'Neal": "C",
+                        "Dikembe Mutombo": "C", "Alonzo Mourning": "C", "Tom Gugliotta": "PF", "Karl Malone": "PF",
+                        "Charles Barkley": "PF", "Dennis Rodman": "PF", "Scottie Pippen": "SF", "Grant Hill": "SF",
+                        "Michael Jordan": "SG", "Clyde Drexler": "SG", "Reggie Miller": "SG", "John Stockton": "PG",
+                        "Magic Johnson": "PG", "Gary Payton": "PG", "Kendall Gill": "SG", "Tim Hardaway": "PG"
+                      };
+                      return positions[playerName] || "G";
+                    };
                     
-                    // Direct match with database position
-                    if (selectedPosition === playerPosition) return true;
+                    const actualPosition = getAccuratePosition(result.player.name);
                     
-                    // Handle grouped positions based on database data
-                    if (selectedPosition === "G" && playerPosition === "G") return true;
-                    if (selectedPosition === "F" && (playerPosition === "F" || playerPosition === "F-G" || playerPosition === "G-F")) return true;
-                    if (selectedPosition === "C" && (playerPosition === "C" || playerPosition === "F-C" || playerPosition === "C-F")) return true;
+                    // Direct match
+                    if (selectedPosition === actualPosition) return true;
+                    
+                    // Handle grouped positions
+                    if (selectedPosition === "G" && (actualPosition === "PG" || actualPosition === "SG")) return true;
+                    if (selectedPosition === "F" && (actualPosition === "SF" || actualPosition === "PF")) return true;
                     
                     return false;
                   }).map((result: any, index) => (
@@ -978,7 +993,57 @@ function MainApp({ user, onLogout, isGuest, onSignIn }: { user?: any; onLogout?:
                       </td>
                       <td className="py-2">
                         <span className="bg-slate-700 text-orange-400 px-2 py-1 rounded text-xs font-medium transition-all duration-300 ease-in-out group-hover:bg-orange-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">
-                          {result.player.position || 'N/A'}
+                          {(() => {
+                            // Import position data function
+                            const getPlayerPosition = (playerName: string): string => {
+                              const playerPositions: { [key: string]: string } = {
+                                // Centers
+                                "Patrick Ewing": "C", "Hakeem Olajuwon": "C", "David Robinson": "C", "Shaquille O'Neal": "C",
+                                "Dikembe Mutombo": "C", "Alonzo Mourning": "C", "Arvydas Sabonis": "C", "Brad Daugherty": "C",
+                                "Vlade Divac": "C", "Rik Smits": "C", "Gheorghe Muresan": "C", "Mark Eaton": "C",
+                                "Joel Embiid": "C", "Nikola Jokić": "C", "Karl-Anthony Towns": "C", "Rudy Gobert": "C",
+                                "Bam Adebayo": "C", "Jusuf Nurkić": "C", "Clint Capela": "C", "Nikola Vučević": "C",
+                                "Hassan Whiteside": "C", "Dwight Howard": "C", "Andre Drummond": "C", "DeAndre Jordan": "C",
+                                "Steven Adams": "C", "Myles Turner": "C", "Brook Lopez": "C", "Al Horford": "C",
+                                
+                                // Power Forwards
+                                "Karl Malone": "PF", "Charles Barkley": "PF", "Dennis Rodman": "PF", "Tim Duncan": "PF",
+                                "Kevin Garnett": "PF", "Dirk Nowitzki": "PF", "Chris Webber": "PF", "Rasheed Wallace": "PF",
+                                "Tom Gugliotta": "PF", "Horace Grant": "PF", "Shawn Kemp": "PF", "Derrick Coleman": "PF",
+                                "Larry Johnson": "PF", "Christian Laettner": "PF", "Otis Thorpe": "PF", "Dale Davis": "PF",
+                                "Antonio McDyess": "PF", "Giannis Antetokounmpo": "PF", "Pascal Siakam": "PF",
+                                "Julius Randle": "PF", "Draymond Green": "PF", "Anthony Davis": "PF", "Jayson Tatum": "PF",
+                                
+                                // Small Forwards
+                                "Scottie Pippen": "SF", "Grant Hill": "SF", "Glen Rice": "SF", "Detlef Schrempf": "SF",
+                                "Chris Mullin": "SF", "Dominique Wilkins": "SF", "Sean Elliott": "SF", "Danny Manning": "SF",
+                                "Cedric Ceballos": "SF", "Jamal Mashburn": "SF", "LeBron James": "SF", "Kevin Durant": "SF",
+                                "Kawhi Leonard": "SF", "Paul George": "SF", "Jimmy Butler": "SF", "Jaylen Brown": "SF",
+                                "DeMar DeRozan": "SF", "Gordon Hayward": "SF", "Khris Middleton": "SF",
+                                
+                                // Shooting Guards
+                                "Michael Jordan": "SG", "Kobe Bryant": "SG", "Clyde Drexler": "SG", "Reggie Miller": "SG",
+                                "Mitch Richmond": "SG", "Joe Dumars": "SG", "Dan Majerle": "SG", "Hersey Hawkins": "SG",
+                                "Dale Ellis": "SG", "Jeff Hornacek": "SG", "Steve Smith": "SG", "Kendall Gill": "SG",
+                                "Allan Houston": "SG", "Ray Allen": "SG", "Vince Carter": "SG", "Tracy McGrady": "SG",
+                                "James Harden": "SG", "Devin Booker": "SG", "Donovan Mitchell": "SG", "Zach LaVine": "SG",
+                                "Bradley Beal": "SG", "CJ McCollum": "SG",
+                                
+                                // Point Guards
+                                "John Stockton": "PG", "Magic Johnson": "PG", "Isiah Thomas": "PG", "Mark Jackson": "PG",
+                                "Tim Hardaway": "PG", "Kevin Johnson": "PG", "Gary Payton": "PG", "Penny Hardaway": "PG",
+                                "Rod Strickland": "PG", "Terrell Brandon": "PG", "Damon Stoudamire": "PG", "Steve Nash": "PG",
+                                "Jason Kidd": "PG", "Chris Paul": "PG", "Stephen Curry": "PG", "Russell Westbrook": "PG",
+                                "Damian Lillard": "PG", "Kyrie Irving": "PG", "Ja Morant": "PG", "Trae Young": "PG",
+                                "Luka Dončić": "PG", "De'Aaron Fox": "PG", "Tyrese Haliburton": "PG", "Fred VanVleet": "PG",
+                                "Mike Conley": "PG", "Kyle Lowry": "PG", "Terry Rozier": "PG"
+                              };
+                              
+                              return playerPositions[playerName] || result.player.position || 'G';
+                            };
+                            
+                            return getPlayerPosition(result.player.name);
+                          })()}
                         </span>
                       </td>
                       <td className="py-2 transition-all duration-300 ease-in-out group-hover:text-blue-400 group-hover:font-semibold">{result.player.team}</td>
