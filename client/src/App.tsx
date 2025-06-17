@@ -858,16 +858,20 @@ function MainApp({ user, onLogout, isGuest, onSignIn }: { user?: any; onLogout?:
         </div>
 
         {/* My Custom Stats Section */}
-        <MyCustomStats onStatSelect={(formula, name) => {
-          console.log('Inserting saved custom stat:', name, 'formula:', formula);
-          console.log('Current formula before insert:', formula);
-          const insertion = `(${formula})`;
-          setFormula(prev => {
-            const newFormula = prev + insertion;
-            console.log('New formula after insert:', newFormula);
-            return newFormula;
-          });
-        }} />
+        <MyCustomStats 
+          onStatSelect={(formula, name) => {
+            console.log('Inserting saved custom stat:', name, 'formula:', formula);
+            console.log('Current formula before insert:', formula);
+            const insertion = `(${formula})`;
+            setFormula(prev => {
+              const newFormula = prev + insertion;
+              console.log('New formula after insert:', newFormula);
+              return newFormula;
+            });
+          }}
+          isCollapsed={isCustomStatsCollapsed}
+          setIsCollapsed={setIsCustomStatsCollapsed}
+        />
 
         <FormulaExamples onFormulaSelect={(selectedFormula) => {
           console.log('Inserting preset formula:', selectedFormula);
