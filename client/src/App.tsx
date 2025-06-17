@@ -923,13 +923,9 @@ function MainApp({ user, onLogout, isGuest, onSignIn }: { user?: any; onLogout?:
                     className="bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 pr-8 text-sm appearance-none cursor-pointer hover:bg-slate-600 transition-colors"
                   >
                     <option value="all">All Positions</option>
-                    <option value="PG">Point Guards</option>
-                    <option value="SG">Shooting Guards</option>
-                    <option value="SF">Small Forwards</option>
-                    <option value="PF">Power Forwards</option>
-                    <option value="C">Centers</option>
                     <option value="G">Guards</option>
                     <option value="F">Forwards</option>
+                    <option value="C">Centers</option>
                   </select>
                   <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" />
                 </div>
@@ -954,40 +950,18 @@ function MainApp({ user, onLogout, isGuest, onSignIn }: { user?: any; onLogout?:
                       return false;
                     }
                     
-                    // Position filter
+                    // Position filter - using actual database position data
                     if (selectedPosition === "all") return true;
                     
-                    const playerName = result.player.name.toLowerCase();
                     const playerPosition = result.player.position;
                     
-                    // Since the data doesn't have detailed positions, we'll use player name patterns
-                    // to determine likely positions for filtering demonstration
-                    let estimatedPosition = "G"; // Default
+                    // Direct match with database position
+                    if (selectedPosition === playerPosition) return true;
                     
-                    // Point Guards - typically known playmakers
-                    const pointGuards = ["chris paul", "stephen curry", "russell westbrook", "damian lillard", 
-                                       "kyrie irving", "ja morant", "trae young", "luka dončić", "de'aaron fox",
-                                       "tyrese haliburton", "fred vanvleet", "mike conley", "kyle lowry", "terry rozier"];
-                    
-                    // Centers - typically known big men
-                    const centers = ["joel embiid", "nikola jokić", "anthony davis", "karl-anthony towns",
-                                   "rudy gobert", "bam adebayo", "jusuf nurkić", "clint capela", "nikola vučević",
-                                   "hassan whiteside", "dwight howard", "andre drummond", "deandre jordan"];
-                    
-                    if (pointGuards.some(pg => playerName.includes(pg))) estimatedPosition = "PG";
-                    else if (centers.some(c => playerName.includes(c))) estimatedPosition = "C";
-                    else if (playerName.includes("lebron") || playerName.includes("durant") || 
-                             playerName.includes("kawhi") || playerName.includes("paul george")) estimatedPosition = "SF";
-                    else if (playerName.includes("giannis") || playerName.includes("davis") || 
-                             playerName.includes("siakam") || playerName.includes("randle")) estimatedPosition = "PF";
-                    else estimatedPosition = "SG"; // Default for other guards
-                    
-                    // Handle specific position matches
-                    if (selectedPosition === estimatedPosition) return true;
-                    
-                    // Handle grouped positions
-                    if (selectedPosition === "G" && (estimatedPosition === "PG" || estimatedPosition === "SG")) return true;
-                    if (selectedPosition === "F" && (estimatedPosition === "SF" || estimatedPosition === "PF")) return true;
+                    // Handle grouped positions based on database data
+                    if (selectedPosition === "G" && playerPosition === "G") return true;
+                    if (selectedPosition === "F" && (playerPosition === "F" || playerPosition === "F-G" || playerPosition === "G-F")) return true;
+                    if (selectedPosition === "C" && (playerPosition === "C" || playerPosition === "F-C" || playerPosition === "C-F")) return true;
                     
                     return false;
                   }).map((result: any, index) => (
@@ -1004,23 +978,7 @@ function MainApp({ user, onLogout, isGuest, onSignIn }: { user?: any; onLogout?:
                       </td>
                       <td className="py-2">
                         <span className="bg-slate-700 text-orange-400 px-2 py-1 rounded text-xs font-medium transition-all duration-300 ease-in-out group-hover:bg-orange-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">
-                          {(() => {
-                            const playerName = result.player.name.toLowerCase();
-                            const pointGuards = ["chris paul", "stephen curry", "russell westbrook", "damian lillard", 
-                                               "kyrie irving", "ja morant", "trae young", "luka dončić", "de'aaron fox",
-                                               "tyrese haliburton", "fred vanvleet", "mike conley", "kyle lowry", "terry rozier"];
-                            const centers = ["joel embiid", "nikola jokić", "anthony davis", "karl-anthony towns",
-                                           "rudy gobert", "bam adebayo", "jusuf nurkić", "clint capela", "nikola vučević",
-                                           "hassan whiteside", "dwight howard", "andre drummond", "deandre jordan"];
-                            
-                            if (pointGuards.some(pg => playerName.includes(pg))) return "PG";
-                            else if (centers.some(c => playerName.includes(c))) return "C";
-                            else if (playerName.includes("lebron") || playerName.includes("durant") || 
-                                     playerName.includes("kawhi") || playerName.includes("paul george")) return "SF";
-                            else if (playerName.includes("giannis") || playerName.includes("davis") || 
-                                     playerName.includes("siakam") || playerName.includes("randle")) return "PF";
-                            else return "SG";
-                          })()}
+                          {result.player.position || 'N/A'}
                         </span>
                       </td>
                       <td className="py-2 transition-all duration-300 ease-in-out group-hover:text-blue-400 group-hover:font-semibold">{result.player.team}</td>
