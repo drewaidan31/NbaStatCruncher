@@ -144,6 +144,7 @@ function MainApp({ user, onLogout, isGuest, onSignIn }: { user?: any; onLogout?:
   const [refreshCounter, setRefreshCounter] = useState(0);
   const [selectedPosition, setSelectedPosition] = useState<string>("all");
   const [selectedTeam, setSelectedTeam] = useState<string>("all");
+  const [isCustomStatsCollapsed, setIsCustomStatsCollapsed] = useState<boolean>(false);
 
 
 
