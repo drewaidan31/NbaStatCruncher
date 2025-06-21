@@ -482,14 +482,16 @@ export default function PlayerComparison({ comparison, onBack, currentFormula }:
                     { name: "TPG", value: "TOV" },
                     { name: "FG%", value: "FG_PCT" },
                     { name: "FGA", value: "FGA" },
+                    { name: "FGM", value: "FGM" },
                     { name: "3P%", value: "THREE_PCT" },
                     { name: "3PA", value: "3PA" },
+                    { name: "3PM", value: "3PM" },
                     { name: "FT%", value: "FT_PCT" },
                     { name: "FTA", value: "FTA" },
                     { name: "+/-", value: "PLUS_MINUS" },
                     { name: "W%", value: "W_PCT" },
-                    { name: "GP", value: "GP" },
-                    { name: "MIN", value: "MIN" }
+                    { name: "MIN", value: "MIN" },
+                    { name: "GP", value: "GP" }
                   ].map((stat) => (
                     <button
                       key={stat.value}
