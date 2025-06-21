@@ -49,8 +49,8 @@ export default function AboutSection() {
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {[
                 "PTS (Points)", "AST (Assists)", "REB (Rebounds)", "STL (Steals)", 
-                "BLK (Blocks)", "TOV (Turnovers)", "FG_PCT (Field Goal %)", "FGA (Field Goal Attempts)",
-                "3P_PCT (3-Point %)", "3PA (3-Point Attempts)", "FT_PCT (Free Throw %)", "FTA (Free Throw Attempts)",
+                "BLK (Blocks)", "TOV (Turnovers)", "FG_PCT (Field Goal %)", "FGA (Field Goal Attempts)", "FGM (Field Goals Made)",
+                "3P_PCT (3-Point %)", "3PA (3-Point Attempts)", "3PM (3-Pointers Made)", "FT_PCT (Free Throw %)", "FTA (Free Throw Attempts)",
                 "PLUS_MINUS (+/-)", "MIN (Minutes)", "GP (Games Played)", "W_PCT (Win %)"
               ].map((stat) => (
                 <div key={stat} className="bg-blue-600 text-white text-sm py-2 px-3 rounded font-mono">
