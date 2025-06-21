@@ -86,5 +86,15 @@ export const FORMULA_PRESETS = [
     name: "Triple Double Threat",
     formula: "(PTS >= 10) + (AST >= 10) + (REB >= 10)",
     category: "Versatility"
+  },
+  {
+    name: "Field Goal Volume",
+    formula: "FGM * 2 + 3PM",
+    category: "Shooting"
+  },
+  {
+    name: "Shooting Efficiency",
+    formula: "FGM / FGA * 100",
+    category: "Shooting"
   }
 ] as const;
