@@ -96,5 +96,15 @@ export const FORMULA_PRESETS = [
     name: "Shooting Efficiency",
     formula: "FGM / FGA * 100",
     category: "Shooting"
+  },
+  {
+    name: "Total Makes",
+    formula: "FGM + FTM",
+    category: "Shooting"
+  },
+  {
+    name: "Points from FTs",
+    formula: "FTM * 1",
+    category: "Shooting"
   }
 ] as const;

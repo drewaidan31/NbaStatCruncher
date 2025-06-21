@@ -50,7 +50,7 @@ export default function AboutSection() {
               {[
                 "PTS (Points)", "AST (Assists)", "REB (Rebounds)", "STL (Steals)", 
                 "BLK (Blocks)", "TOV (Turnovers)", "FG_PCT (Field Goal %)", "FGA (Field Goal Attempts)", "FGM (Field Goals Made)",
-                "3P_PCT (3-Point %)", "3PA (3-Point Attempts)", "3PM (3-Pointers Made)", "FT_PCT (Free Throw %)", "FTA (Free Throw Attempts)",
+                "3P_PCT (3-Point %)", "3PA (3-Point Attempts)", "3PM (3-Pointers Made)", "FT_PCT (Free Throw %)", "FTA (Free Throw Attempts)", "FTM (Free Throws Made)",
                 "PLUS_MINUS (+/-)", "MIN (Minutes)", "GP (Games Played)", "W_PCT (Win %)"
               ].map((stat) => (
                 <div key={stat} className="bg-blue-600 text-white text-sm py-2 px-3 rounded font-mono">

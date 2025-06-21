@@ -907,6 +907,7 @@ export default function PlayerAnalysis({ player, season, onBack }: PlayerAnalysi
                     { name: "3PM", value: "3PM" },
                     { name: "FT%", value: "FT_PCT" },
                     { name: "FTA", value: "FTA" },
+                    { name: "FTM", value: "FTM" },
                     { name: "+/-", value: "PLUS_MINUS" },
                     { name: "W%", value: "W_PCT" },
                     { name: "MIN", value: "MIN" },
