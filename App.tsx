@@ -480,10 +480,10 @@ function MainApp() {
               <span className="text-sm text-slate-600 dark:text-slate-400">• Changes daily</span>
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
               {/* Player Info and Stats */}
               <div className="space-y-4">
-                <div className="bg-slate-200 dark:bg-slate-700 rounded-lg p-5 transition-all duration-300 ease-in-out group-hover:bg-slate-300 dark:group-hover:bg-slate-600 group-hover:shadow-lg">
+                <div className="bg-slate-200 dark:bg-slate-700 rounded-lg p-4 sm:p-5 transition-all duration-300 ease-in-out group-hover:bg-slate-300 dark:group-hover:bg-slate-600 group-hover:shadow-lg">
                   <div className="flex items-center gap-4 mb-4">
                     <div className="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center text-white font-bold text-lg transition-all duration-300 ease-in-out group-hover:scale-125 group-hover:bg-orange-500 group-hover:shadow-lg group-hover:rotate-12">
                       {featuredPlayer.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2)}
@@ -566,11 +566,11 @@ function MainApp() {
               </div>
               
               {/* Chart */}
-              <div className="bg-slate-200 dark:bg-slate-700 rounded-lg p-5">
-                <div className="flex items-center justify-between mb-4">
+              <div className="bg-slate-200 dark:bg-slate-700 rounded-lg p-4 sm:p-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
                   <div className="flex items-center gap-2">
                     <TrendingUp className="w-5 h-5 text-orange-400" />
-                    <h4 className="text-lg font-semibold text-slate-900 dark:text-white">Career Progression</h4>
+                    <h4 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">Career Progression</h4>
                   </div>
                   <button
                     onClick={() => {
@@ -579,13 +579,13 @@ function MainApp() {
                       setResults([]);
                       setError("");
                     }}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-slate-300 dark:bg-slate-600 hover:bg-slate-400 dark:hover:bg-slate-500 rounded-lg transition-colors text-sm text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+                    className="flex items-center gap-2 px-3 py-1.5 bg-slate-300 dark:bg-slate-600 hover:bg-slate-400 dark:hover:bg-slate-500 rounded-lg transition-colors text-sm text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white self-start sm:self-auto"
                   >
                     <RefreshCw className="w-4 h-4" />
-                    Refresh
+                    <span className="hidden sm:inline">Refresh</span>
                   </button>
                 </div>
-                <div className="h-48 w-full">
+                <div className="h-40 sm:h-48 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={featuredChartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
@@ -697,50 +697,53 @@ function MainApp() {
               </div>
             </div>
             
-            <div className="flex gap-3">
+            {/* Mobile layout for buttons */}
+            <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={calculateStats}
                 disabled={!formula.trim()}
-                className="bg-orange-600 hover:bg-orange-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium py-2 px-6 rounded-lg transition-colors"
+                className="bg-orange-600 hover:bg-orange-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-colors text-base"
               >
                 Calculate
               </button>
-              <button
-                onClick={handleSaveStat}
-                disabled={!formula.trim() || !customStatName.trim()}
-                className="bg-green-600 hover:bg-green-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors"
-              >
-                Save Stat
-              </button>
-              <button
-                onClick={() => {
-                  setShowSavedStats(!showSavedStats);
-                  if (!showSavedStats) {
-                    fetchSavedStats();
-                  }
-                }}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-              >
-                Saved Stats
-              </button>
-              <button
-                onClick={() => {
-                  setFormula("");
-                  setCustomStatName("Total Impact");
-                }}
-                className="bg-slate-600 hover:bg-slate-500 text-white py-2 px-4 rounded-lg transition-colors"
-              >
-                Clear
-              </button>
-              <button
-                onClick={() => {
-                  setFormula(prev => prev.slice(0, -1));
-                }}
-                disabled={!formula}
-                className="bg-red-600 hover:bg-red-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white py-2 px-4 rounded-lg transition-colors"
-              >
-                Delete
-              </button>
+              <div className="flex gap-2 sm:gap-3">
+                <button
+                  onClick={handleSaveStat}
+                  disabled={!formula.trim() || !customStatName.trim()}
+                  className="flex-1 sm:flex-none bg-green-600 hover:bg-green-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors text-sm sm:text-base"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={() => {
+                    setShowSavedStats(!showSavedStats);
+                    if (!showSavedStats) {
+                      fetchSavedStats();
+                    }
+                  }}
+                  className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors text-sm sm:text-base"
+                >
+                  Saved
+                </button>
+                <button
+                  onClick={() => {
+                    setFormula("");
+                    setCustomStatName("Total Impact");
+                  }}
+                  className="flex-1 sm:flex-none bg-slate-600 hover:bg-slate-500 text-white py-3 px-4 rounded-lg transition-colors text-sm sm:text-base"
+                >
+                  Clear
+                </button>
+                <button
+                  onClick={() => {
+                    setFormula(prev => prev.slice(0, -1));
+                  }}
+                  disabled={!formula}
+                  className="flex-1 sm:flex-none bg-red-600 hover:bg-red-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white py-3 px-4 rounded-lg transition-colors text-sm sm:text-base"
+                >
+                  Del
+                </button>
+              </div>
             </div>
           </div>
 
