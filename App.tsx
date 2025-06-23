@@ -80,7 +80,7 @@ function MainApp() {
     formula: string;
     createdAt: string;
   }>>([]);
-  const [customStatName, setCustomStatName] = useState("Total Impact");
+  const [customStatName, setCustomStatName] = useState("");
   const [showSavedStats, setShowSavedStats] = useState(false);
   const [featuredPlayer, setFeaturedPlayer] = useState<Player | null>(null);
   const [featuredStat, setFeaturedStat] = useState<{name: string, formula: string, description: string} | null>(null);
@@ -290,6 +290,16 @@ function MainApp() {
   };
 
   const handleSaveStat = async () => {
+    if (!customStatName.trim()) {
+      alert('Please enter a name for your custom stat before saving.');
+      return;
+    }
+    
+    if (!formula.trim()) {
+      alert('Please enter a formula before saving.');
+      return;
+    }
+    
     try {
       const response = await fetch('/api/custom-stats/save', {
         method: 'POST',
@@ -297,9 +307,9 @@ function MainApp() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: customStatName,
+          name: customStatName.trim(),
           formula: formula,
-          description: `Custom stat: ${customStatName}`
+          description: `Custom stat: ${customStatName.trim()}`
         }),
         credentials: 'include',
       });
@@ -728,7 +738,7 @@ function MainApp() {
                 <button
                   onClick={() => {
                     setFormula("");
-                    setCustomStatName("Total Impact");
+                    setCustomStatName("");
                   }}
                   className="flex-1 sm:flex-none bg-slate-600 hover:bg-slate-500 text-white py-3 px-4 rounded-lg transition-colors text-sm sm:text-base"
                 >
