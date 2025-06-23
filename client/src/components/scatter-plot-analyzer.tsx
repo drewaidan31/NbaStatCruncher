@@ -153,14 +153,14 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-slate-800 border border-slate-600 rounded-lg p-3 shadow-xl">
-          <p className="text-white font-bold">{data.name}</p>
-          <p className="text-slate-300">{data.team} • {data.season}</p>
-          <div className="mt-2 space-y-1">
-            <p className="text-sm">
+        <div className="bg-slate-800 border border-slate-600 rounded-lg p-2 sm:p-3 shadow-xl max-w-xs">
+          <p className="text-white font-bold text-sm truncate">{data.name}</p>
+          <p className="text-slate-300 text-xs">{data.team} • {data.season}</p>
+          <div className="mt-1 sm:mt-2 space-y-1">
+            <p className="text-xs sm:text-sm">
               <span className="text-blue-400">X-Axis:</span> {data.x.toFixed(2)}
             </p>
-            <p className="text-sm">
+            <p className="text-xs sm:text-sm">
               <span className="text-green-400">Y-Axis:</span> {data.y.toFixed(2)}
             </p>
           </div>
@@ -181,21 +181,21 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
   return (
     <div className="min-h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+        {/* Header - Mobile optimized */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 sm:mb-8">
           <Button
             variant="ghost"
             onClick={onBack}
-            className="flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 self-start"
           >
             <ArrowLeft className="w-4 h-4" />
             Back
           </Button>
           <div className="flex items-center gap-3">
-            <TrendingUp className="w-8 h-8 text-orange-500" />
+            <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500" />
             <div>
-              <h1 className="text-2xl font-bold">Scatter Plot Analyzer</h1>
-              <p className="text-slate-600 dark:text-slate-400">
+              <h1 className="text-xl sm:text-2xl font-bold">Scatter Plot Analyzer</h1>
+              <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">
                 Compare two custom stats to identify elite performers
               </p>
             </div>
@@ -210,12 +210,12 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
               Configure Analysis
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-3 gap-6">
+          <CardContent className="p-4 sm:p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
               <div>
                 <label className="block text-sm font-medium mb-2">X-Axis Stat</label>
                 <Select value={xAxisStat} onValueChange={setXAxisStat}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-12">
                     <SelectValue placeholder="Select X-axis statistic" />
                   </SelectTrigger>
                   <SelectContent>
@@ -227,7 +227,7 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
                   </SelectContent>
                 </Select>
                 {xAxisStat && (
-                  <p className="text-xs text-slate-500 mt-1 font-mono">
+                  <p className="text-xs text-slate-500 mt-1 font-mono break-all">
                     {customStats.find(s => s.formula === xAxisStat)?.formula}
                   </p>
                 )}
@@ -236,7 +236,7 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
               <div>
                 <label className="block text-sm font-medium mb-2">Y-Axis Stat</label>
                 <Select value={yAxisStat} onValueChange={setYAxisStat}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-12">
                     <SelectValue placeholder="Select Y-axis statistic" />
                   </SelectTrigger>
                   <SelectContent>
@@ -248,7 +248,7 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
                   </SelectContent>
                 </Select>
                 {yAxisStat && (
-                  <p className="text-xs text-slate-500 mt-1 font-mono">
+                  <p className="text-xs text-slate-500 mt-1 font-mono break-all">
                     {customStats.find(s => s.formula === yAxisStat)?.formula}
                   </p>
                 )}
@@ -257,7 +257,7 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
               <div>
                 <label className="block text-sm font-medium mb-2">Season</label>
                 <Select value={selectedSeason} onValueChange={setSelectedSeason}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-12">
                     <SelectValue placeholder="Select season" />
                   </SelectTrigger>
                   <SelectContent>
@@ -301,32 +301,32 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
           </CardContent>
         </Card>
 
-        {/* Analysis Stats */}
+        {/* Analysis Stats - Mobile optimized */}
         {scatterData.length > 0 && (
-          <Card className="mb-8">
-            <CardContent className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+          <Card className="mb-6 sm:mb-8">
+            <CardContent className="p-4 sm:p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 text-center">
                 <div>
-                  <div className="text-2xl font-bold text-slate-900 dark:text-white">
+                  <div className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
                     {scatterData.length}
                   </div>
-                  <div className="text-sm text-slate-600 dark:text-slate-400">
+                  <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                     Total Players
                   </div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-orange-600">
+                  <div className="text-xl sm:text-2xl font-bold text-orange-600">
                     {topRightQuadrant.length}
                   </div>
-                  <div className="text-sm text-slate-600 dark:text-slate-400">
+                  <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                     Elite Performers (Top-Right)
                   </div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-blue-600">
+                  <div className="text-xl sm:text-2xl font-bold text-blue-600">
                     {new Set(scatterData.map(d => d.team)).size}
                   </div>
-                  <div className="text-sm text-slate-600 dark:text-slate-400">
+                  <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                     Teams Represented
                   </div>
                 </div>
@@ -335,32 +335,39 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
           </Card>
         )}
 
-        {/* Scatter Plot */}
+        {/* Scatter Plot - Mobile optimized */}
         {xAxisStat && yAxisStat && (
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-blue-500" />
-                {xAxisStatName} vs {yAxisStatName}
-                {loading && <Badge variant="secondary">Loading...</Badge>}
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm sm:text-base">
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
+                  <span className="break-words">{xAxisStatName} vs {yAxisStatName}</span>
+                </div>
+                {loading && <Badge variant="secondary" className="self-start sm:self-auto">Loading...</Badge>}
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 sm:p-6">
               {loading ? (
-                <div className="h-96 flex items-center justify-center">
+                <div className="h-64 sm:h-96 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="text-lg mb-2">Calculating statistics...</div>
+                    <div className="text-base sm:text-lg mb-2">Calculating statistics...</div>
                     <div className="text-sm text-slate-600 dark:text-slate-400">
                       This may take a moment
                     </div>
                   </div>
                 </div>
               ) : scatterData.length > 0 ? (
-                <div className="h-96 w-full">
+                <div className="h-64 sm:h-80 lg:h-96 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <ScatterChart
                       data={scatterData}
-                      margin={{ top: 20, right: 20, bottom: 40, left: 40 }}
+                      margin={{ 
+                        top: 10, 
+                        right: 10, 
+                        bottom: 60, 
+                        left: 60 
+                      }}
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
                       <XAxis 
@@ -368,14 +375,28 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
                         dataKey="x" 
                         name={xAxisStatName}
                         stroke="var(--chart-text)"
-                        label={{ value: xAxisStatName, position: 'insideBottom', offset: -10 }}
+                        fontSize={10}
+                        tick={{ fontSize: 10 }}
+                        label={{ 
+                          value: xAxisStatName, 
+                          position: 'insideBottom', 
+                          offset: -5,
+                          style: { textAnchor: 'middle', fontSize: '12px' }
+                        }}
                       />
                       <YAxis 
                         type="number" 
                         dataKey="y" 
                         name={yAxisStatName}
                         stroke="var(--chart-text)"
-                        label={{ value: yAxisStatName, angle: -90, position: 'insideLeft' }}
+                        fontSize={10}
+                        tick={{ fontSize: 10 }}
+                        label={{ 
+                          value: yAxisStatName, 
+                          angle: -90, 
+                          position: 'insideLeft',
+                          style: { textAnchor: 'middle', fontSize: '12px' }
+                        }}
                       />
                       <Tooltip content={<CustomTooltip />} />
                       
@@ -401,7 +422,7 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
                         {scatterData.map((entry, index) => (
                           <circle 
                             key={`scatter-${index}`}
-                            r={4}
+                            r={3}
                             fill={entry.teamColor}
                             stroke="#ffffff"
                             strokeWidth={1}
@@ -414,9 +435,9 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
                   </ResponsiveContainer>
                 </div>
               ) : (
-                <div className="h-96 flex items-center justify-center">
+                <div className="h-64 sm:h-96 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="text-lg mb-2">No data available</div>
+                    <div className="text-base sm:text-lg mb-2">No data available</div>
                     <div className="text-sm text-slate-600 dark:text-slate-400">
                       Please select both X and Y axis statistics
                     </div>
