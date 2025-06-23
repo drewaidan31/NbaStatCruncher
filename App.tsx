@@ -658,15 +658,15 @@ function MainApp() {
           </div>
         )}
 
-        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 p-6">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-300 dark:border-slate-700 p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">NBA Formula Builder</h2>
-              <p className="text-slate-600 dark:text-slate-300 mt-2">Build your own basketball analytics formulas using real NBA player data. Create custom stats, compare players, and discover new insights.</p>
+              <h2 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">NBA Formula Builder</h2>
+              <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 mt-2">Build your own basketball analytics formulas using real NBA player data. Create custom stats, compare players, and discover new insights.</p>
             </div>
             <Button
               onClick={() => setViewMode('guided-builder')}
-              className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2"
+              className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2 w-full sm:w-auto justify-center"
             >
               <Sparkles className="w-4 h-4" />
               Simple Mode
@@ -948,12 +948,12 @@ function MainApp() {
   return (
     <div className="min-h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition-colors">
       <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-start mb-8">
-          <div className="text-center flex-1">
-            <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
+        <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-8 gap-4">
+          <div className="text-center sm:text-left flex-1">
+            <h1 className="text-2xl sm:text-4xl font-bold mb-4 bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
               NBA Formula Builder
             </h1>
-            <p className="text-xl text-slate-600 dark:text-slate-300">
+            <p className="text-base sm:text-xl text-slate-600 dark:text-slate-300">
               Create custom basketball statistics with authentic NBA player data
             </p>
           </div>
@@ -973,67 +973,87 @@ function MainApp() {
           </div>
         </div>
 
-        {/* Navigation Bar */}
-        <div className="flex justify-center mb-6">
-          <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-2 border border-slate-300 dark:border-slate-700">
-            <div className="flex gap-2">
-              <button
-                onClick={() => setViewMode('leaderboard')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  viewMode === 'leaderboard'
-                    ? "bg-orange-600 text-white"
-                    : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600"
-                }`}
+        {/* Navigation Bar - Mobile optimized */}
+        <div className="mb-6">
+          {/* Mobile dropdown navigation */}
+          <div className="block sm:hidden">
+            <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-2 border border-slate-300 dark:border-slate-700">
+              <select
+                value={viewMode}
+                onChange={(e) => setViewMode(e.target.value as ViewMode)}
+                className="w-full bg-transparent text-slate-700 dark:text-slate-300 font-medium text-base py-2 px-3 rounded-lg appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-orange-500"
               >
-                <BarChart3 className="w-4 h-4" />
-                Leaderboards
-              </button>
-              <button
-                onClick={() => setViewMode('search')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  viewMode === 'search'
-                    ? "bg-orange-600 text-white"
-                    : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600"
-                }`}
-              >
-                <Search className="w-4 h-4" />
-                Player Search
-              </button>
-              <button
-                onClick={() => setViewMode('stats-library')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  viewMode === 'stats-library'
-                    ? "bg-orange-600 text-white"
-                    : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600"
-                }`}
-              >
-                <Calculator className="w-4 h-4" />
-                Stats Library
-              </button>
+                <option value="leaderboard">📊 Leaderboards</option>
+                <option value="search">🔍 Player Search</option>
+                <option value="stats-library">📚 Stats Library</option>
+                <option value="scatter-plot">📈 Scatter Plot</option>
+                <option value="about">📖 Custom Stats Guide</option>
+              </select>
+            </div>
+          </div>
 
-              <button
-                onClick={() => setViewMode('scatter-plot')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  viewMode === 'scatter-plot'
-                    ? "bg-orange-600 text-white"
-                    : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600"
-                }`}
-              >
-                <TrendingUp className="w-4 h-4" />
-                Scatter Plot
-              </button>
+          {/* Desktop navigation */}
+          <div className="hidden sm:flex justify-center">
+            <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-2 border border-slate-300 dark:border-slate-700">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setViewMode('leaderboard')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    viewMode === 'leaderboard'
+                      ? "bg-orange-600 text-white"
+                      : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600"
+                  }`}
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  Leaderboards
+                </button>
+                <button
+                  onClick={() => setViewMode('search')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    viewMode === 'search'
+                      ? "bg-orange-600 text-white"
+                      : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600"
+                  }`}
+                >
+                  <Search className="w-4 h-4" />
+                  Player Search
+                </button>
+                <button
+                  onClick={() => setViewMode('stats-library')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    viewMode === 'stats-library'
+                      ? "bg-orange-600 text-white"
+                      : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600"
+                  }`}
+                >
+                  <Calculator className="w-4 h-4" />
+                  Stats Library
+                </button>
 
-              <button
-                onClick={() => setViewMode('about')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  viewMode === 'about'
-                    ? "bg-orange-600 text-white"
-                    : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600"
-                }`}
-              >
-                <Calculator className="w-4 h-4" />
-                Custom Stats Guide
-              </button>
+                <button
+                  onClick={() => setViewMode('scatter-plot')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    viewMode === 'scatter-plot'
+                      ? "bg-orange-600 text-white"
+                      : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600"
+                  }`}
+                >
+                  <TrendingUp className="w-4 h-4" />
+                  Scatter Plot
+                </button>
+
+                <button
+                  onClick={() => setViewMode('about')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    viewMode === 'about'
+                      ? "bg-orange-600 text-white"
+                      : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600"
+                  }`}
+                >
+                  <Calculator className="w-4 h-4" />
+                  Custom Stats Guide
+                </button>
+              </div>
             </div>
           </div>
         </div>
