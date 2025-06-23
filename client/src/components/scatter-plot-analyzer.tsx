@@ -349,7 +349,7 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
             </CardHeader>
             <CardContent className="p-4 sm:p-6">
               {loading ? (
-                <div className="h-64 sm:h-96 flex items-center justify-center">
+                <div className="h-80 sm:h-96 lg:h-[500px] flex items-center justify-center">
                   <div className="text-center">
                     <div className="text-base sm:text-lg mb-2">Calculating statistics...</div>
                     <div className="text-sm text-slate-600 dark:text-slate-400">
@@ -358,15 +358,15 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
                   </div>
                 </div>
               ) : scatterData.length > 0 ? (
-                <div className="h-64 sm:h-80 lg:h-96 w-full">
+                <div className="h-80 sm:h-96 lg:h-[500px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <ScatterChart
                       data={scatterData}
                       margin={{ 
-                        top: 10, 
-                        right: 10, 
-                        bottom: 60, 
-                        left: 60 
+                        top: 5, 
+                        right: 5, 
+                        bottom: 45, 
+                        left: 45 
                       }}
                     >
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
@@ -375,13 +375,13 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
                         dataKey="x" 
                         name={xAxisStatName}
                         stroke="var(--chart-text)"
-                        fontSize={10}
-                        tick={{ fontSize: 10 }}
+                        fontSize={11}
+                        tick={{ fontSize: 11 }}
                         label={{ 
                           value: xAxisStatName, 
                           position: 'insideBottom', 
-                          offset: -5,
-                          style: { textAnchor: 'middle', fontSize: '12px' }
+                          offset: -2,
+                          style: { textAnchor: 'middle', fontSize: '13px' }
                         }}
                       />
                       <YAxis 
@@ -389,13 +389,13 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
                         dataKey="y" 
                         name={yAxisStatName}
                         stroke="var(--chart-text)"
-                        fontSize={10}
-                        tick={{ fontSize: 10 }}
+                        fontSize={11}
+                        tick={{ fontSize: 11 }}
                         label={{ 
                           value: yAxisStatName, 
                           angle: -90, 
                           position: 'insideLeft',
-                          style: { textAnchor: 'middle', fontSize: '12px' }
+                          style: { textAnchor: 'middle', fontSize: '13px' }
                         }}
                       />
                       <Tooltip content={<CustomTooltip />} />
@@ -422,7 +422,7 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
                         {scatterData.map((entry, index) => (
                           <circle 
                             key={`scatter-${index}`}
-                            r={3}
+                            r={4}
                             fill={entry.teamColor}
                             stroke="#ffffff"
                             strokeWidth={1}
@@ -435,7 +435,7 @@ export default function ScatterPlotAnalyzer({ players, onBack }: ScatterPlotAnal
                   </ResponsiveContainer>
                 </div>
               ) : (
-                <div className="h-64 sm:h-96 flex items-center justify-center">
+                <div className="h-80 sm:h-96 lg:h-[500px] flex items-center justify-center">
                   <div className="text-center">
                     <div className="text-base sm:text-lg mb-2">No data available</div>
                     <div className="text-sm text-slate-600 dark:text-slate-400">

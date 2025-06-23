@@ -94,6 +94,14 @@ The application is optimized for multiple deployment platforms:
 - **Database Migration**: Drizzle handles schema synchronization
 - **Asset Optimization**: Static files served efficiently
 
+## Recent Changes
+
+- June 23, 2025: Mobile UI optimization completed
+  - Enhanced responsive design across all components
+  - Fixed cramped scatter plot display on mobile devices
+  - Improved touch-friendly interactions and button sizing
+  - Optimized leaderboard tables with better mobile layouts
+
 ## Changelog
 
 - June 17, 2025. Initial setup
