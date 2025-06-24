@@ -869,11 +869,21 @@ function MainApp() {
                       
                       const playerPosition = result.player.position;
                     
-                      // Apply position filter
+                      // Apply position filter - accommodate both specific (PG, SG) and generic (G, F) positions
                       if (selectedPosition === "G") {
-                        return playerPosition === "PG" || playerPosition === "SG";
+                        return playerPosition === "PG" || playerPosition === "SG" || playerPosition === "G";
                       } else if (selectedPosition === "F") {
-                        return playerPosition === "SF" || playerPosition === "PF";
+                        return playerPosition === "SF" || playerPosition === "PF" || playerPosition === "F";
+                      } else if (selectedPosition === "PG") {
+                        return playerPosition === "PG";
+                      } else if (selectedPosition === "SG") {
+                        return playerPosition === "SG";
+                      } else if (selectedPosition === "SF") {
+                        return playerPosition === "SF";
+                      } else if (selectedPosition === "PF") {
+                        return playerPosition === "PF";
+                      } else if (selectedPosition === "C") {
+                        return playerPosition === "C";
                       } else {
                         return playerPosition === selectedPosition;
                       }
