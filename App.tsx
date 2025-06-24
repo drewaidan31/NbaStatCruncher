@@ -275,6 +275,15 @@ function MainApp() {
       if (response.ok) {
         const data = await response.json();
         console.log("Calculation results:", data.length, "players");
+        
+        // Debug: Check position distribution
+        const positionCounts = {};
+        data.forEach((result: any) => {
+          const pos = result.player.position;
+          positionCounts[pos] = (positionCounts[pos] || 0) + 1;
+        });
+        console.log("Position distribution:", positionCounts);
+        
         setResults([...data]); // Force new array reference to trigger re-render
         // Clear error on successful calculation
         setError("");
