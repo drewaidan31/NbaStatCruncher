@@ -286,6 +286,10 @@ function MainApp() {
         console.log("Sample result structure:", data[0]);
         console.log("About to set results, data is array:", Array.isArray(data), "length:", data?.length);
         
+        // Test position filtering immediately
+        const pgPlayers = data.filter((result: any) => result.player.position === "PG");
+        console.log("PG players in dataset:", pgPlayers.length);
+        
         setResults(data);
         console.log("Results state set, new value:", data?.length, "items");
         // Clear error on successful calculation
@@ -834,7 +838,7 @@ function MainApp() {
           });
         }} />
 
-        {console.log("About to render leaderboard, results:", results, "length:", results?.length, "type:", typeof results)}
+        {console.log("About to render leaderboard, results length:", results?.length, "selectedPosition:", selectedPosition)}
         {Array.isArray(results) && results.length > 0 && (
           <div id="leaderboard-results" className="bg-slate-800 rounded-xl border border-slate-700 p-6">
             <div className="flex items-center justify-between mb-4">
@@ -877,7 +881,8 @@ function MainApp() {
                   </tr>
                 </thead>
                 <tbody>
-                  {results.filter((result: any) => {
+                  {(() => {
+                    const filtered = results.filter((result: any) => {
                       if (selectedPosition === "all") return true;
                       
                       const playerPosition = result.player.position;
@@ -890,7 +895,10 @@ function MainApp() {
                       } else {
                         return playerPosition === selectedPosition;
                       }
-                  }).map((result: any, index) => (
+                    });
+                    console.log(`Filtered ${results.length} to ${filtered.length} for position: ${selectedPosition}`);
+                    return filtered;
+                  })().map((result: any, index) => (
                     <tr 
                       key={`${result.player.id}-${result.bestSeason}-${index}`} 
                       onClick={() => handlePlayerSelect(result.player, result.bestSeason)}
