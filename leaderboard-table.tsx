@@ -118,9 +118,24 @@ export default function LeaderboardTable({
         return false;
       }
       
-      // Position filter (simplified matching)
-      if (selectedPosition !== "all" && !player.position.includes(selectedPosition)) {
-        return false;
+      // Position filter - exact matching
+      if (selectedPosition !== "all") {
+        if (selectedPosition === "G") {
+          // Guards group
+          if (player.position !== "PG" && player.position !== "SG" && player.position !== "G") {
+            return false;
+          }
+        } else if (selectedPosition === "F") {
+          // Forwards group  
+          if (player.position !== "SF" && player.position !== "PF" && player.position !== "F") {
+            return false;
+          }
+        } else {
+          // Exact position match
+          if (player.position !== selectedPosition) {
+            return false;
+          }
+        }
       }
       
       return true;
