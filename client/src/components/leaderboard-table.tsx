@@ -118,9 +118,47 @@ export default function LeaderboardTable({
         return false;
       }
       
-      // Position filter (simplified matching)
-      if (selectedPosition !== "all" && !player.position.includes(selectedPosition)) {
-        return false;
+      // Position filter with proper handling for grouped positions
+      if (selectedPosition !== "all") {
+        const playerPos = player.position || "";
+        const playerName = player.name.toLowerCase();
+        
+        // Estimate position based on player name for better filtering since DB has mostly "G" positions
+        const estimatedPosition = (() => {
+          const pointGuards = ["chris paul", "stephen curry", "russell westbrook", "damian lillard", 
+                             "kyrie irving", "ja morant", "trae young", "luka dončić", "de'aaron fox",
+                             "tyrese haliburton", "fred vanvleet", "mike conley", "kyle lowry", "terry rozier"];
+          const centers = ["joel embiid", "nikola jokić", "anthony davis", "karl-anthony towns",
+                         "rudy gobert", "bam adebayo", "jusuf nurkić", "clint capela", "nikola vučević",
+                         "hassan whiteside", "dwight howard", "andre drummond", "deandre jordan"];
+          
+          if (pointGuards.some(pg => playerName.includes(pg))) return "PG";
+          else if (centers.some(c => playerName.includes(c))) return "C";
+          else if (playerName.includes("lebron") || playerName.includes("durant") || 
+                   playerName.includes("kawhi") || playerName.includes("paul george")) return "SF";
+          else if (playerName.includes("giannis") || playerName.includes("davis") || 
+                   playerName.includes("siakam") || playerName.includes("randle")) return "PF";
+          else if (playerPos.includes("G")) return "SG"; // Default guards to SG
+          else if (playerPos.includes("F")) return "SF"; // Default forwards to SF
+          else return playerPos;
+        })();
+        
+        if (selectedPosition === "G") {
+          // All guards: check DB position or estimated position
+          if (!playerPos.includes("G") && estimatedPosition !== "PG" && estimatedPosition !== "SG") {
+            return false;
+          }
+        } else if (selectedPosition === "F") {
+          // All forwards: check DB position or estimated position
+          if (!playerPos.includes("F") && estimatedPosition !== "SF" && estimatedPosition !== "PF") {
+            return false;
+          }
+        } else {
+          // Specific positions (PG, SG, SF, PF, C)
+          if (!playerPos.includes(selectedPosition) && estimatedPosition !== selectedPosition) {
+            return false;
+          }
+        }
       }
       
       return true;
