@@ -867,59 +867,16 @@ function MainApp() {
                   {results.filter((result: any) => {
                       if (selectedPosition === "all") return true;
                       
-                      const playerName = result.player.name.toLowerCase();
+                      const playerPosition = result.player.position;
                     
-                    // Enhanced position detection based on known NBA players
-                    const getPlayerPosition = (name: string) => {
-                      // Point Guards
-                      if (name.includes("chris paul") || name.includes("stephen curry") || name.includes("russell westbrook") || 
-                          name.includes("damian lillard") || name.includes("kyrie irving") || name.includes("ja morant") || 
-                          name.includes("trae young") || name.includes("luka doncic") || name.includes("de'aaron fox") ||
-                          name.includes("tyrese haliburton") || name.includes("fred vanvleet") || name.includes("mike conley") ||
-                          name.includes("kyle lowry") || name.includes("terry rozier") || name.includes("darius garland") ||
-                          name.includes("jalen brunson") || name.includes("cade cunningham") || name.includes("lamelo ball")) {
-                        return "PG";
+                      // Apply position filter
+                      if (selectedPosition === "G") {
+                        return playerPosition === "PG" || playerPosition === "SG";
+                      } else if (selectedPosition === "F") {
+                        return playerPosition === "SF" || playerPosition === "PF";
+                      } else {
+                        return playerPosition === selectedPosition;
                       }
-                      
-                      // Centers
-                      if (name.includes("joel embiid") || name.includes("nikola jokic") || name.includes("anthony davis") ||
-                          name.includes("karl-anthony towns") || name.includes("rudy gobert") || name.includes("bam adebayo") ||
-                          name.includes("jusuf nurkic") || name.includes("clint capela") || name.includes("nikola vucevic") ||
-                          name.includes("myles turner") || name.includes("brook lopez") || name.includes("jarrett allen") ||
-                          name.includes("deandre ayton") || name.includes("kristaps porzingis") || name.includes("robert williams")) {
-                        return "C";
-                      }
-                      
-                      // Small Forwards
-                      if (name.includes("lebron james") || name.includes("kevin durant") || name.includes("kawhi leonard") ||
-                          name.includes("paul george") || name.includes("jayson tatum") || name.includes("jimmy butler") ||
-                          name.includes("demar derozan") || name.includes("khris middleton") || name.includes("tobias harris") ||
-                          name.includes("mikal bridges") || name.includes("og anunoby") || name.includes("harrison barnes")) {
-                        return "SF";
-                      }
-                      
-                      // Power Forwards
-                      if (name.includes("giannis antetokounmpo") || name.includes("pascal siakam") || name.includes("julius randle") ||
-                          name.includes("domantas sabonis") || name.includes("evan mobley") || name.includes("john collins") ||
-                          name.includes("jaren jackson") || name.includes("paolo banchero") || name.includes("franz wagner") ||
-                          name.includes("scottie barnes") || name.includes("alperen sengun")) {
-                        return "PF";
-                      }
-                      
-                      // Shooting Guards (everyone else defaults to SG since most are guards in DB)
-                      return "SG";
-                    };
-                    
-                    const actualPosition = getPlayerPosition(playerName);
-                    
-                    // Apply position filter
-                    if (selectedPosition === "G") {
-                      return actualPosition === "PG" || actualPosition === "SG";
-                    } else if (selectedPosition === "F") {
-                      return actualPosition === "SF" || actualPosition === "PF";
-                    } else {
-                      return actualPosition === selectedPosition;
-                    }
                   }).map((result: any, index) => (
                     <tr 
                       key={`${result.player.id}-${result.bestSeason}-${index}`} 
