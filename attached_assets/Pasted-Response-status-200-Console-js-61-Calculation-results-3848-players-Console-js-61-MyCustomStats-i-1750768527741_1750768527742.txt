@@ -1,0 +1,60 @@
+Response status: 200
+Console.js:61 Calculation results: 3848 players
+Console.js:61 MyCustomStats - isAuthenticated: false
+Console.js:61 MyCustomStats - userCustomStats: []
+Console.js:61 MyCustomStats - isLoading: false
+Console.js:61 MyCustomStats - error: null
+Console.js:61 MyCustomStats - Not authenticated, hiding component
+Console.js:61 FormulaExamples component rendering, examples count: 10
+App.tsx:1305 
+            
+            
+           GET https://582c431d-183f-4599-a670-4b5d33bdef8e-00-3evd14iavpmq6.kirk.replit.dev/api/auth/user 401 (Unauthorized)
+window.fetch @ Network.js:219
+checkAuth2 @ App.tsx:1305
+setInterval
+(anonymous) @ App.tsx:1336
+commitHookEffectListMount @ chunk-7SSXMLWA.js?v=bc6955b5:16915
+commitPassiveMountOnFiber @ chunk-7SSXMLWA.js?v=bc6955b5:18156
+commitPassiveMountEffects_complete @ chunk-7SSXMLWA.js?v=bc6955b5:18129
+commitPassiveMountEffects_begin @ chunk-7SSXMLWA.js?v=bc6955b5:18119
+commitPassiveMountEffects @ chunk-7SSXMLWA.js?v=bc6955b5:18109
+flushPassiveEffectsImpl @ chunk-7SSXMLWA.js?v=bc6955b5:19490
+flushPassiveEffects @ chunk-7SSXMLWA.js?v=bc6955b5:19447
+(anonymous) @ chunk-7SSXMLWA.js?v=bc6955b5:19328
+workLoop @ chunk-7SSXMLWA.js?v=bc6955b5:197
+flushWork @ chunk-7SSXMLWA.js?v=bc6955b5:176
+performWorkUntilDeadline @ chunk-7SSXMLWA.js?v=bc6955b5:384Understand this error
+Console.js:61 Making API request to: /api/auth/user
+queryClient.ts:35 
+            
+            
+           GET https://582c431d-183f-4599-a670-4b5d33bdef8e-00-3evd14iavpmq6.kirk.replit.dev/api/auth/user 401 (Unauthorized)
+window.fetch @ Network.js:219
+(anonymous) @ queryClient.ts:35
+fetchFn @ @tanstack_react-query.js?v=bc6955b5:840
+run @ @tanstack_react-query.js?v=bc6955b5:494
+start @ @tanstack_react-query.js?v=bc6955b5:536
+fetch @ @tanstack_react-query.js?v=bc6955b5:926
+executeFetch_fn @ @tanstack_react-query.js?v=bc6955b5:2211
+fetch @ @tanstack_react-query.js?v=bc6955b5:2011
+refetch @ @tanstack_react-query.js?v=bc6955b5:2001
+onFocus @ @tanstack_react-query.js?v=bc6955b5:749
+(anonymous) @ @tanstack_react-query.js?v=bc6955b5:1112
+(anonymous) @ @tanstack_react-query.js?v=bc6955b5:1111
+batch @ @tanstack_react-query.js?v=bc6955b5:583
+onFocus @ @tanstack_react-query.js?v=bc6955b5:1110
+(anonymous) @ @tanstack_react-query.js?v=bc6955b5:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=bc6955b5:313
+onFocus @ @tanstack_react-query.js?v=bc6955b5:312
+(anonymous) @ @tanstack_react-query.js?v=bc6955b5:299
+listener @ @tanstack_react-query.js?v=bc6955b5:270Understand this error
+Console.js:61 API response status: 401 for URL: /api/auth/user
+Console.js:61 Returning null for 401 status
+Console.js:61 MyCustomStats - isAuthenticated: false
+Console.js:61 MyCustomStats - userCustomStats: []
+Console.js:61 MyCustomStats - isLoading: false
+Console.js:61 MyCustomStats - error: null
+Console.js:61 MyCustomStats - Not authenticated, hiding component
+Console.js:61 FormulaExamples component rendering, examples count: 10
