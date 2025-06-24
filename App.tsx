@@ -835,7 +835,10 @@ function MainApp() {
                 <div className="relative">
                   <select
                     value={selectedPosition}
-                    onChange={(e) => setSelectedPosition(e.target.value)}
+                    onChange={(e) => {
+                      console.log(`Position filter changed to: ${e.target.value}`);
+                      setSelectedPosition(e.target.value);
+                    }}
                     className="bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 pr-8 text-sm appearance-none cursor-pointer hover:bg-slate-600 transition-colors"
                   >
                     <option value="all">All Positions</option>
@@ -864,10 +867,12 @@ function MainApp() {
                   </tr>
                 </thead>
                 <tbody>
-                  {results.filter((result: any) => {
-                    if (selectedPosition === "all") return true;
-                    
-                    const playerName = result.player.name.toLowerCase();
+                  {(() => {
+                    console.log(`Filtering ${results.length} results with position: ${selectedPosition}`);
+                    return results.filter((result: any) => {
+                      if (selectedPosition === "all") return true;
+                      
+                      const playerName = result.player.name.toLowerCase();
                     
                     // Enhanced position detection based on known NBA players
                     const getPlayerPosition = (name: string) => {
@@ -912,15 +917,28 @@ function MainApp() {
                     
                     const actualPosition = getPlayerPosition(playerName);
                     
+                    // Debug logging for first few players when filtering
+                    const resultIndex = results.indexOf(result);
+                    if (selectedPosition !== "all" && resultIndex < 5) {
+                      console.log(`Player: ${result.player.name}, Detected Position: ${actualPosition}, Selected Filter: ${selectedPosition}`);
+                    }
+                    
                     // Apply position filter
                     if (selectedPosition === "G") {
-                      return actualPosition === "PG" || actualPosition === "SG";
+                      const isGuard = actualPosition === "PG" || actualPosition === "SG";
+                      if (resultIndex < 5) console.log(`${result.player.name} is guard: ${isGuard}`);
+                      return isGuard;
                     } else if (selectedPosition === "F") {
-                      return actualPosition === "SF" || actualPosition === "PF";
+                      const isForward = actualPosition === "SF" || actualPosition === "PF";
+                      if (resultIndex < 5) console.log(`${result.player.name} is forward: ${isForward}`);
+                      return isForward;
                     } else {
-                      return actualPosition === selectedPosition;
+                      const isMatch = actualPosition === selectedPosition;
+                      if (resultIndex < 5) console.log(`${result.player.name} matches ${selectedPosition}: ${isMatch}`);
+                      return isMatch;
                     }
-                  }).map((result: any, index) => (
+                    });
+                  })().map((result: any, index) => (
                     <tr 
                       key={`${result.player.id}-${result.bestSeason}-${index}`} 
                       onClick={() => handlePlayerSelect(result.player, result.bestSeason)}
