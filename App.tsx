@@ -824,7 +824,6 @@ function MainApp() {
 
         {results.length > 0 && (
           <div id="leaderboard-results" className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-            {console.log(`Rendering leaderboard with ${results.length} results, selectedPosition: ${selectedPosition}`)}
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">
                 {customStatName ? `${customStatName} Leaderboard` : "Custom Statistics Leaderboard"}
@@ -836,12 +835,7 @@ function MainApp() {
                 <div className="relative">
                   <select
                     value={selectedPosition}
-                    onChange={(e) => {
-                      const newPosition = e.target.value;
-                      console.log(`Position filter changed from ${selectedPosition} to: ${newPosition}`);
-                      setSelectedPosition(newPosition);
-                      console.log(`State updated, selectedPosition is now: ${newPosition}`);
-                    }}
+                    onChange={(e) => setSelectedPosition(e.target.value)}
                     className="bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 pr-8 text-sm appearance-none cursor-pointer hover:bg-slate-600 transition-colors"
                   >
                     <option value="all">All Positions</option>
@@ -870,9 +864,7 @@ function MainApp() {
                   </tr>
                 </thead>
                 <tbody>
-                  {(() => {
-                    console.log(`Filtering ${results.length} results with position: ${selectedPosition}`);
-                    const filteredResults = results.filter((result: any) => {
+                  {results.filter((result: any) => {
                       if (selectedPosition === "all") return true;
                       
                       const playerName = result.player.name.toLowerCase();
@@ -920,30 +912,15 @@ function MainApp() {
                     
                     const actualPosition = getPlayerPosition(playerName);
                     
-                    // Debug logging for first few players when filtering
-                    const resultIndex = results.indexOf(result);
-                    if (selectedPosition !== "all" && resultIndex < 5) {
-                      console.log(`Player: ${result.player.name}, Detected Position: ${actualPosition}, Selected Filter: ${selectedPosition}`);
-                    }
-                    
                     // Apply position filter
                     if (selectedPosition === "G") {
-                      const isGuard = actualPosition === "PG" || actualPosition === "SG";
-                      if (resultIndex < 5) console.log(`${result.player.name} is guard: ${isGuard}`);
-                      return isGuard;
+                      return actualPosition === "PG" || actualPosition === "SG";
                     } else if (selectedPosition === "F") {
-                      const isForward = actualPosition === "SF" || actualPosition === "PF";
-                      if (resultIndex < 5) console.log(`${result.player.name} is forward: ${isForward}`);
-                      return isForward;
+                      return actualPosition === "SF" || actualPosition === "PF";
                     } else {
-                      const isMatch = actualPosition === selectedPosition;
-                      if (resultIndex < 5) console.log(`${result.player.name} matches ${selectedPosition}: ${isMatch}`);
-                      return isMatch;
+                      return actualPosition === selectedPosition;
                     }
-                    });
-                    console.log(`After filtering: ${filteredResults.length} results`);
-                    return filteredResults;
-                  })().map((result: any, index) => (
+                  }).map((result: any, index) => (
                     <tr 
                       key={`${result.player.id}-${result.bestSeason}-${index}`} 
                       onClick={() => handlePlayerSelect(result.player, result.bestSeason)}
