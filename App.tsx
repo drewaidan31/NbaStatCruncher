@@ -868,38 +868,38 @@ function MainApp() {
                     if (selectedPosition === "all") return true;
                     
                     const playerName = result.player.name.toLowerCase();
-                    const playerPosition = result.player.position;
+                    const playerPos = result.player.position || "";
                     
-                    // Since the data doesn't have detailed positions, we'll use player name patterns
-                    // to determine likely positions for filtering demonstration
-                    let estimatedPosition = "G"; // Default
+                    // Estimate position based on player name for better filtering since DB has mostly "G" positions
+                    const estimatedPosition = (() => {
+                      const pointGuards = ["chris paul", "stephen curry", "russell westbrook", "damian lillard", 
+                                         "kyrie irving", "ja morant", "trae young", "luka dončić", "de'aaron fox",
+                                         "tyrese haliburton", "fred vanvleet", "mike conley", "kyle lowry", "terry rozier"];
+                      const centers = ["joel embiid", "nikola jokić", "anthony davis", "karl-anthony towns",
+                                     "rudy gobert", "bam adebayo", "jusuf nurkić", "clint capela", "nikola vučević",
+                                     "hassan whiteside", "dwight howard", "andre drummond", "deandre jordan"];
+                      
+                      if (pointGuards.some(pg => playerName.includes(pg))) return "PG";
+                      else if (centers.some(c => playerName.includes(c))) return "C";
+                      else if (playerName.includes("lebron") || playerName.includes("durant") || 
+                               playerName.includes("kawhi") || playerName.includes("paul george")) return "SF";
+                      else if (playerName.includes("giannis") || playerName.includes("davis") || 
+                               playerName.includes("siakam") || playerName.includes("randle")) return "PF";
+                      else if (playerPos.includes("G")) return "SG"; // Default guards to SG
+                      else if (playerPos.includes("F")) return "SF"; // Default forwards to SF
+                      else return playerPos;
+                    })();
                     
-                    // Point Guards - typically known playmakers
-                    const pointGuards = ["chris paul", "stephen curry", "russell westbrook", "damian lillard", 
-                                       "kyrie irving", "ja morant", "trae young", "luka dončić", "de'aaron fox",
-                                       "tyrese haliburton", "fred vanvleet", "mike conley", "kyle lowry", "terry rozier"];
-                    
-                    // Centers - typically known big men
-                    const centers = ["joel embiid", "nikola jokić", "anthony davis", "karl-anthony towns",
-                                   "rudy gobert", "bam adebayo", "jusuf nurkić", "clint capela", "nikola vučević",
-                                   "hassan whiteside", "dwight howard", "andre drummond", "deandre jordan"];
-                    
-                    if (pointGuards.some(pg => playerName.includes(pg))) estimatedPosition = "PG";
-                    else if (centers.some(c => playerName.includes(c))) estimatedPosition = "C";
-                    else if (playerName.includes("lebron") || playerName.includes("durant") || 
-                             playerName.includes("kawhi") || playerName.includes("paul george")) estimatedPosition = "SF";
-                    else if (playerName.includes("giannis") || playerName.includes("davis") || 
-                             playerName.includes("siakam") || playerName.includes("randle")) estimatedPosition = "PF";
-                    else estimatedPosition = "SG"; // Default for other guards
-                    
-                    // Handle specific position matches
-                    if (selectedPosition === estimatedPosition) return true;
-                    
-                    // Handle grouped positions
-                    if (selectedPosition === "G" && (estimatedPosition === "PG" || estimatedPosition === "SG")) return true;
-                    if (selectedPosition === "F" && (estimatedPosition === "SF" || estimatedPosition === "PF")) return true;
-                    
-                    return false;
+                    if (selectedPosition === "G") {
+                      // All guards: check DB position or estimated position
+                      return playerPos.includes("G") || estimatedPosition === "PG" || estimatedPosition === "SG";
+                    } else if (selectedPosition === "F") {
+                      // All forwards: check DB position or estimated position
+                      return playerPos.includes("F") || estimatedPosition === "SF" || estimatedPosition === "PF";
+                    } else {
+                      // Specific positions (PG, SG, SF, PF, C)
+                      return playerPos.includes(selectedPosition) || estimatedPosition === selectedPosition;
+                    }
                   }).map((result: any, index) => (
                     <tr 
                       key={`${result.player.id}-${result.bestSeason}-${index}`} 
