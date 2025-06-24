@@ -30,7 +30,6 @@ export default function LeaderboardTable({
   formula,
   searchTerm,
   selectedTeam,
-  selectedPosition,
   selectedSeason = "all-time",
 }: LeaderboardTableProps) {
   const [sortField, setSortField] = useState<SortField>('customStat');

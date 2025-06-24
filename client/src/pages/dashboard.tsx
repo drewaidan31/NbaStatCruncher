@@ -10,7 +10,7 @@ export default function Dashboard() {
   const [formula, setFormula] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTeam, setSelectedTeam] = useState("all");
-  const [selectedPosition, setSelectedPosition] = useState("all");
+
   const [selectedSeason, setSelectedSeason] = useState("all-time");
 
   return (
@@ -25,8 +25,6 @@ export default function Dashboard() {
           onSearchChange={setSearchTerm}
           selectedTeam={selectedTeam}
           onTeamChange={setSelectedTeam}
-          selectedPosition={selectedPosition}
-          onPositionChange={setSelectedPosition}
         />
 
         {/* Season Selector */}
@@ -81,7 +79,6 @@ export default function Dashboard() {
           formula={formula}
           searchTerm={searchTerm}
           selectedTeam={selectedTeam}
-          selectedPosition={selectedPosition}
           selectedSeason={selectedSeason}
         />
       </main>
