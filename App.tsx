@@ -882,8 +882,14 @@ function MainApp() {
                       
                       const playerPosition = result.player.position;
                       
-                      // Simple direct position matching - use exactly what's in the database
-                      return playerPosition === selectedPosition;
+                      // Position filter with proper matching
+                      if (selectedPosition === "G") {
+                        return playerPosition === "PG" || playerPosition === "SG" || playerPosition === "G";
+                      } else if (selectedPosition === "F") {
+                        return playerPosition === "SF" || playerPosition === "PF" || playerPosition === "F";
+                      } else {
+                        return playerPosition === selectedPosition;
+                      }
                   }).map((result: any, index) => (
                     <tr 
                       key={`${result.player.id}-${result.bestSeason}-${index}`} 
