@@ -7,8 +7,6 @@ interface SearchFiltersProps {
   onSearchChange: (value: string) => void;
   selectedTeam: string;
   onTeamChange: (value: string) => void;
-  selectedPosition: string;
-  onPositionChange: (value: string) => void;
   showTeamLeaderboard?: boolean;
   onTeamLeaderboardToggle?: (enabled: boolean) => void;
 }
@@ -18,8 +16,6 @@ export default function SearchFilters({
   onSearchChange,
   selectedTeam,
   onTeamChange,
-  selectedPosition,
-  onPositionChange,
   showTeamLeaderboard = false,
   onTeamLeaderboardToggle,
 }: SearchFiltersProps) {
@@ -29,7 +25,7 @@ export default function SearchFilters({
     "ORL", "PHI", "PHX", "POR", "SAC", "SAS", "TOR", "UTA", "WAS"
   ];
 
-  const positions = ["all", "PG", "SG", "SF", "PF", "C"];
+
 
   return (
     <div className="bg-slate-800 rounded-xl p-6 mb-8 border border-slate-700">
@@ -77,23 +73,7 @@ export default function SearchFilters({
             </SelectContent>
           </Select>
 
-          <Select value={selectedPosition} onValueChange={onPositionChange}>
-            <SelectTrigger className="w-44 bg-slate-900 border border-slate-600 text-slate-50 focus:border-orange-500 focus:ring-orange-500">
-              <SelectValue placeholder="All Positions" />
-            </SelectTrigger>
-            <SelectContent className="bg-slate-900 border-slate-600">
-              {positions.map((position) => (
-                <SelectItem key={position} value={position} className="text-slate-50 focus:bg-slate-700">
-                  {position === "all" ? "All Positions" : 
-                   position === "PG" ? "Point Guard" :
-                   position === "SG" ? "Shooting Guard" :
-                   position === "SF" ? "Small Forward" :
-                   position === "PF" ? "Power Forward" :
-                   position === "C" ? "Center" : position}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+
         </div>
       </div>
     </div>

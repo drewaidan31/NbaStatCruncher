@@ -12,7 +12,6 @@ interface LeaderboardTableProps {
   formula: string;
   searchTerm: string;
   selectedTeam: string;
-  selectedPosition: string;
   selectedSeason?: string;
 }
 
@@ -118,8 +117,7 @@ export default function LeaderboardTable({
         return false;
       }
       
-      // Position filter removed - database only contains generic "G" positions
-      // All position filtering disabled until proper position data is available
+      // Position filtering completely removed from the application
       
       return true;
     });

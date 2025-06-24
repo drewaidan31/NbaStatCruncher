@@ -86,7 +86,7 @@ function MainApp() {
   const [featuredStat, setFeaturedStat] = useState<{name: string, formula: string, description: string} | null>(null);
   const [featuredChartData, setFeaturedChartData] = useState<Array<{season: string, value: number, team: string}>>([]);
   const [refreshCounter, setRefreshCounter] = useState(0);
-  const [selectedPosition, setSelectedPosition] = useState<string>("all"); // Position filtering disabled due to database limitations
+
 
 
 
@@ -838,7 +838,7 @@ function MainApp() {
           });
         }} />
 
-        {console.log("About to render leaderboard, results length:", results?.length, "selectedPosition:", selectedPosition)}
+        {console.log("About to render leaderboard, results length:", results?.length)}
         {Array.isArray(results) && results.length > 0 && (
           <div id="leaderboard-results" className="bg-slate-800 rounded-xl border border-slate-700 p-6">
             <div className="flex items-center justify-between mb-4">
@@ -846,20 +846,7 @@ function MainApp() {
                 {customStatName ? `${customStatName} Leaderboard` : "Custom Statistics Leaderboard"}
               </h3>
               
-              {/* Position Filter - Disabled (database only has generic "G" positions) */}
-              <div className="flex items-center gap-2 opacity-50">
-                <Filter className="w-4 h-4 text-slate-400" />
-                <div className="relative">
-                  <select
-                    value="all"
-                    disabled
-                    className="bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 pr-8 text-sm appearance-none cursor-not-allowed"
-                  >
-                    <option value="all">All Players</option>
-                  </select>
-                  <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" />
-                </div>
-              </div>
+
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
