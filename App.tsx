@@ -62,7 +62,7 @@ function MainApp() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [formula, setFormula] = useState("");
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState<any[]>([]);
   const [selectedSeason, setSelectedSeason] = useState("all-time");
   const [viewMode, setViewMode] = useState<ViewMode>('leaderboard');
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
@@ -275,7 +275,7 @@ function MainApp() {
       if (response.ok) {
         const data = await response.json();
         console.log("Calculation results:", data.length, "players");
-        setResults(data);
+        setResults([...data]); // Force new array reference to trigger re-render
         // Clear error on successful calculation
         setError("");
       } else {
@@ -822,7 +822,7 @@ function MainApp() {
           });
         }} />
 
-        {results.length > 0 && (
+        {results && results.length > 0 && (
           <div id="leaderboard-results" className="bg-slate-800 rounded-xl border border-slate-700 p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">
