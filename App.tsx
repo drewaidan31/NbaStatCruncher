@@ -283,6 +283,7 @@ function MainApp() {
           positionCounts[pos] = (positionCounts[pos] || 0) + 1;
         });
         console.log("Position distribution:", positionCounts);
+        console.log("Sample result structure:", data[0]);
         
         setResults([...data]); // Force new array reference to trigger re-render
         // Clear error on successful calculation
@@ -831,6 +832,7 @@ function MainApp() {
           });
         }} />
 
+        {console.log("About to render leaderboard, results length:", results?.length)}
         {results && results.length > 0 && (
           <div id="leaderboard-results" className="bg-slate-800 rounded-xl border border-slate-700 p-6">
             <div className="flex items-center justify-between mb-4">
