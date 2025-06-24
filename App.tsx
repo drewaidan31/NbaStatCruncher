@@ -284,8 +284,10 @@ function MainApp() {
         });
         console.log("Position distribution:", positionCounts);
         console.log("Sample result structure:", data[0]);
+        console.log("About to set results, data is array:", Array.isArray(data), "length:", data?.length);
         
-        setResults([...data]); // Force new array reference to trigger re-render
+        setResults(data);
+        console.log("Results state set, new value:", data?.length, "items");
         // Clear error on successful calculation
         setError("");
       } else {
@@ -832,8 +834,8 @@ function MainApp() {
           });
         }} />
 
-        {console.log("About to render leaderboard, results length:", results?.length)}
-        {results && results.length > 0 && (
+        {console.log("About to render leaderboard, results:", results, "length:", results?.length, "type:", typeof results)}
+        {Array.isArray(results) && results.length > 0 && (
           <div id="leaderboard-results" className="bg-slate-800 rounded-xl border border-slate-700 p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">
