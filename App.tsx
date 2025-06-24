@@ -86,7 +86,7 @@ function MainApp() {
   const [featuredStat, setFeaturedStat] = useState<{name: string, formula: string, description: string} | null>(null);
   const [featuredChartData, setFeaturedChartData] = useState<Array<{season: string, value: number, team: string}>>([]);
   const [refreshCounter, setRefreshCounter] = useState(0);
-  const [selectedPosition, setSelectedPosition] = useState<string>("all");
+  const [selectedPosition, setSelectedPosition] = useState<string>("all"); // Position filtering disabled due to database limitations
 
 
 
@@ -855,7 +855,7 @@ function MainApp() {
                     disabled
                     className="bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 pr-8 text-sm appearance-none cursor-not-allowed"
                   >
-                    <option value="all">All Positions (No Specific Data)</option>
+                    <option value="all">All Players</option>
                   </select>
                   <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" />
                 </div>
