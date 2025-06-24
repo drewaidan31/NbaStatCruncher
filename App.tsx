@@ -824,6 +824,7 @@ function MainApp() {
 
         {results.length > 0 && (
           <div id="leaderboard-results" className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+            {console.log(`Rendering leaderboard with ${results.length} results, selectedPosition: ${selectedPosition}`)}
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">
                 {customStatName ? `${customStatName} Leaderboard` : "Custom Statistics Leaderboard"}
@@ -836,8 +837,10 @@ function MainApp() {
                   <select
                     value={selectedPosition}
                     onChange={(e) => {
-                      console.log(`Position filter changed to: ${e.target.value}`);
-                      setSelectedPosition(e.target.value);
+                      const newPosition = e.target.value;
+                      console.log(`Position filter changed from ${selectedPosition} to: ${newPosition}`);
+                      setSelectedPosition(newPosition);
+                      console.log(`State updated, selectedPosition is now: ${newPosition}`);
                     }}
                     className="bg-slate-700 border border-slate-600 text-white rounded-lg px-3 py-2 pr-8 text-sm appearance-none cursor-pointer hover:bg-slate-600 transition-colors"
                   >
@@ -869,7 +872,7 @@ function MainApp() {
                 <tbody>
                   {(() => {
                     console.log(`Filtering ${results.length} results with position: ${selectedPosition}`);
-                    return results.filter((result: any) => {
+                    const filteredResults = results.filter((result: any) => {
                       if (selectedPosition === "all") return true;
                       
                       const playerName = result.player.name.toLowerCase();
@@ -938,6 +941,8 @@ function MainApp() {
                       return isMatch;
                     }
                     });
+                    console.log(`After filtering: ${filteredResults.length} results`);
+                    return filteredResults;
                   })().map((result: any, index) => (
                     <tr 
                       key={`${result.player.id}-${result.bestSeason}-${index}`} 
